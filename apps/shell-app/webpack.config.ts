@@ -20,7 +20,10 @@ module.exports = {
   resolve: {
     ...baseConfig.resolve,
     alias: {
-      '3a-ecommerce-ui-library': path.resolve(__dirname, '../../packages/ui-library/dist'),
+      '3a-ecommerce-ui-library': path.resolve(
+        __dirname,
+        '../../packages/ui-library/dist/ui-library.es.js'
+      ),
       '3a-ecommerce-utils': path.resolve(__dirname, '../../packages/utils/dist'),
       '3a-ecommerce-types': path.resolve(__dirname, '../../packages/types/dist'),
     },

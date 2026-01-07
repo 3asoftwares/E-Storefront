@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
-const baseConfig = require('3a-ecommerce-utils/config/tailwind');
+import baseConfig from '3a-ecommerce-utils/config/tailwind';
 
-module.exports = {
+export default {
   ...baseConfig,
   content: [
     './app/**/*.{js,ts,jsx,tsx,mdx}',

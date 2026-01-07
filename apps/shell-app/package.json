@@ -14,8 +14,8 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "3a-ecommerce-ui-library": "^1.0.0",
-    "3a-ecommerce-utils": "^1.0.0",
+    "3a-ecommerce-ui-library": "workspace:*",
+    "3a-ecommerce-utils": "workspace:*",
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/react-fontawesome": "^0.2.6",
