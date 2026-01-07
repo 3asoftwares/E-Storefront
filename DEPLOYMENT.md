@@ -1,6 +1,16 @@
 # Deployment Guide
 
-This guide covers deploying the E-Commerce platform using **Railway** (backend) and **Vercel** (frontend).
+Deploy the E-Commerce platform using a **cost-effective** stack:
+
+| Component | Service | Free Tier |
+|-----------|---------|-----------|
+| **Frontend** | Vercel | ✅ Generous free tier |
+| **Backend APIs** | Fly.io | ✅ 3 shared VMs free |
+| **Database** | MongoDB Atlas | ✅ 512MB free (M0) |
+| **Cache** | Upstash Redis | ✅ 10K commands/day |
+| **Auth/Edge** | Cloudflare Workers | ✅ 100K requests/day |
+
+---
 
 ## Architecture Overview
 
@@ -9,335 +19,386 @@ This guide covers deploying the E-Commerce platform using **Railway** (backend) 
 │                        VERCEL (Frontend)                        │
 ├─────────────┬─────────────┬─────────────┬──────────────────────┤
 │  Shell App  │  Admin App  │ Seller App  │   Storefront App     │
-│  (React)    │  (Vite)     │  (Vite)     │   (Next.js)          │
+│  (React)    │  (Vite)     │  (Vite)     │   (Next.js SSR)      │
 └──────┬──────┴──────┬──────┴──────┬──────┴──────────┬───────────┘
        │             │             │                  │
        └─────────────┴──────┬──────┴──────────────────┘
                             │
                             ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                      RAILWAY (Backend)                           │
+│                       FLY.IO (Backend)                           │
 ├─────────────────────────────────────────────────────────────────┤
 │                    GraphQL Gateway                               │
 ├──────────┬──────────┬──────────┬──────────┬────────────────────┤
 │   Auth   │ Product  │  Order   │ Category │      Coupon        │
 │ Service  │ Service  │ Service  │ Service  │     Service        │
 └──────────┴──────────┴──────────┴──────────┴────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    MongoDB Atlas (Database)                      │
-└─────────────────────────────────────────────────────────────────┘
+        │                   │
+        ▼                   ▼
+┌───────────────────┐  ┌───────────────────┐
+│  MongoDB Atlas    │  │  Upstash Redis    │
+│  (Database)       │  │  (Cache)          │
+└───────────────────┘  └───────────────────┘
 ```
 
 ---
 
-## Step 1: Database Setup (MongoDB Atlas)
+## Step 1: MongoDB Atlas Setup (Database)
 
-### 1.1 Create MongoDB Atlas Account
-1. Go to [MongoDB Atlas](https://cloud.mongodb.com)
-2. Create a free account or sign in
-3. Create a new project: `ecommerce-platform`
+> **Note:** Your codebase uses MongoDB/Mongoose. Supabase uses PostgreSQL which would require code migration.
 
-### 1.2 Create a Cluster
-1. Click "Build a Database"
-2. Choose **M0 Free Tier** (or M10+ for production)
-3. Select your preferred region
-4. Click "Create"
+### 1.1 Create Free Cluster
+1. Go to [cloud.mongodb.com](https://cloud.mongodb.com)
+2. Sign up / Sign in
+3. Create new project: `ecommerce-platform`
+4. Build a Database → **M0 Free Tier**
+5. Choose region closest to your users
 
-### 1.3 Configure Access
-1. Go to **Database Access** → Add Database User
+### 1.2 Configure Access
+1. **Database Access** → Add User
    - Username: `ecommerce-admin`
-   - Password: (generate a strong password)
+   - Password: Generate secure password (save it!)
    - Role: `Atlas Admin`
 
-2. Go to **Network Access** → Add IP Address
+2. **Network Access** → Add IP
    - Click "Allow Access from Anywhere" (0.0.0.0/0)
-   - Or add Railway's IP ranges for production
 
-### 1.4 Get Connection String
-1. Click "Connect" on your cluster
+### 1.3 Get Connection String
+1. Click "Connect" on cluster
 2. Choose "Connect your application"
-3. Copy the connection string:
-   ```
-   mongodb+srv://ecommerce-admin:<password>@cluster0.xxxxx.mongodb.net/ecommerce?retryWrites=true&w=majority
-   ```
+3. Copy string:
+```
+mongodb+srv://ecommerce-admin:<password>@cluster0.xxxxx.mongodb.net/ecommerce?retryWrites=true&w=majority
+```
 
 ---
 
-## Step 2: Railway Backend Deployment
+## Step 2: Upstash Redis Setup (Cache)
 
-### 2.1 Create Railway Account
-1. Go to [Railway](https://railway.app)
+### 2.1 Create Redis Database
+1. Go to [upstash.com](https://upstash.com)
 2. Sign up with GitHub
+3. Create Database:
+   - Name: `ecommerce-cache`
+   - Region: Same as Fly.io (e.g., `us-east-1`)
+   - Type: Regional
 
-### 2.2 Create New Project
-1. Click "New Project"
-2. Select "Deploy from GitHub repo"
-3. Choose `E-Commerce-Microservices-Platform`
+### 2.2 Get Connection Details
+From dashboard, copy:
+```
+REDIS_URL=redis://default:xxxxx@us1-xxxxx.upstash.io:6379
+```
 
-### 2.3 Deploy Backend Services
-
-For each service, create a new service in Railway:
-
-#### Auth Service
-1. Click "New Service" → "GitHub Repo"
-2. Select your repo
-3. Set **Root Directory**: `services/auth-service`
-4. Add Environment Variables:
-   ```
-   PORT=3010
-   NODE_ENV=production
-   MONGODB_URI=<your-mongodb-atlas-connection-string>
-   JWT_SECRET=<generate-256-bit-secret>
-   JWT_EXPIRES_IN=1h
-   JWT_REFRESH_SECRET=<generate-another-256-bit-secret>
-   JWT_REFRESH_EXPIRES_IN=7d
-   ALLOWED_ORIGINS=https://your-storefront.vercel.app,https://your-admin.vercel.app,https://your-seller.vercel.app
-   SMTP_HOST=smtp.gmail.com
-   SMTP_PORT=587
-   SMTP_USER=your-email@gmail.com
-   SMTP_PASS=your-app-password
-   EMAIL_FROM=noreply@yourdomain.com
-   GOOGLE_CLIENT_ID=your-google-client-id
-   GOOGLE_CLIENT_SECRET=your-google-client-secret
-   FRONTEND_URL=https://your-storefront.vercel.app
-   ADMIN_URL=https://your-admin.vercel.app
-   SELLER_URL=https://your-seller.vercel.app
-   LOG_LEVEL=info
-   ENABLE_FILE_LOGGING=false
-   ```
-
-#### Product Service
-1. New Service → Root Directory: `services/product-service`
-2. Environment Variables:
-   ```
-   PORT=3011
-   NODE_ENV=production
-   MONGODB_URI=<your-mongodb-atlas-connection-string>
-   JWT_SECRET=<same-jwt-secret-as-auth>
-   ALLOWED_ORIGINS=https://your-storefront.vercel.app,https://your-admin.vercel.app,https://your-seller.vercel.app
-   LOG_LEVEL=info
-   ENABLE_FILE_LOGGING=false
-   ```
-
-#### Order Service
-1. New Service → Root Directory: `services/order-service`
-2. Environment Variables:
-   ```
-   PORT=3012
-   NODE_ENV=production
-   MONGODB_URI=<your-mongodb-atlas-connection-string>
-   JWT_SECRET=<same-jwt-secret-as-auth>
-   ALLOWED_ORIGINS=https://your-storefront.vercel.app,https://your-admin.vercel.app,https://your-seller.vercel.app
-   LOG_LEVEL=info
-   ENABLE_FILE_LOGGING=false
-   ```
-
-#### Category Service
-1. New Service → Root Directory: `services/category-service`
-2. Environment Variables:
-   ```
-   PORT=3013
-   NODE_ENV=production
-   MONGODB_URI=<your-mongodb-atlas-connection-string>
-   ALLOWED_ORIGINS=https://your-storefront.vercel.app,https://your-admin.vercel.app,https://your-seller.vercel.app
-   LOG_LEVEL=info
-   ENABLE_FILE_LOGGING=false
-   ```
-
-#### Coupon Service
-1. New Service → Root Directory: `services/coupon-service`
-2. Environment Variables:
-   ```
-   PORT=3014
-   NODE_ENV=production
-   MONGODB_URI=<your-mongodb-atlas-connection-string>
-   JWT_SECRET=<same-jwt-secret-as-auth>
-   ALLOWED_ORIGINS=https://your-storefront.vercel.app,https://your-admin.vercel.app,https://your-seller.vercel.app
-   LOG_LEVEL=info
-   ENABLE_FILE_LOGGING=false
-   ```
-
-#### GraphQL Gateway
-1. New Service → Root Directory: `services/graphql-gateway`
-2. Environment Variables:
-   ```
-   PORT=4000
-   NODE_ENV=production
-   AUTH_SERVICE_URL=https://auth-service-xxx.railway.app
-   PRODUCT_SERVICE_URL=https://product-service-xxx.railway.app
-   ORDER_SERVICE_URL=https://order-service-xxx.railway.app
-   CATEGORY_SERVICE_URL=https://category-service-xxx.railway.app
-   COUPON_SERVICE_URL=https://coupon-service-xxx.railway.app
-   ALLOWED_ORIGINS=https://your-storefront.vercel.app,https://your-admin.vercel.app,https://your-seller.vercel.app
-   LOG_LEVEL=info
-   ENABLE_FILE_LOGGING=false
-   ```
-
-### 2.4 Get Service URLs
-After deployment, Railway provides URLs like:
-- `auth-service-production.up.railway.app`
-- `product-service-production.up.railway.app`
-- etc.
-
-Update the **GraphQL Gateway** with these URLs.
+Or use the REST API:
+```
+UPSTASH_REDIS_REST_URL=https://us1-xxxxx.upstash.io
+UPSTASH_REDIS_REST_TOKEN=xxxxx
+```
 
 ---
 
-## Step 3: Vercel Frontend Deployment
+## Step 3: Fly.io Backend Deployment
 
-### 3.1 Create Vercel Account
-1. Go to [Vercel](https://vercel.com)
-2. Sign up with GitHub
+### 3.1 Install Fly CLI
 
-### 3.2 Deploy Storefront App
-1. Click "Add New" → "Project"
+**Windows (PowerShell):**
+```powershell
+pwsh -Command "iwr https://fly.io/install.ps1 -useb | iex"
+```
+
+**Or download from:** https://fly.io/docs/hands-on/install-flyctl/
+
+### 3.2 Login to Fly.io
+```bash
+fly auth login
+```
+
+### 3.3 Deploy Each Service
+
+Navigate to project root and deploy each service:
+
+#### Deploy Auth Service
+```bash
+cd services/auth-service
+fly launch --name ecommerce-auth-service --no-deploy
+
+# Set secrets
+fly secrets set \
+  MONGODB_URI="mongodb+srv://user:pass@cluster.mongodb.net/ecommerce" \
+  JWT_SECRET="your-256-bit-secret" \
+  JWT_REFRESH_SECRET="your-refresh-secret" \
+  SMTP_HOST="smtp.gmail.com" \
+  SMTP_PORT="587" \
+  SMTP_USER="your-email@gmail.com" \
+  SMTP_PASS="your-app-password" \
+  EMAIL_FROM="noreply@yourdomain.com" \
+  GOOGLE_CLIENT_ID="your-google-client-id" \
+  GOOGLE_CLIENT_SECRET="your-google-client-secret" \
+  ALLOWED_ORIGINS="https://your-storefront.vercel.app,https://your-admin.vercel.app" \
+  FRONTEND_URL="https://your-storefront.vercel.app"
+
+# Deploy
+fly deploy
+```
+
+#### Deploy Product Service
+```bash
+cd ../product-service
+fly launch --name ecommerce-product-service --no-deploy
+
+fly secrets set \
+  MONGODB_URI="mongodb+srv://user:pass@cluster.mongodb.net/ecommerce" \
+  JWT_SECRET="your-256-bit-secret" \
+  REDIS_URL="redis://default:xxx@us1-xxx.upstash.io:6379" \
+  ALLOWED_ORIGINS="https://your-storefront.vercel.app,https://your-admin.vercel.app"
+
+fly deploy
+```
+
+#### Deploy Order Service
+```bash
+cd ../order-service
+fly launch --name ecommerce-order-service --no-deploy
+
+fly secrets set \
+  MONGODB_URI="mongodb+srv://user:pass@cluster.mongodb.net/ecommerce" \
+  JWT_SECRET="your-256-bit-secret" \
+  ALLOWED_ORIGINS="https://your-storefront.vercel.app,https://your-admin.vercel.app"
+
+fly deploy
+```
+
+#### Deploy Category Service
+```bash
+cd ../category-service
+fly launch --name ecommerce-category-service --no-deploy
+
+fly secrets set \
+  MONGODB_URI="mongodb+srv://user:pass@cluster.mongodb.net/ecommerce" \
+  ALLOWED_ORIGINS="https://your-storefront.vercel.app,https://your-admin.vercel.app"
+
+fly deploy
+```
+
+#### Deploy Coupon Service
+```bash
+cd ../coupon-service
+fly launch --name ecommerce-coupon-service --no-deploy
+
+fly secrets set \
+  MONGODB_URI="mongodb+srv://user:pass@cluster.mongodb.net/ecommerce" \
+  JWT_SECRET="your-256-bit-secret" \
+  ALLOWED_ORIGINS="https://your-storefront.vercel.app,https://your-admin.vercel.app"
+
+fly deploy
+```
+
+#### Deploy GraphQL Gateway
+```bash
+cd ../graphql-gateway
+fly launch --name ecommerce-graphql-gateway --no-deploy
+
+fly secrets set \
+  AUTH_SERVICE_URL="https://ecommerce-auth-service.fly.dev" \
+  PRODUCT_SERVICE_URL="https://ecommerce-product-service.fly.dev" \
+  ORDER_SERVICE_URL="https://ecommerce-order-service.fly.dev" \
+  CATEGORY_SERVICE_URL="https://ecommerce-category-service.fly.dev" \
+  COUPON_SERVICE_URL="https://ecommerce-coupon-service.fly.dev" \
+  ALLOWED_ORIGINS="https://your-storefront.vercel.app,https://your-admin.vercel.app"
+
+fly deploy
+```
+
+### 3.4 Verify Deployments
+```bash
+# Check status
+fly status -a ecommerce-auth-service
+fly status -a ecommerce-graphql-gateway
+
+# View logs
+fly logs -a ecommerce-auth-service
+
+# Check health
+curl https://ecommerce-auth-service.fly.dev/health
+curl https://ecommerce-graphql-gateway.fly.dev/graphql?query=%7B__typename%7D
+```
+
+---
+
+## Step 4: Vercel Frontend Deployment
+
+### 4.1 Install Vercel CLI (Optional)
+```bash
+npm i -g vercel
+```
+
+### 4.2 Deploy via Vercel Dashboard (Recommended)
+
+#### Deploy Storefront App
+1. Go to [vercel.com](https://vercel.com) → New Project
 2. Import `E-Commerce-Microservices-Platform`
 3. Configure:
-   - **Framework Preset**: Next.js
+   - **Framework**: Next.js
    - **Root Directory**: `apps/storefront-app`
-4. Add Environment Variables:
+4. Environment Variables:
    ```
    NEXT_PUBLIC_ENV=production
-   NEXT_PUBLIC_GRAPHQL_URL=https://graphql-gateway-xxx.railway.app/graphql
-   NEXT_PUBLIC_AUTH_API_URL=https://auth-service-xxx.railway.app
+   NEXT_PUBLIC_GRAPHQL_URL=https://ecommerce-graphql-gateway.fly.dev/graphql
+   NEXT_PUBLIC_AUTH_API_URL=https://ecommerce-auth-service.fly.dev
    NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
    ```
-5. Click "Deploy"
+5. Deploy
 
-### 3.3 Deploy Admin App
-1. Add New Project → Same repo
+#### Deploy Admin App
+1. New Project → Same repo
 2. Configure:
-   - **Framework Preset**: Vite
+   - **Framework**: Vite
    - **Root Directory**: `apps/admin-app`
 3. Environment Variables:
    ```
    VITE_ENV=production
-   VITE_GRAPHQL_URL=https://graphql-gateway-xxx.railway.app/graphql
-   VITE_CLOUDINARY_CLOUD_NAME=your-cloudinary-name
-   VITE_CLOUDINARY_UPLOAD_PRESET=your-upload-preset
+   VITE_GRAPHQL_URL=https://ecommerce-graphql-gateway.fly.dev/graphql
+   VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
+   VITE_CLOUDINARY_UPLOAD_PRESET=your-preset
    ```
 
-### 3.4 Deploy Seller App
-1. Add New Project → Same repo
+#### Deploy Seller App
+1. New Project → Same repo
 2. Configure:
-   - **Framework Preset**: Vite
+   - **Framework**: Vite
    - **Root Directory**: `apps/seller-app`
 3. Environment Variables:
    ```
    VITE_ENV=production
-   VITE_AUTH_API=https://auth-service-xxx.railway.app
-   VITE_PRODUCT_API=https://product-service-xxx.railway.app
-   VITE_ORDER_API=https://order-service-xxx.railway.app
-   VITE_CATEGORY_API=https://category-service-xxx.railway.app
-   VITE_CLOUDINARY_CLOUD_NAME=your-cloudinary-name
-   VITE_CLOUDINARY_UPLOAD_PRESET=your-upload-preset
-   VITE_SHELL_APP_URL=https://shell-app-xxx.vercel.app
+   VITE_AUTH_API=https://ecommerce-auth-service.fly.dev
+   VITE_PRODUCT_API=https://ecommerce-product-service.fly.dev
+   VITE_ORDER_API=https://ecommerce-order-service.fly.dev
+   VITE_CATEGORY_API=https://ecommerce-category-service.fly.dev
+   VITE_SHELL_APP_URL=https://your-shell-app.vercel.app
+   VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
+   VITE_CLOUDINARY_UPLOAD_PRESET=your-preset
    ```
 
-### 3.5 Deploy Shell App
-1. Add New Project → Same repo
+#### Deploy Shell App
+1. New Project → Same repo
 2. Configure:
-   - **Framework Preset**: Other
+   - **Framework**: Other
    - **Root Directory**: `apps/shell-app`
-   - **Build Command**: `yarn build`
+   - **Build Command**: `cd ../.. && yarn install && yarn workspace shell-app build`
    - **Output Directory**: `dist`
 3. Environment Variables:
    ```
    NODE_ENV=production
-   GRAPHQL_URL=https://graphql-gateway-xxx.railway.app/graphql
-   ADMIN_APP_URL=https://admin-app-xxx.vercel.app
-   SELLER_APP_URL=https://seller-app-xxx.vercel.app
+   GRAPHQL_URL=https://ecommerce-graphql-gateway.fly.dev/graphql
+   ADMIN_APP_URL=https://your-admin-app.vercel.app
+   SELLER_APP_URL=https://your-seller-app.vercel.app
    ```
 
 ---
 
-## Step 4: Update CORS Settings
+## Step 5: Update CORS After Deployment
 
-After all deployments, update the `ALLOWED_ORIGINS` in each Railway service with the actual Vercel URLs:
+After all deployments, update `ALLOWED_ORIGINS` in each Fly.io service:
 
+```bash
+fly secrets set ALLOWED_ORIGINS="https://storefront-xxx.vercel.app,https://admin-xxx.vercel.app,https://seller-xxx.vercel.app,https://shell-xxx.vercel.app" -a ecommerce-auth-service
+
+# Repeat for all services...
 ```
-ALLOWED_ORIGINS=https://storefront-xxx.vercel.app,https://admin-xxx.vercel.app,https://seller-xxx.vercel.app,https://shell-xxx.vercel.app
+
+---
+
+## Step 6: Cloudflare Workers (Optional - Edge Auth)
+
+For edge-optimized authentication, you can add Cloudflare Workers:
+
+### 6.1 Create Worker
+```bash
+npm create cloudflare@latest ecommerce-auth-edge
+```
+
+### 6.2 Example Worker for JWT Validation
+```typescript
+// src/index.ts
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const token = request.headers.get('Authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      return new Response('Unauthorized', { status: 401 });
+    }
+
+    // Validate JWT at the edge
+    try {
+      const payload = await verifyJWT(token, env.JWT_SECRET);
+      
+      // Forward to backend with validated user
+      const backendUrl = `${env.AUTH_SERVICE_URL}${new URL(request.url).pathname}`;
+      return fetch(backendUrl, {
+        ...request,
+        headers: {
+          ...Object.fromEntries(request.headers),
+          'X-User-Id': payload.userId,
+          'X-User-Role': payload.role,
+        },
+      });
+    } catch (e) {
+      return new Response('Invalid token', { status: 401 });
+    }
+  },
+};
 ```
 
 ---
 
-## Step 5: Custom Domains (Optional)
+## Quick Reference - Service URLs
 
-### Vercel Custom Domains
-1. Go to Project Settings → Domains
-2. Add your custom domain
-3. Update DNS records as instructed
+After deployment, your URLs will be:
 
-### Railway Custom Domains
-1. Go to Service Settings → Domains
-2. Add custom domain
-3. Update DNS records
+### Backend (Fly.io)
+```
+https://ecommerce-auth-service.fly.dev
+https://ecommerce-product-service.fly.dev
+https://ecommerce-order-service.fly.dev
+https://ecommerce-category-service.fly.dev
+https://ecommerce-coupon-service.fly.dev
+https://ecommerce-graphql-gateway.fly.dev
+```
 
----
-
-## Environment Variables Quick Reference
-
-### Backend Services (Railway)
-
-| Variable | Auth | Product | Order | Category | Coupon | Gateway |
-|----------|------|---------|-------|----------|--------|---------|
-| PORT | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| NODE_ENV | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| MONGODB_URI | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| JWT_SECRET | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ |
-| ALLOWED_ORIGINS | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| LOG_LEVEL | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-
-### Frontend Apps (Vercel)
-
-| Variable | Storefront | Admin | Seller | Shell |
-|----------|------------|-------|--------|-------|
-| GRAPHQL_URL | ✅ | ✅ | ❌ | ✅ |
-| AUTH_API | ✅ | ❌ | ✅ | ❌ |
-| CLOUDINARY | ❌ | ✅ | ✅ | ❌ |
-| GOOGLE_CLIENT_ID | ✅ | ❌ | ❌ | ❌ |
+### Frontend (Vercel)
+```
+https://ecommerce-storefront.vercel.app
+https://ecommerce-admin.vercel.app
+https://ecommerce-seller.vercel.app
+https://ecommerce-shell.vercel.app
+```
 
 ---
 
-## Troubleshooting
+## Fly.io CLI Quick Commands
 
-### Railway Build Fails
-- Check the build logs for specific errors
-- Ensure all workspace dependencies are correctly referenced
-- Verify the root directory is set correctly
+```bash
+# List all apps
+fly apps list
 
-### Vercel Build Fails
-- Check that shared packages build first
-- Verify environment variables are set
-- Check for TypeScript errors
+# Check app status
+fly status -a <app-name>
 
-### CORS Errors
-- Ensure `ALLOWED_ORIGINS` includes all frontend URLs
-- Check that URLs don't have trailing slashes
-- Verify the protocol (https vs http)
+# View logs
+fly logs -a <app-name>
 
-### Database Connection Issues
-- Verify MongoDB Atlas whitelist includes Railway IPs
-- Check connection string format
-- Ensure database user has correct permissions
+# SSH into container
+fly ssh console -a <app-name>
 
----
+# Scale up/down
+fly scale count 2 -a <app-name>
 
-## Monitoring & Logs
+# Update secrets
+fly secrets set KEY=value -a <app-name>
 
-### Railway
-- View logs: Service → Logs tab
-- Monitor metrics: Service → Metrics tab
-
-### Vercel
-- View deployment logs: Project → Deployments
-- Runtime logs: Project → Logs
-
-### MongoDB Atlas
-- Monitor performance: Cluster → Metrics
-- View slow queries: Performance Advisor
+# Restart app
+fly apps restart <app-name>
+```
 
 ---
 
@@ -345,17 +406,50 @@ ALLOWED_ORIGINS=https://storefront-xxx.vercel.app,https://admin-xxx.vercel.app,h
 
 ### Free Tier Limits
 
-| Service | Free Tier |
-|---------|-----------|
-| Railway | $5/month credit, 500 execution hours |
-| Vercel | 100GB bandwidth, serverless functions |
-| MongoDB Atlas | M0 cluster (512MB storage) |
+| Service | Free Tier Limit |
+|---------|-----------------|
+| **Fly.io** | 3 shared-cpu VMs, 160GB outbound |
+| **Vercel** | 100GB bandwidth, 100 deployments/day |
+| **MongoDB Atlas** | 512MB storage (M0) |
+| **Upstash Redis** | 10K commands/day, 256MB |
+| **Cloudflare Workers** | 100K requests/day |
 
-### Production Recommendations
+### Estimated Monthly Cost (Scaling Up)
 
-| Service | Recommended Plan | Estimated Cost |
-|---------|------------------|----------------|
-| Railway | Developer ($20/mo) | ~$40-60/month (6 services) |
-| Vercel | Pro ($20/mo) | ~$20/month |
-| MongoDB Atlas | M10 ($57/mo) | ~$57/month |
-| **Total** | | **~$120-140/month** |
+| Service | Hobby/Pro Plan |
+|---------|----------------|
+| Fly.io (6 services) | ~$15-30/month |
+| Vercel Pro | $20/month |
+| MongoDB Atlas M10 | $57/month |
+| Upstash Pay-as-you-go | ~$5/month |
+| **Total** | **~$100/month** |
+
+---
+
+## Troubleshooting
+
+### Fly.io Build Fails
+```bash
+# Check build logs
+fly logs -a <app-name>
+
+# Rebuild
+fly deploy --no-cache
+```
+
+### CORS Errors
+- Ensure all Vercel URLs are in `ALLOWED_ORIGINS`
+- No trailing slashes in URLs
+- Check protocol (https not http)
+
+### Database Connection Issues
+- Verify MongoDB Atlas IP whitelist includes `0.0.0.0/0`
+- Check connection string format
+- Ensure database user has correct permissions
+
+### Fly.io Machine Sleeping
+Free tier machines auto-stop. First request may be slow (~2s cold start).
+To keep alive:
+```bash
+fly scale count 1 --min-machines-running=1 -a <app-name>
+```
