@@ -10,7 +10,10 @@ const recordCount = {
     customers: 70,
   },
   categories: 20,
-  products: 300,
+  products: {
+    total: 300,
+    perCategory: 15,
+  },
   coupons: 20,
   orders: 50,
   reviews: 100,
@@ -92,7 +95,7 @@ function generateUsers() {
 
     users.push({
       _id: { $oid: generateObjectId(ID_PREFIX.USER, userIndex) },
-      email: `admin${i + 1}@ecommerce.com`,
+      email: `admin${i + 1}@yopmail.com`,
       password: HASHED_PASSWORDS.ADMIN, // 'Admin@123'
       name: `${firstName} ${lastName}`,
       role: USER_ROLES.ADMIN,
@@ -105,14 +108,14 @@ function generateUsers() {
   }
 
   // Generate sellers (20)
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < recordCount.users.sellers; i++) {
     const firstName = FIRST_NAMES[10 + i];
     const lastName = LAST_NAMES[10 + i];
     const createdAt = generateDate(2024, 2024);
 
     const seller = {
       _id: { $oid: generateObjectId(ID_PREFIX.USER, userIndex) },
-      email: `seller${i + 1}@marketplace.com`,
+      email: `seller${i + 1}@yopmail.com`,
       password: HASHED_PASSWORDS.SELLER, // 'Seller@123'
       name: `${firstName} ${lastName}`,
       role: USER_ROLES.SELLER,
@@ -127,14 +130,14 @@ function generateUsers() {
   }
 
   // Generate customers (70)
-  for (let i = 0; i < 70; i++) {
+  for (let i = 0; i < recordCount.users.customers; i++) {
     const firstName = FIRST_NAMES[(30 + i) % 50];
     const lastName = LAST_NAMES[(30 + i) % 50];
     const createdAt = generateDate(2024, 2025);
 
     const customer = {
       _id: { $oid: generateObjectId(ID_PREFIX.USER, userIndex) },
-      email: `customer${i + 1}@email.com`,
+      email: `customer${i + 1}@yopmail.com`,
       password: HASHED_PASSWORDS.CUSTOMER, // 'User@123'
       name: `${firstName} ${lastName}`,
       role: USER_ROLES.CUSTOMER,
@@ -180,7 +183,7 @@ function generateProducts() {
     const templates = PRODUCT_TEMPLATES[catIndex] || PRODUCT_TEMPLATES[0];
 
     // 15 products per category = 300 total
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < recordCount.products.perCategory; i++) {
       // Assign seller (rotating through 20 sellers)
       const seller = sellers[productIndex % sellers.length];
       const templateName = templates[i % templates.length];
@@ -254,7 +257,7 @@ function generateCoupons() {
 
 // Generate Orders (50) - matches IOrder model
 function generateOrders() {
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < recordCount.orders; i++) {
     // Pick a customer
     const customer = customers[i % customers.length];
     const numItems = Math.floor(Math.random() * 4) + 1; // 1-4 items per order
@@ -355,7 +358,7 @@ function generateOrders() {
 
 // Generate Reviews (100) - matches Review interface from user.types
 function generateReviews() {
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < recordCount.reviews; i++) {
     const customer = customers[i % customers.length];
     const product = products[i % products.length];
     const titleIndex = i % REVIEW_TITLES.length;
@@ -382,7 +385,7 @@ function generateReviews() {
 
 // Generate Addresses (100) - linked to users
 function generateAddresses() {
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < recordCount.addresses; i++) {
     const user = users[i % users.length];
     const cityIndex = i % CITIES.length;
     const createdAt = generateDate(2024, 2025);
