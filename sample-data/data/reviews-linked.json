@@ -12,13 +12,13 @@
     "images": [
       "https://picsum.photos/seed/review0/200/200"
     ],
-    "helpful": 6,
+    "helpful": 3,
     "verified": true,
     "createdAt": {
-      "$date": "2025-05-31T18:44:46.288Z"
+      "$date": "2025-04-26T13:26:28.371Z"
     },
     "updatedAt": {
-      "$date": "2025-11-23T12:55:33.643Z"
+      "$date": "2025-02-09T10:06:10.413Z"
     }
   },
   {
@@ -28,17 +28,17 @@
     "productId": "695b4b98ffa2345600000002",
     "userId": "60a1b2c3d4e5f6a700000020",
     "userName": "Ashley Young",
-    "rating": 5,
+    "rating": 4,
     "title": "Excellent quality!",
     "comment": "Excellent quality and fast shipping. Will buy again!",
     "images": [],
-    "helpful": 3,
+    "helpful": 2,
     "verified": true,
     "createdAt": {
-      "$date": "2025-08-01T10:14:28.766Z"
+      "$date": "2025-12-30T17:53:18.649Z"
     },
     "updatedAt": {
-      "$date": "2025-06-23T11:31:32.168Z"
+      "$date": "2025-07-02T02:56:32.987Z"
     }
   },
   {
@@ -52,13 +52,13 @@
     "title": "Worth the price",
     "comment": "Good value for money. Very satisfied with my purchase.",
     "images": [],
-    "helpful": 16,
+    "helpful": 0,
     "verified": true,
     "createdAt": {
-      "$date": "2025-01-21T22:41:19.593Z"
+      "$date": "2025-12-22T16:39:55.636Z"
     },
     "updatedAt": {
-      "$date": "2025-06-28T12:34:53.479Z"
+      "$date": "2025-04-06T15:29:44.632Z"
     }
   },
   {
@@ -68,17 +68,17 @@
     "productId": "695b4b98ffa2345600000004",
     "userId": "60a1b2c3d4e5f6a700000022",
     "userName": "Kimberly King",
-    "rating": 5,
+    "rating": 3,
     "title": "Exactly as described",
     "comment": "Exactly as described in the listing. Very happy with it!",
     "images": [],
     "helpful": 9,
     "verified": true,
     "createdAt": {
-      "$date": "2025-02-13T15:51:47.828Z"
+      "$date": "2025-07-10T18:55:33.933Z"
     },
     "updatedAt": {
-      "$date": "2025-03-22T15:52:47.650Z"
+      "$date": "2025-09-13T03:53:21.945Z"
     }
   },
   {
@@ -88,17 +88,17 @@
     "productId": "695b4b98ffa2345600000005",
     "userId": "60a1b2c3d4e5f6a700000023",
     "userName": "Paul Wright",
-    "rating": 4,
+    "rating": 3,
     "title": "Perfect purchase",
     "comment": "Perfect! This is exactly what I was looking for.",
     "images": [],
-    "helpful": 14,
+    "helpful": 15,
     "verified": true,
     "createdAt": {
-      "$date": "2025-01-05T16:09:40.935Z"
+      "$date": "2025-04-07T16:18:31.021Z"
     },
     "updatedAt": {
-      "$date": "2025-01-28T21:53:24.098Z"
+      "$date": "2025-04-09T20:48:19.943Z"
     }
   },
   {
@@ -108,19 +108,19 @@
     "productId": "695b4b98ffa2345600000006",
     "userId": "60a1b2c3d4e5f6a700000024",
     "userName": "Emily Scott",
-    "rating": 3,
+    "rating": 5,
     "title": "Good but slow shipping",
     "comment": "Nice product overall, but shipping took longer than expected.",
     "images": [
       "https://picsum.photos/seed/review5/200/200"
     ],
-    "helpful": 9,
+    "helpful": 15,
     "verified": true,
     "createdAt": {
-      "$date": "2025-04-19T22:17:17.738Z"
+      "$date": "2025-07-25T08:22:01.711Z"
     },
     "updatedAt": {
-      "$date": "2025-02-04T14:53:50.246Z"
+      "$date": "2025-01-01T23:12:31.082Z"
     }
   },
   {
@@ -130,17 +130,17 @@
     "productId": "695b4b98ffa2345600000007",
     "userId": "60a1b2c3d4e5f6a700000025",
     "userName": "Andrew Torres",
-    "rating": 4,
+    "rating": 3,
     "title": "Amazing quality!",
     "comment": "Amazing quality! The craftsmanship is superb.",
     "images": [],
-    "helpful": 14,
+    "helpful": 4,
     "verified": true,
     "createdAt": {
-      "$date": "2025-07-12T16:40:16.733Z"
+      "$date": "2025-09-12T23:56:24.146Z"
     },
     "updatedAt": {
-      "$date": "2025-08-29T22:54:57.834Z"
+      "$date": "2025-06-28T04:50:08.870Z"
     }
   },
   {
@@ -150,17 +150,17 @@
     "productId": "695b4b98ffa2345600000008",
     "userId": "60a1b2c3d4e5f6a700000026",
     "userName": "Donna Nguyen",
-    "rating": 3,
+    "rating": 4,
     "title": "Works great",
     "comment": "Works great, no complaints at all. Very pleased.",
     "images": [],
-    "helpful": 5,
+    "helpful": 3,
     "verified": true,
     "createdAt": {
-      "$date": "2025-06-12T03:51:36.606Z"
+      "$date": "2025-06-13T10:44:53.579Z"
     },
     "updatedAt": {
-      "$date": "2025-03-02T05:15:42.429Z"
+      "$date": "2025-12-16T22:48:15.287Z"
     }
   },
   {
@@ -174,13 +174,13 @@
     "title": "Better than expected!",
     "comment": "Better than expected! The quality is top-notch.",
     "images": [],
-    "helpful": 2,
+    "helpful": 18,
     "verified": true,
     "createdAt": {
-      "$date": "2025-03-04T03:15:35.146Z"
+      "$date": "2025-02-24T23:40:46.116Z"
     },
     "updatedAt": {
-      "$date": "2025-07-31T18:53:17.938Z"
+      "$date": "2025-05-07T10:49:26.924Z"
     }
   },
   {
@@ -190,17 +190,17 @@
     "productId": "695b4b98ffa234560000000a",
     "userId": "60a1b2c3d4e5f6a700000028",
     "userName": "Michelle Flores",
-    "rating": 3,
+    "rating": 4,
     "title": "Highly recommend",
     "comment": "Solid product, would definitely recommend to others.",
     "images": [],
-    "helpful": 11,
+    "helpful": 15,
     "verified": true,
     "createdAt": {
-      "$date": "2025-12-01T03:43:48.739Z"
+      "$date": "2025-09-04T13:51:20.439Z"
     },
     "updatedAt": {
-      "$date": "2025-11-25T20:03:44.737Z"
+      "$date": "2025-12-12T15:11:14.177Z"
     }
   },
   {
@@ -210,19 +210,19 @@
     "productId": "695b4b98ffa234560000000b",
     "userId": "60a1b2c3d4e5f6a700000029",
     "userName": "Kenneth Green",
-    "rating": 3,
+    "rating": 5,
     "title": "Great product!",
     "comment": "This product exceeded my expectations. Highly recommended!",
     "images": [
       "https://picsum.photos/seed/review10/200/200"
     ],
-    "helpful": 7,
+    "helpful": 11,
     "verified": true,
     "createdAt": {
-      "$date": "2025-11-15T13:17:18.679Z"
+      "$date": "2025-09-22T04:06:11.014Z"
     },
     "updatedAt": {
-      "$date": "2025-06-01T14:54:48.152Z"
+      "$date": "2025-01-23T07:47:50.139Z"
     }
   },
   {
@@ -236,13 +236,13 @@
     "title": "Excellent quality!",
     "comment": "Excellent quality and fast shipping. Will buy again!",
     "images": [],
-    "helpful": 17,
+    "helpful": 12,
     "verified": true,
     "createdAt": {
-      "$date": "2025-12-17T15:44:39.608Z"
+      "$date": "2025-10-07T23:57:36.314Z"
     },
     "updatedAt": {
-      "$date": "2025-10-20T13:49:20.400Z"
+      "$date": "2025-09-05T00:57:13.632Z"
     }
   },
   {
@@ -252,17 +252,17 @@
     "productId": "695b4b98ffa234560000000d",
     "userId": "60a1b2c3d4e5f6a70000002b",
     "userName": "Kevin Nelson",
-    "rating": 5,
+    "rating": 4,
     "title": "Worth the price",
     "comment": "Good value for money. Very satisfied with my purchase.",
     "images": [],
-    "helpful": 0,
+    "helpful": 4,
     "verified": true,
     "createdAt": {
-      "$date": "2025-01-24T03:05:50.979Z"
+      "$date": "2025-12-22T00:52:07.222Z"
     },
     "updatedAt": {
-      "$date": "2025-06-17T14:54:11.796Z"
+      "$date": "2025-12-24T03:43:32.277Z"
     }
   },
   {
@@ -276,13 +276,13 @@
     "title": "Exactly as described",
     "comment": "Exactly as described in the listing. Very happy with it!",
     "images": [],
-    "helpful": 19,
+    "helpful": 2,
     "verified": true,
     "createdAt": {
-      "$date": "2025-02-15T02:16:08.932Z"
+      "$date": "2025-06-11T16:09:21.652Z"
     },
     "updatedAt": {
-      "$date": "2025-03-04T03:34:26.416Z"
+      "$date": "2025-02-14T23:53:23.846Z"
     }
   },
   {
@@ -292,17 +292,17 @@
     "productId": "695b4b98ffa234560000000f",
     "userId": "60a1b2c3d4e5f6a70000002d",
     "userName": "Brian Hall",
-    "rating": 5,
+    "rating": 4,
     "title": "Perfect purchase",
     "comment": "Perfect! This is exactly what I was looking for.",
     "images": [],
-    "helpful": 10,
+    "helpful": 18,
     "verified": true,
     "createdAt": {
-      "$date": "2025-03-03T14:18:26.755Z"
+      "$date": "2025-07-29T05:35:49.389Z"
     },
     "updatedAt": {
-      "$date": "2025-03-29T08:58:05.246Z"
+      "$date": "2025-12-12T13:17:59.762Z"
     }
   },
   {
@@ -312,19 +312,19 @@
     "productId": "695b4b98ffa2345600000010",
     "userId": "60a1b2c3d4e5f6a70000002e",
     "userName": "Amanda Rivera",
-    "rating": 4,
+    "rating": 3,
     "title": "Good but slow shipping",
     "comment": "Nice product overall, but shipping took longer than expected.",
     "images": [
       "https://picsum.photos/seed/review15/200/200"
     ],
-    "helpful": 18,
+    "helpful": 8,
     "verified": true,
     "createdAt": {
-      "$date": "2025-06-05T20:30:54.978Z"
+      "$date": "2025-11-15T03:23:01.859Z"
     },
     "updatedAt": {
-      "$date": "2025-03-31T02:28:32.424Z"
+      "$date": "2025-11-29T01:54:29.885Z"
     }
   },
   {
@@ -334,17 +334,17 @@
     "productId": "695b4b98ffa2345600000011",
     "userId": "60a1b2c3d4e5f6a70000002f",
     "userName": "George Campbell",
-    "rating": 3,
+    "rating": 5,
     "title": "Amazing quality!",
     "comment": "Amazing quality! The craftsmanship is superb.",
     "images": [],
-    "helpful": 8,
+    "helpful": 9,
     "verified": true,
     "createdAt": {
-      "$date": "2025-08-10T13:27:42.810Z"
+      "$date": "2025-05-31T18:02:31.661Z"
     },
     "updatedAt": {
-      "$date": "2025-08-13T17:13:08.573Z"
+      "$date": "2025-11-24T08:05:05.005Z"
     }
   },
   {
@@ -354,17 +354,17 @@
     "productId": "695b4b98ffa2345600000012",
     "userId": "60a1b2c3d4e5f6a700000030",
     "userName": "Melissa Mitchell",
-    "rating": 4,
+    "rating": 3,
     "title": "Works great",
     "comment": "Works great, no complaints at all. Very pleased.",
     "images": [],
-    "helpful": 4,
+    "helpful": 18,
     "verified": true,
     "createdAt": {
-      "$date": "2025-03-11T17:27:08.062Z"
+      "$date": "2025-12-21T19:50:25.189Z"
     },
     "updatedAt": {
-      "$date": "2025-02-07T01:59:46.383Z"
+      "$date": "2025-04-17T10:51:35.559Z"
     }
   },
   {
@@ -374,17 +374,17 @@
     "productId": "695b4b98ffa2345600000013",
     "userId": "60a1b2c3d4e5f6a700000031",
     "userName": "Timothy Carter",
-    "rating": 3,
+    "rating": 4,
     "title": "Better than expected!",
     "comment": "Better than expected! The quality is top-notch.",
     "images": [],
     "helpful": 0,
     "verified": true,
     "createdAt": {
-      "$date": "2025-07-23T23:43:28.604Z"
+      "$date": "2025-07-23T19:26:45.627Z"
     },
     "updatedAt": {
-      "$date": "2025-09-09T19:29:57.871Z"
+      "$date": "2025-06-15T00:17:46.099Z"
     }
   },
   {
@@ -394,17 +394,17 @@
     "productId": "695b4b98ffa2345600000014",
     "userId": "60a1b2c3d4e5f6a700000032",
     "userName": "Deborah Roberts",
-    "rating": 5,
+    "rating": 3,
     "title": "Highly recommend",
     "comment": "Solid product, would definitely recommend to others.",
     "images": [],
-    "helpful": 2,
+    "helpful": 8,
     "verified": true,
     "createdAt": {
-      "$date": "2025-09-06T07:26:17.763Z"
+      "$date": "2025-05-12T11:15:38.246Z"
     },
     "updatedAt": {
-      "$date": "2025-05-12T10:13:39.018Z"
+      "$date": "2025-10-31T17:45:24.241Z"
     }
   },
   {
@@ -420,13 +420,13 @@
     "images": [
       "https://picsum.photos/seed/review20/200/200"
     ],
-    "helpful": 18,
+    "helpful": 14,
     "verified": true,
     "createdAt": {
-      "$date": "2025-09-06T10:29:39.948Z"
+      "$date": "2025-10-31T03:17:02.080Z"
     },
     "updatedAt": {
-      "$date": "2025-02-03T16:10:33.704Z"
+      "$date": "2025-05-23T19:16:20.808Z"
     }
   },
   {
@@ -440,13 +440,13 @@
     "title": "Excellent quality!",
     "comment": "Excellent quality and fast shipping. Will buy again!",
     "images": [],
-    "helpful": 18,
+    "helpful": 13,
     "verified": true,
     "createdAt": {
-      "$date": "2025-12-05T02:48:38.931Z"
+      "$date": "2025-09-18T01:53:59.271Z"
     },
     "updatedAt": {
-      "$date": "2025-08-02T09:44:54.122Z"
+      "$date": "2025-07-21T04:13:56.440Z"
     }
   },
   {
@@ -460,13 +460,13 @@
     "title": "Worth the price",
     "comment": "Good value for money. Very satisfied with my purchase.",
     "images": [],
-    "helpful": 17,
+    "helpful": 11,
     "verified": true,
     "createdAt": {
-      "$date": "2025-04-15T20:19:59.957Z"
+      "$date": "2025-09-07T02:18:43.954Z"
     },
     "updatedAt": {
-      "$date": "2025-08-04T00:48:37.329Z"
+      "$date": "2025-08-15T04:01:40.799Z"
     }
   },
   {
@@ -483,10 +483,10 @@
     "helpful": 15,
     "verified": true,
     "createdAt": {
-      "$date": "2025-09-28T03:41:39.404Z"
+      "$date": "2025-12-13T04:28:33.430Z"
     },
     "updatedAt": {
-      "$date": "2025-07-01T01:55:08.545Z"
+      "$date": "2025-05-01T15:59:07.964Z"
     }
   },
   {
@@ -496,17 +496,17 @@
     "productId": "695b4b98ffa2345600000019",
     "userId": "60a1b2c3d4e5f6a700000037",
     "userName": "John Jones",
-    "rating": 3,
+    "rating": 5,
     "title": "Perfect purchase",
     "comment": "Perfect! This is exactly what I was looking for.",
     "images": [],
-    "helpful": 12,
+    "helpful": 4,
     "verified": true,
     "createdAt": {
-      "$date": "2025-08-26T21:23:38.694Z"
+      "$date": "2025-10-07T04:58:04.254Z"
     },
     "updatedAt": {
-      "$date": "2025-09-24T04:52:03.935Z"
+      "$date": "2025-12-02T00:24:30.058Z"
     }
   },
   {
@@ -516,19 +516,19 @@
     "productId": "695b4b98ffa234560000001a",
     "userId": "60a1b2c3d4e5f6a700000038",
     "userName": "Jennifer Garcia",
-    "rating": 3,
+    "rating": 4,
     "title": "Good but slow shipping",
     "comment": "Nice product overall, but shipping took longer than expected.",
     "images": [
       "https://picsum.photos/seed/review25/200/200"
     ],
-    "helpful": 15,
+    "helpful": 14,
     "verified": true,
     "createdAt": {
-      "$date": "2025-12-07T15:29:41.518Z"
+      "$date": "2025-01-13T09:25:33.202Z"
     },
     "updatedAt": {
-      "$date": "2025-03-30T02:15:10.599Z"
+      "$date": "2025-09-28T08:51:14.943Z"
     }
   },
   {
@@ -542,13 +542,13 @@
     "title": "Amazing quality!",
     "comment": "Amazing quality! The craftsmanship is superb.",
     "images": [],
-    "helpful": 12,
+    "helpful": 6,
     "verified": true,
     "createdAt": {
-      "$date": "2025-12-18T14:17:20.829Z"
+      "$date": "2025-07-28T10:31:09.595Z"
     },
     "updatedAt": {
-      "$date": "2025-07-30T05:12:59.543Z"
+      "$date": "2025-12-10T07:17:41.829Z"
     }
   },
   {
@@ -558,17 +558,17 @@
     "productId": "695b4b98ffa234560000001c",
     "userId": "60a1b2c3d4e5f6a70000003a",
     "userName": "Linda Davis",
-    "rating": 3,
+    "rating": 4,
     "title": "Works great",
     "comment": "Works great, no complaints at all. Very pleased.",
     "images": [],
     "helpful": 15,
     "verified": true,
     "createdAt": {
-      "$date": "2025-01-27T04:14:02.031Z"
+      "$date": "2025-08-13T00:20:20.488Z"
     },
     "updatedAt": {
-      "$date": "2025-05-11T18:45:51.455Z"
+      "$date": "2025-01-26T16:50:46.376Z"
     }
   },
   {
@@ -578,17 +578,17 @@
     "productId": "695b4b98ffa234560000001d",
     "userId": "60a1b2c3d4e5f6a70000003b",
     "userName": "David Rodriguez",
-    "rating": 5,
+    "rating": 3,
     "title": "Better than expected!",
     "comment": "Better than expected! The quality is top-notch.",
     "images": [],
-    "helpful": 10,
+    "helpful": 17,
     "verified": true,
     "createdAt": {
-      "$date": "2025-08-30T14:24:05.900Z"
+      "$date": "2025-10-07T01:58:36.008Z"
     },
     "updatedAt": {
-      "$date": "2025-02-18T07:48:49.400Z"
+      "$date": "2025-12-30T16:49:16.647Z"
     }
   },
   {
@@ -602,13 +602,13 @@
     "title": "Highly recommend",
     "comment": "Solid product, would definitely recommend to others.",
     "images": [],
-    "helpful": 16,
+    "helpful": 8,
     "verified": true,
     "createdAt": {
-      "$date": "2025-09-29T23:11:28.618Z"
+      "$date": "2025-11-02T01:52:34.434Z"
     },
     "updatedAt": {
-      "$date": "2025-10-11T21:54:49.619Z"
+      "$date": "2025-01-14T23:36:54.796Z"
     }
   },
   {
@@ -618,19 +618,19 @@
     "productId": "695b4b98ffa234560000001f",
     "userId": "60a1b2c3d4e5f6a70000003d",
     "userName": "William Hernandez",
-    "rating": 4,
+    "rating": 3,
     "title": "Great product!",
     "comment": "This product exceeded my expectations. Highly recommended!",
     "images": [
       "https://picsum.photos/seed/review30/200/200"
     ],
-    "helpful": 7,
+    "helpful": 8,
     "verified": true,
     "createdAt": {
-      "$date": "2025-04-09T14:07:08.812Z"
+      "$date": "2025-11-07T20:16:42.819Z"
     },
     "updatedAt": {
-      "$date": "2025-07-21T19:52:51.614Z"
+      "$date": "2025-03-28T15:18:40.250Z"
     }
   },
   {
@@ -640,17 +640,17 @@
     "productId": "695b4b98ffa2345600000020",
     "userId": "60a1b2c3d4e5f6a70000003e",
     "userName": "Barbara Lopez",
-    "rating": 5,
+    "rating": 4,
     "title": "Excellent quality!",
     "comment": "Excellent quality and fast shipping. Will buy again!",
     "images": [],
-    "helpful": 14,
+    "helpful": 4,
     "verified": true,
     "createdAt": {
-      "$date": "2025-04-29T23:30:15.040Z"
+      "$date": "2025-01-10T18:55:52.409Z"
     },
     "updatedAt": {
-      "$date": "2025-07-22T13:20:54.615Z"
+      "$date": "2025-06-04T09:44:51.750Z"
     }
   },
   {
@@ -660,17 +660,17 @@
     "productId": "695b4b98ffa2345600000021",
     "userId": "60a1b2c3d4e5f6a70000003f",
     "userName": "Richard Gonzalez",
-    "rating": 4,
+    "rating": 5,
     "title": "Worth the price",
     "comment": "Good value for money. Very satisfied with my purchase.",
     "images": [],
-    "helpful": 0,
+    "helpful": 6,
     "verified": true,
     "createdAt": {
-      "$date": "2025-03-05T04:28:34.931Z"
+      "$date": "2025-04-10T22:55:09.022Z"
     },
     "updatedAt": {
-      "$date": "2025-08-11T01:34:42.478Z"
+      "$date": "2025-07-02T03:02:23.091Z"
     }
   },
   {
@@ -680,17 +680,17 @@
     "productId": "695b4b98ffa2345600000022",
     "userId": "60a1b2c3d4e5f6a700000040",
     "userName": "Susan Wilson",
-    "rating": 4,
+    "rating": 5,
     "title": "Exactly as described",
     "comment": "Exactly as described in the listing. Very happy with it!",
     "images": [],
-    "helpful": 11,
+    "helpful": 2,
     "verified": true,
     "createdAt": {
-      "$date": "2025-09-20T18:15:46.675Z"
+      "$date": "2025-02-06T04:31:33.359Z"
     },
     "updatedAt": {
-      "$date": "2025-01-14T00:54:49.895Z"
+      "$date": "2025-05-09T15:55:31.146Z"
     }
   },
   {
@@ -700,17 +700,17 @@
     "productId": "695b4b98ffa2345600000023",
     "userId": "60a1b2c3d4e5f6a700000041",
     "userName": "Joseph Anderson",
-    "rating": 3,
+    "rating": 4,
     "title": "Perfect purchase",
     "comment": "Perfect! This is exactly what I was looking for.",
     "images": [],
-    "helpful": 2,
+    "helpful": 19,
     "verified": true,
     "createdAt": {
-      "$date": "2025-09-22T16:05:58.884Z"
+      "$date": "2025-09-27T16:31:23.669Z"
     },
     "updatedAt": {
-      "$date": "2025-08-15T00:04:59.421Z"
+      "$date": "2025-09-26T05:02:36.765Z"
     }
   },
   {
@@ -720,19 +720,19 @@
     "productId": "695b4b98ffa2345600000024",
     "userId": "60a1b2c3d4e5f6a700000042",
     "userName": "Jessica Thomas",
-    "rating": 4,
+    "rating": 5,
     "title": "Good but slow shipping",
     "comment": "Nice product overall, but shipping took longer than expected.",
     "images": [
       "https://picsum.photos/seed/review35/200/200"
     ],
-    "helpful": 5,
+    "helpful": 2,
     "verified": true,
     "createdAt": {
-      "$date": "2025-06-27T12:03:59.138Z"
+      "$date": "2025-02-12T02:04:23.577Z"
     },
     "updatedAt": {
-      "$date": "2025-06-16T21:59:52.412Z"
+      "$date": "2025-11-01T04:10:50.302Z"
     }
   },
   {
@@ -746,13 +746,13 @@
     "title": "Amazing quality!",
     "comment": "Amazing quality! The craftsmanship is superb.",
     "images": [],
-    "helpful": 2,
+    "helpful": 3,
     "verified": true,
     "createdAt": {
-      "$date": "2025-01-03T03:17:30.364Z"
+      "$date": "2025-09-25T05:38:16.709Z"
     },
     "updatedAt": {
-      "$date": "2025-10-28T11:53:32.048Z"
+      "$date": "2025-12-06T11:23:15.100Z"
     }
   },
   {
@@ -766,13 +766,13 @@
     "title": "Works great",
     "comment": "Works great, no complaints at all. Very pleased.",
     "images": [],
-    "helpful": 12,
+    "helpful": 0,
     "verified": true,
     "createdAt": {
-      "$date": "2025-03-04T08:55:58.707Z"
+      "$date": "2025-12-11T01:54:11.192Z"
     },
     "updatedAt": {
-      "$date": "2025-11-07T22:45:01.434Z"
+      "$date": "2025-11-21T03:33:17.411Z"
     }
   },
   {
@@ -782,17 +782,17 @@
     "productId": "695b4b98ffa2345600000027",
     "userId": "60a1b2c3d4e5f6a700000045",
     "userName": "Christopher Jackson",
-    "rating": 4,
+    "rating": 5,
     "title": "Better than expected!",
     "comment": "Better than expected! The quality is top-notch.",
     "images": [],
-    "helpful": 2,
+    "helpful": 18,
     "verified": true,
     "createdAt": {
-      "$date": "2025-04-24T04:58:29.287Z"
+      "$date": "2025-03-19T10:10:37.252Z"
     },
     "updatedAt": {
-      "$date": "2025-06-06T19:14:47.748Z"
+      "$date": "2025-09-13T23:16:57.880Z"
     }
   },
   {
@@ -802,17 +802,17 @@
     "productId": "695b4b98ffa2345600000028",
     "userId": "60a1b2c3d4e5f6a700000046",
     "userName": "Karen Martin",
-    "rating": 3,
+    "rating": 5,
     "title": "Highly recommend",
     "comment": "Solid product, would definitely recommend to others.",
     "images": [],
-    "helpful": 3,
+    "helpful": 17,
     "verified": true,
     "createdAt": {
-      "$date": "2025-07-23T16:12:01.967Z"
+      "$date": "2025-02-14T17:39:42.329Z"
     },
     "updatedAt": {
-      "$date": "2025-09-16T06:18:27.829Z"
+      "$date": "2025-10-04T02:52:26.707Z"
     }
   },
   {
@@ -822,19 +822,19 @@
     "productId": "695b4b98ffa2345600000029",
     "userId": "60a1b2c3d4e5f6a700000047",
     "userName": "Charles Lee",
-    "rating": 4,
+    "rating": 3,
     "title": "Great product!",
     "comment": "This product exceeded my expectations. Highly recommended!",
     "images": [
       "https://picsum.photos/seed/review40/200/200"
     ],
-    "helpful": 16,
+    "helpful": 2,
     "verified": true,
     "createdAt": {
-      "$date": "2025-03-29T14:45:46.526Z"
+      "$date": "2025-10-18T21:40:40.870Z"
     },
     "updatedAt": {
-      "$date": "2025-10-13T15:31:41.530Z"
+      "$date": "2025-01-28T07:24:35.052Z"
     }
   },
   {
@@ -844,17 +844,17 @@
     "productId": "695b4b98ffa234560000002a",
     "userId": "60a1b2c3d4e5f6a700000048",
     "userName": "Lisa Perez",
-    "rating": 4,
+    "rating": 3,
     "title": "Excellent quality!",
     "comment": "Excellent quality and fast shipping. Will buy again!",
     "images": [],
-    "helpful": 16,
+    "helpful": 9,
     "verified": true,
     "createdAt": {
-      "$date": "2025-07-11T19:03:49.520Z"
+      "$date": "2025-03-19T07:52:07.042Z"
     },
     "updatedAt": {
-      "$date": "2025-12-20T06:46:04.808Z"
+      "$date": "2025-01-11T04:20:29.570Z"
     }
   },
   {
@@ -864,17 +864,17 @@
     "productId": "695b4b98ffa234560000002b",
     "userId": "60a1b2c3d4e5f6a700000049",
     "userName": "Daniel Thompson",
-    "rating": 5,
+    "rating": 4,
     "title": "Worth the price",
     "comment": "Good value for money. Very satisfied with my purchase.",
     "images": [],
-    "helpful": 9,
+    "helpful": 10,
     "verified": true,
     "createdAt": {
-      "$date": "2025-06-06T08:13:35.037Z"
+      "$date": "2025-05-22T18:43:52.910Z"
     },
     "updatedAt": {
-      "$date": "2025-05-17T18:32:23.008Z"
+      "$date": "2025-11-04T22:15:34.690Z"
     }
   },
   {
@@ -888,13 +888,13 @@
     "title": "Exactly as described",
     "comment": "Exactly as described in the listing. Very happy with it!",
     "images": [],
-    "helpful": 0,
+    "helpful": 7,
     "verified": true,
     "createdAt": {
-      "$date": "2025-03-26T01:25:07.311Z"
+      "$date": "2025-10-08T23:07:13.072Z"
     },
     "updatedAt": {
-      "$date": "2025-01-13T19:04:07.673Z"
+      "$date": "2025-09-01T14:47:28.146Z"
     }
   },
   {
@@ -904,17 +904,17 @@
     "productId": "695b4b98ffa234560000002d",
     "userId": "60a1b2c3d4e5f6a70000004b",
     "userName": "Matthew Harris",
-    "rating": 3,
+    "rating": 5,
     "title": "Perfect purchase",
     "comment": "Perfect! This is exactly what I was looking for.",
     "images": [],
-    "helpful": 1,
+    "helpful": 9,
     "verified": true,
     "createdAt": {
-      "$date": "2025-06-15T18:17:32.072Z"
+      "$date": "2025-05-14T11:07:20.491Z"
     },
     "updatedAt": {
-      "$date": "2025-03-17T21:13:59.906Z"
+      "$date": "2025-05-22T10:01:25.807Z"
     }
   },
   {
@@ -930,13 +930,13 @@
     "images": [
       "https://picsum.photos/seed/review45/200/200"
     ],
-    "helpful": 1,
+    "helpful": 15,
     "verified": true,
     "createdAt": {
-      "$date": "2025-05-29T12:03:57.992Z"
+      "$date": "2025-02-16T05:35:21.827Z"
     },
     "updatedAt": {
-      "$date": "2025-09-14T17:11:48.937Z"
+      "$date": "2025-09-06T20:17:25.617Z"
     }
   },
   {
@@ -946,17 +946,17 @@
     "productId": "695b4b98ffa234560000002f",
     "userId": "60a1b2c3d4e5f6a70000004d",
     "userName": "Anthony Clark",
-    "rating": 5,
+    "rating": 4,
     "title": "Amazing quality!",
     "comment": "Amazing quality! The craftsmanship is superb.",
     "images": [],
-    "helpful": 10,
+    "helpful": 2,
     "verified": true,
     "createdAt": {
-      "$date": "2025-01-03T04:45:26.235Z"
+      "$date": "2025-08-14T07:18:18.919Z"
     },
     "updatedAt": {
-      "$date": "2025-01-26T10:51:10.704Z"
+      "$date": "2025-12-13T12:35:05.306Z"
     }
   },
   {
@@ -966,17 +966,17 @@
     "productId": "695b4b98ffa2345600000030",
     "userId": "60a1b2c3d4e5f6a70000004e",
     "userName": "Margaret Ramirez",
-    "rating": 4,
+    "rating": 3,
     "title": "Works great",
     "comment": "Works great, no complaints at all. Very pleased.",
     "images": [],
-    "helpful": 8,
+    "helpful": 19,
     "verified": true,
     "createdAt": {
-      "$date": "2025-10-04T12:01:50.026Z"
+      "$date": "2025-11-20T21:43:38.823Z"
     },
     "updatedAt": {
-      "$date": "2025-01-23T19:20:49.723Z"
+      "$date": "2025-03-14T03:21:47.584Z"
     }
   },
   {
@@ -990,13 +990,13 @@
     "title": "Better than expected!",
     "comment": "Better than expected! The quality is top-notch.",
     "images": [],
-    "helpful": 10,
+    "helpful": 12,
     "verified": true,
     "createdAt": {
-      "$date": "2025-08-18T09:26:52.169Z"
+      "$date": "2025-07-18T05:11:32.883Z"
     },
     "updatedAt": {
-      "$date": "2025-01-21T15:22:41.276Z"
+      "$date": "2025-03-01T09:15:25.776Z"
     }
   },
   {
@@ -1010,13 +1010,13 @@
     "title": "Highly recommend",
     "comment": "Solid product, would definitely recommend to others.",
     "images": [],
-    "helpful": 12,
+    "helpful": 18,
     "verified": true,
     "createdAt": {
-      "$date": "2025-09-12T19:40:30.898Z"
+      "$date": "2025-10-11T06:09:57.401Z"
     },
     "updatedAt": {
-      "$date": "2025-02-06T21:19:57.211Z"
+      "$date": "2025-06-30T06:32:54.554Z"
     }
   },
   {
@@ -1032,13 +1032,13 @@
     "images": [
       "https://picsum.photos/seed/review50/200/200"
     ],
-    "helpful": 18,
+    "helpful": 1,
     "verified": true,
     "createdAt": {
-      "$date": "2025-02-10T06:32:55.297Z"
+      "$date": "2025-11-24T08:57:27.094Z"
     },
     "updatedAt": {
-      "$date": "2025-12-29T13:55:43.025Z"
+      "$date": "2025-02-23T14:13:38.020Z"
     }
   },
   {
@@ -1052,13 +1052,13 @@
     "title": "Excellent quality!",
     "comment": "Excellent quality and fast shipping. Will buy again!",
     "images": [],
-    "helpful": 5,
+    "helpful": 10,
     "verified": true,
     "createdAt": {
-      "$date": "2025-04-06T01:27:38.114Z"
+      "$date": "2025-08-15T17:41:02.710Z"
     },
     "updatedAt": {
-      "$date": "2025-08-25T07:42:47.458Z"
+      "$date": "2025-06-30T21:39:25.671Z"
     }
   },
   {
@@ -1068,17 +1068,17 @@
     "productId": "695b4b98ffa2345600000035",
     "userId": "60a1b2c3d4e5f6a700000053",
     "userName": "Steven Allen",
-    "rating": 5,
+    "rating": 4,
     "title": "Worth the price",
     "comment": "Good value for money. Very satisfied with my purchase.",
     "images": [],
     "helpful": 17,
     "verified": true,
     "createdAt": {
-      "$date": "2025-10-12T20:50:19.445Z"
+      "$date": "2025-04-30T18:58:23.970Z"
     },
     "updatedAt": {
-      "$date": "2025-04-06T18:59:26.944Z"
+      "$date": "2025-06-10T10:40:29.190Z"
     }
   },
   {
@@ -1088,17 +1088,17 @@
     "productId": "695b4b98ffa2345600000036",
     "userId": "60a1b2c3d4e5f6a700000054",
     "userName": "Kimberly King",
-    "rating": 4,
+    "rating": 5,
     "title": "Exactly as described",
     "comment": "Exactly as described in the listing. Very happy with it!",
     "images": [],
-    "helpful": 14,
+    "helpful": 0,
     "verified": true,
     "createdAt": {
-      "$date": "2025-08-01T17:10:44.725Z"
+      "$date": "2025-04-01T10:12:36.097Z"
     },
     "updatedAt": {
-      "$date": "2025-04-04T02:53:57.247Z"
+      "$date": "2025-09-22T15:20:00.027Z"
     }
   },
   {
@@ -1112,13 +1112,13 @@
     "title": "Perfect purchase",
     "comment": "Perfect! This is exactly what I was looking for.",
     "images": [],
-    "helpful": 10,
+    "helpful": 4,
     "verified": true,
     "createdAt": {
-      "$date": "2025-06-23T13:35:28.771Z"
+      "$date": "2025-06-01T13:36:44.235Z"
     },
     "updatedAt": {
-      "$date": "2025-09-25T05:12:38.519Z"
+      "$date": "2025-02-21T19:14:46.203Z"
     }
   },
   {
@@ -1128,19 +1128,19 @@
     "productId": "695b4b98ffa2345600000038",
     "userId": "60a1b2c3d4e5f6a700000056",
     "userName": "Emily Scott",
-    "rating": 4,
+    "rating": 5,
     "title": "Good but slow shipping",
     "comment": "Nice product overall, but shipping took longer than expected.",
     "images": [
       "https://picsum.photos/seed/review55/200/200"
     ],
-    "helpful": 1,
+    "helpful": 12,
     "verified": true,
     "createdAt": {
-      "$date": "2025-08-04T11:02:26.661Z"
+      "$date": "2025-10-01T15:39:44.445Z"
     },
     "updatedAt": {
-      "$date": "2025-07-15T11:42:37.015Z"
+      "$date": "2025-09-04T01:02:25.835Z"
     }
   },
   {
@@ -1150,17 +1150,17 @@
     "productId": "695b4b98ffa2345600000039",
     "userId": "60a1b2c3d4e5f6a700000057",
     "userName": "Andrew Torres",
-    "rating": 5,
+    "rating": 3,
     "title": "Amazing quality!",
     "comment": "Amazing quality! The craftsmanship is superb.",
     "images": [],
-    "helpful": 12,
+    "helpful": 5,
     "verified": true,
     "createdAt": {
-      "$date": "2025-12-04T19:01:24.681Z"
+      "$date": "2025-04-22T22:35:05.112Z"
     },
     "updatedAt": {
-      "$date": "2025-01-03T08:11:37.437Z"
+      "$date": "2025-07-29T19:41:29.111Z"
     }
   },
   {
@@ -1170,17 +1170,17 @@
     "productId": "695b4b98ffa234560000003a",
     "userId": "60a1b2c3d4e5f6a700000058",
     "userName": "Donna Nguyen",
-    "rating": 4,
+    "rating": 5,
     "title": "Works great",
     "comment": "Works great, no complaints at all. Very pleased.",
     "images": [],
-    "helpful": 12,
+    "helpful": 16,
     "verified": true,
     "createdAt": {
-      "$date": "2025-06-07T07:40:53.890Z"
+      "$date": "2025-05-03T23:48:34.625Z"
     },
     "updatedAt": {
-      "$date": "2025-08-06T21:59:29.796Z"
+      "$date": "2025-07-23T19:02:52.586Z"
     }
   },
   {
@@ -1190,17 +1190,17 @@
     "productId": "695b4b98ffa234560000003b",
     "userId": "60a1b2c3d4e5f6a700000059",
     "userName": "Joshua Hill",
-    "rating": 3,
+    "rating": 5,
     "title": "Better than expected!",
     "comment": "Better than expected! The quality is top-notch.",
     "images": [],
     "helpful": 6,
     "verified": true,
     "createdAt": {
-      "$date": "2025-11-24T20:39:22.116Z"
+      "$date": "2025-05-28T18:10:05.877Z"
     },
     "updatedAt": {
-      "$date": "2025-04-07T06:56:56.557Z"
+      "$date": "2025-07-31T10:18:42.531Z"
     }
   },
   {
@@ -1214,13 +1214,13 @@
     "title": "Highly recommend",
     "comment": "Solid product, would definitely recommend to others.",
     "images": [],
-    "helpful": 15,
+    "helpful": 18,
     "verified": true,
     "createdAt": {
-      "$date": "2025-09-12T03:47:42.975Z"
+      "$date": "2025-01-27T01:39:36.829Z"
     },
     "updatedAt": {
-      "$date": "2025-03-10T09:59:48.613Z"
+      "$date": "2025-01-30T01:32:01.267Z"
     }
   },
   {
@@ -1230,7 +1230,7 @@
     "productId": "695b4b98ffa234560000003d",
     "userId": "60a1b2c3d4e5f6a70000005b",
     "userName": "Kenneth Green",
-    "rating": 3,
+    "rating": 5,
     "title": "Great product!",
     "comment": "This product exceeded my expectations. Highly recommended!",
     "images": [
@@ -1239,10 +1239,10 @@
     "helpful": 3,
     "verified": true,
     "createdAt": {
-      "$date": "2025-04-14T12:16:04.003Z"
+      "$date": "2025-02-17T17:08:22.890Z"
     },
     "updatedAt": {
-      "$date": "2025-02-03T01:28:10.739Z"
+      "$date": "2025-04-19T07:29:44.353Z"
     }
   },
   {
@@ -1256,13 +1256,13 @@
     "title": "Excellent quality!",
     "comment": "Excellent quality and fast shipping. Will buy again!",
     "images": [],
-    "helpful": 2,
+    "helpful": 0,
     "verified": true,
     "createdAt": {
-      "$date": "2025-05-26T07:56:20.153Z"
+      "$date": "2025-08-20T13:36:13.887Z"
     },
     "updatedAt": {
-      "$date": "2025-01-04T11:46:20.697Z"
+      "$date": "2025-05-28T21:06:14.004Z"
     }
   },
   {
@@ -1272,17 +1272,17 @@
     "productId": "695b4b98ffa234560000003f",
     "userId": "60a1b2c3d4e5f6a70000005d",
     "userName": "Kevin Nelson",
-    "rating": 5,
+    "rating": 4,
     "title": "Worth the price",
     "comment": "Good value for money. Very satisfied with my purchase.",
     "images": [],
-    "helpful": 8,
+    "helpful": 2,
     "verified": true,
     "createdAt": {
-      "$date": "2025-03-11T11:39:22.247Z"
+      "$date": "2025-11-20T21:50:40.601Z"
     },
     "updatedAt": {
-      "$date": "2025-04-16T20:55:32.326Z"
+      "$date": "2025-09-23T13:17:32.318Z"
     }
   },
   {
@@ -1296,13 +1296,13 @@
     "title": "Exactly as described",
     "comment": "Exactly as described in the listing. Very happy with it!",
     "images": [],
-    "helpful": 8,
+    "helpful": 7,
     "verified": true,
     "createdAt": {
-      "$date": "2025-06-08T20:03:53.767Z"
+      "$date": "2025-05-25T01:37:18.338Z"
     },
     "updatedAt": {
-      "$date": "2025-06-12T20:46:38.647Z"
+      "$date": "2025-03-18T11:48:56.645Z"
     }
   },
   {
@@ -1316,13 +1316,13 @@
     "title": "Perfect purchase",
     "comment": "Perfect! This is exactly what I was looking for.",
     "images": [],
-    "helpful": 10,
+    "helpful": 19,
     "verified": true,
     "createdAt": {
-      "$date": "2025-05-01T07:54:33.648Z"
+      "$date": "2025-06-04T15:04:06.494Z"
     },
     "updatedAt": {
-      "$date": "2025-07-05T22:54:11.171Z"
+      "$date": "2025-08-18T00:33:35.000Z"
     }
   },
   {
@@ -1341,10 +1341,10 @@
     "helpful": 7,
     "verified": true,
     "createdAt": {
-      "$date": "2025-03-12T00:03:07.703Z"
+      "$date": "2025-04-16T06:51:50.308Z"
     },
     "updatedAt": {
-      "$date": "2025-05-08T21:51:55.935Z"
+      "$date": "2025-06-02T23:19:54.548Z"
     }
   },
   {
@@ -1354,17 +1354,17 @@
     "productId": "695b4b98ffa2345600000043",
     "userId": "60a1b2c3d4e5f6a700000061",
     "userName": "George Campbell",
-    "rating": 4,
+    "rating": 3,
     "title": "Amazing quality!",
     "comment": "Amazing quality! The craftsmanship is superb.",
     "images": [],
-    "helpful": 17,
+    "helpful": 12,
     "verified": true,
     "createdAt": {
-      "$date": "2025-01-16T21:17:05.135Z"
+      "$date": "2025-02-16T03:44:56.629Z"
     },
     "updatedAt": {
-      "$date": "2025-11-27T18:01:16.913Z"
+      "$date": "2025-01-06T20:28:39.180Z"
     }
   },
   {
@@ -1378,13 +1378,13 @@
     "title": "Works great",
     "comment": "Works great, no complaints at all. Very pleased.",
     "images": [],
-    "helpful": 2,
+    "helpful": 4,
     "verified": true,
     "createdAt": {
-      "$date": "2025-05-08T09:28:20.124Z"
+      "$date": "2025-01-24T16:48:45.209Z"
     },
     "updatedAt": {
-      "$date": "2025-10-27T19:30:27.298Z"
+      "$date": "2025-02-07T13:10:36.048Z"
     }
   },
   {
@@ -1394,17 +1394,17 @@
     "productId": "695b4b98ffa2345600000045",
     "userId": "60a1b2c3d4e5f6a700000063",
     "userName": "Timothy Carter",
-    "rating": 5,
+    "rating": 4,
     "title": "Better than expected!",
     "comment": "Better than expected! The quality is top-notch.",
     "images": [],
-    "helpful": 16,
+    "helpful": 14,
     "verified": true,
     "createdAt": {
-      "$date": "2025-01-10T05:38:33.026Z"
+      "$date": "2025-03-26T13:59:14.760Z"
     },
     "updatedAt": {
-      "$date": "2025-11-28T07:50:54.291Z"
+      "$date": "2025-01-19T16:11:55.320Z"
     }
   },
   {
@@ -1414,17 +1414,17 @@
     "productId": "695b4b98ffa2345600000046",
     "userId": "60a1b2c3d4e5f6a700000064",
     "userName": "Deborah Roberts",
-    "rating": 4,
+    "rating": 3,
     "title": "Highly recommend",
     "comment": "Solid product, would definitely recommend to others.",
     "images": [],
-    "helpful": 19,
+    "helpful": 14,
     "verified": true,
     "createdAt": {
-      "$date": "2025-11-27T14:40:09.008Z"
+      "$date": "2025-02-22T22:58:57.442Z"
     },
     "updatedAt": {
-      "$date": "2025-05-02T04:04:48.049Z"
+      "$date": "2025-01-02T14:08:27.929Z"
     }
   },
   {
@@ -1434,19 +1434,19 @@
     "productId": "695b4b98ffa2345600000047",
     "userId": "60a1b2c3d4e5f6a70000001f",
     "userName": "Donald Walker",
-    "rating": 5,
+    "rating": 3,
     "title": "Great product!",
     "comment": "This product exceeded my expectations. Highly recommended!",
     "images": [
       "https://picsum.photos/seed/review70/200/200"
     ],
-    "helpful": 12,
+    "helpful": 1,
     "verified": true,
     "createdAt": {
-      "$date": "2025-10-13T03:45:06.505Z"
+      "$date": "2025-06-21T05:48:37.518Z"
     },
     "updatedAt": {
-      "$date": "2025-05-22T23:00:26.532Z"
+      "$date": "2025-04-21T09:39:48.155Z"
     }
   },
   {
@@ -1456,17 +1456,17 @@
     "productId": "695b4b98ffa2345600000048",
     "userId": "60a1b2c3d4e5f6a700000020",
     "userName": "Ashley Young",
-    "rating": 4,
+    "rating": 5,
     "title": "Excellent quality!",
     "comment": "Excellent quality and fast shipping. Will buy again!",
     "images": [],
-    "helpful": 11,
+    "helpful": 17,
     "verified": true,
     "createdAt": {
-      "$date": "2025-05-25T00:33:11.347Z"
+      "$date": "2025-01-23T13:21:19.019Z"
     },
     "updatedAt": {
-      "$date": "2025-07-24T10:36:11.342Z"
+      "$date": "2025-09-15T09:31:15.141Z"
     }
   },
   {
@@ -1480,13 +1480,13 @@
     "title": "Worth the price",
     "comment": "Good value for money. Very satisfied with my purchase.",
     "images": [],
-    "helpful": 8,
+    "helpful": 14,
     "verified": true,
     "createdAt": {
-      "$date": "2025-09-06T07:03:31.617Z"
+      "$date": "2025-09-20T03:17:25.342Z"
     },
     "updatedAt": {
-      "$date": "2025-12-05T16:31:14.044Z"
+      "$date": "2025-02-05T10:00:14.887Z"
     }
   },
   {
@@ -1500,13 +1500,13 @@
     "title": "Exactly as described",
     "comment": "Exactly as described in the listing. Very happy with it!",
     "images": [],
-    "helpful": 8,
+    "helpful": 16,
     "verified": true,
     "createdAt": {
-      "$date": "2025-11-16T18:26:41.483Z"
+      "$date": "2025-09-30T01:47:44.940Z"
     },
     "updatedAt": {
-      "$date": "2025-12-12T22:46:32.007Z"
+      "$date": "2025-04-21T09:35:48.154Z"
     }
   },
   {
@@ -1516,17 +1516,17 @@
     "productId": "695b4b98ffa234560000004b",
     "userId": "60a1b2c3d4e5f6a700000023",
     "userName": "Paul Wright",
-    "rating": 3,
+    "rating": 5,
     "title": "Perfect purchase",
     "comment": "Perfect! This is exactly what I was looking for.",
     "images": [],
-    "helpful": 0,
+    "helpful": 14,
     "verified": true,
     "createdAt": {
-      "$date": "2025-06-24T16:06:59.681Z"
+      "$date": "2025-07-16T20:52:19.061Z"
     },
     "updatedAt": {
-      "$date": "2025-01-01T20:24:27.239Z"
+      "$date": "2025-02-01T22:09:50.360Z"
     }
   },
   {
@@ -1536,19 +1536,19 @@
     "productId": "695b4b98ffa234560000004c",
     "userId": "60a1b2c3d4e5f6a700000024",
     "userName": "Emily Scott",
-    "rating": 3,
+    "rating": 4,
     "title": "Good but slow shipping",
     "comment": "Nice product overall, but shipping took longer than expected.",
     "images": [
       "https://picsum.photos/seed/review75/200/200"
     ],
-    "helpful": 8,
+    "helpful": 13,
     "verified": true,
     "createdAt": {
-      "$date": "2025-06-14T00:33:19.925Z"
+      "$date": "2025-07-25T04:14:54.389Z"
     },
     "updatedAt": {
-      "$date": "2025-07-09T01:11:06.773Z"
+      "$date": "2025-11-26T20:29:54.788Z"
     }
   },
   {
@@ -1558,17 +1558,17 @@
     "productId": "695b4b98ffa234560000004d",
     "userId": "60a1b2c3d4e5f6a700000025",
     "userName": "Andrew Torres",
-    "rating": 3,
+    "rating": 5,
     "title": "Amazing quality!",
     "comment": "Amazing quality! The craftsmanship is superb.",
     "images": [],
-    "helpful": 15,
+    "helpful": 0,
     "verified": true,
     "createdAt": {
-      "$date": "2025-10-27T17:35:28.275Z"
+      "$date": "2025-03-05T23:51:00.319Z"
     },
     "updatedAt": {
-      "$date": "2025-02-24T19:35:34.311Z"
+      "$date": "2025-01-26T08:05:06.749Z"
     }
   },
   {
@@ -1578,17 +1578,17 @@
     "productId": "695b4b98ffa234560000004e",
     "userId": "60a1b2c3d4e5f6a700000026",
     "userName": "Donna Nguyen",
-    "rating": 5,
+    "rating": 3,
     "title": "Works great",
     "comment": "Works great, no complaints at all. Very pleased.",
     "images": [],
-    "helpful": 16,
+    "helpful": 17,
     "verified": true,
     "createdAt": {
-      "$date": "2025-09-12T08:17:52.492Z"
+      "$date": "2025-01-08T00:09:08.908Z"
     },
     "updatedAt": {
-      "$date": "2025-04-25T15:54:51.445Z"
+      "$date": "2025-11-03T05:06:42.383Z"
     }
   },
   {
@@ -1598,17 +1598,17 @@
     "productId": "695b4b98ffa234560000004f",
     "userId": "60a1b2c3d4e5f6a700000027",
     "userName": "Joshua Hill",
-    "rating": 3,
+    "rating": 5,
     "title": "Better than expected!",
     "comment": "Better than expected! The quality is top-notch.",
     "images": [],
-    "helpful": 10,
+    "helpful": 3,
     "verified": true,
     "createdAt": {
-      "$date": "2025-09-26T07:14:46.063Z"
+      "$date": "2025-10-18T21:18:48.930Z"
     },
     "updatedAt": {
-      "$date": "2025-11-01T14:22:49.840Z"
+      "$date": "2025-07-06T16:04:03.433Z"
     }
   },
   {
@@ -1622,13 +1622,13 @@
     "title": "Highly recommend",
     "comment": "Solid product, would definitely recommend to others.",
     "images": [],
-    "helpful": 15,
+    "helpful": 3,
     "verified": true,
     "createdAt": {
-      "$date": "2025-01-02T11:02:40.596Z"
+      "$date": "2025-01-17T08:27:46.611Z"
     },
     "updatedAt": {
-      "$date": "2025-01-28T14:55:57.752Z"
+      "$date": "2025-08-13T05:08:58.506Z"
     }
   },
   {
@@ -1644,13 +1644,13 @@
     "images": [
       "https://picsum.photos/seed/review80/200/200"
     ],
-    "helpful": 19,
+    "helpful": 0,
     "verified": false,
     "createdAt": {
-      "$date": "2025-03-02T19:49:35.490Z"
+      "$date": "2025-03-11T07:43:34.531Z"
     },
     "updatedAt": {
-      "$date": "2025-12-02T21:45:10.865Z"
+      "$date": "2025-03-05T06:44:32.626Z"
     }
   },
   {
@@ -1660,17 +1660,17 @@
     "productId": "695b4b98ffa2345600000052",
     "userId": "60a1b2c3d4e5f6a70000002a",
     "userName": "Dorothy Adams",
-    "rating": 5,
+    "rating": 4,
     "title": "Excellent quality!",
     "comment": "Excellent quality and fast shipping. Will buy again!",
     "images": [],
-    "helpful": 10,
+    "helpful": 17,
     "verified": false,
     "createdAt": {
-      "$date": "2025-06-03T11:19:51.329Z"
+      "$date": "2025-03-20T11:50:23.040Z"
     },
     "updatedAt": {
-      "$date": "2025-05-29T20:04:42.677Z"
+      "$date": "2025-01-24T03:52:45.351Z"
     }
   },
   {
@@ -1684,13 +1684,13 @@
     "title": "Worth the price",
     "comment": "Good value for money. Very satisfied with my purchase.",
     "images": [],
-    "helpful": 7,
+    "helpful": 3,
     "verified": false,
     "createdAt": {
-      "$date": "2025-03-04T04:30:17.199Z"
+      "$date": "2025-04-29T05:24:15.512Z"
     },
     "updatedAt": {
-      "$date": "2025-03-20T00:00:42.514Z"
+      "$date": "2025-03-25T18:18:35.474Z"
     }
   },
   {
@@ -1700,17 +1700,17 @@
     "productId": "695b4b98ffa2345600000054",
     "userId": "60a1b2c3d4e5f6a70000002c",
     "userName": "Carol Baker",
-    "rating": 3,
+    "rating": 4,
     "title": "Exactly as described",
     "comment": "Exactly as described in the listing. Very happy with it!",
     "images": [],
-    "helpful": 3,
+    "helpful": 11,
     "verified": false,
     "createdAt": {
-      "$date": "2025-09-12T18:49:15.339Z"
+      "$date": "2025-07-27T17:19:28.185Z"
     },
     "updatedAt": {
-      "$date": "2025-06-12T16:08:31.372Z"
+      "$date": "2025-11-11T04:52:41.324Z"
     }
   },
   {
@@ -1720,17 +1720,17 @@
     "productId": "695b4b98ffa2345600000055",
     "userId": "60a1b2c3d4e5f6a70000002d",
     "userName": "Brian Hall",
-    "rating": 3,
+    "rating": 4,
     "title": "Perfect purchase",
     "comment": "Perfect! This is exactly what I was looking for.",
     "images": [],
-    "helpful": 13,
+    "helpful": 12,
     "verified": false,
     "createdAt": {
-      "$date": "2025-10-27T23:16:16.200Z"
+      "$date": "2025-03-09T17:26:18.938Z"
     },
     "updatedAt": {
-      "$date": "2025-11-05T23:13:43.498Z"
+      "$date": "2025-06-21T13:22:33.248Z"
     }
   },
   {
@@ -1746,13 +1746,13 @@
     "images": [
       "https://picsum.photos/seed/review85/200/200"
     ],
-    "helpful": 2,
+    "helpful": 4,
     "verified": false,
     "createdAt": {
-      "$date": "2025-01-12T01:46:59.355Z"
+      "$date": "2025-12-01T12:06:32.714Z"
     },
     "updatedAt": {
-      "$date": "2025-02-21T14:22:37.395Z"
+      "$date": "2025-07-09T03:38:03.142Z"
     }
   },
   {
@@ -1762,17 +1762,17 @@
     "productId": "695b4b98ffa2345600000057",
     "userId": "60a1b2c3d4e5f6a70000002f",
     "userName": "George Campbell",
-    "rating": 3,
+    "rating": 5,
     "title": "Amazing quality!",
     "comment": "Amazing quality! The craftsmanship is superb.",
     "images": [],
-    "helpful": 10,
+    "helpful": 3,
     "verified": false,
     "createdAt": {
-      "$date": "2025-09-02T22:57:49.006Z"
+      "$date": "2025-07-23T10:20:53.768Z"
     },
     "updatedAt": {
-      "$date": "2025-04-22T06:39:09.737Z"
+      "$date": "2025-10-28T01:50:05.441Z"
     }
   },
   {
@@ -1782,17 +1782,17 @@
     "productId": "695b4b98ffa2345600000058",
     "userId": "60a1b2c3d4e5f6a700000030",
     "userName": "Melissa Mitchell",
-    "rating": 3,
+    "rating": 4,
     "title": "Works great",
     "comment": "Works great, no complaints at all. Very pleased.",
     "images": [],
-    "helpful": 6,
+    "helpful": 13,
     "verified": false,
     "createdAt": {
-      "$date": "2025-01-02T10:32:35.212Z"
+      "$date": "2025-03-12T13:27:35.687Z"
     },
     "updatedAt": {
-      "$date": "2025-01-17T23:34:57.077Z"
+      "$date": "2025-07-31T17:17:41.544Z"
     }
   },
   {
@@ -1802,17 +1802,17 @@
     "productId": "695b4b98ffa2345600000059",
     "userId": "60a1b2c3d4e5f6a700000031",
     "userName": "Timothy Carter",
-    "rating": 5,
+    "rating": 3,
     "title": "Better than expected!",
     "comment": "Better than expected! The quality is top-notch.",
     "images": [],
-    "helpful": 11,
+    "helpful": 9,
     "verified": false,
     "createdAt": {
-      "$date": "2025-12-28T17:19:04.761Z"
+      "$date": "2025-03-22T22:48:23.541Z"
     },
     "updatedAt": {
-      "$date": "2025-01-14T21:13:56.418Z"
+      "$date": "2025-10-09T14:34:03.398Z"
     }
   },
   {
@@ -1826,13 +1826,13 @@
     "title": "Highly recommend",
     "comment": "Solid product, would definitely recommend to others.",
     "images": [],
-    "helpful": 18,
+    "helpful": 1,
     "verified": false,
     "createdAt": {
-      "$date": "2025-06-23T14:31:25.997Z"
+      "$date": "2025-07-09T18:10:38.666Z"
     },
     "updatedAt": {
-      "$date": "2025-12-07T00:26:09.969Z"
+      "$date": "2025-03-29T11:07:09.805Z"
     }
   },
   {
@@ -1848,13 +1848,13 @@
     "images": [
       "https://picsum.photos/seed/review90/200/200"
     ],
-    "helpful": 14,
+    "helpful": 10,
     "verified": false,
     "createdAt": {
-      "$date": "2025-02-28T20:36:32.859Z"
+      "$date": "2025-01-07T05:25:14.488Z"
     },
     "updatedAt": {
-      "$date": "2025-11-14T21:21:54.782Z"
+      "$date": "2025-12-26T03:31:39.028Z"
     }
   },
   {
@@ -1864,17 +1864,17 @@
     "productId": "695b4b98ffa234560000005c",
     "userId": "60a1b2c3d4e5f6a700000034",
     "userName": "Mary Johnson",
-    "rating": 4,
+    "rating": 3,
     "title": "Excellent quality!",
     "comment": "Excellent quality and fast shipping. Will buy again!",
     "images": [],
     "helpful": 4,
     "verified": false,
     "createdAt": {
-      "$date": "2025-09-21T15:39:34.406Z"
+      "$date": "2025-07-01T00:01:05.072Z"
     },
     "updatedAt": {
-      "$date": "2025-09-20T10:18:23.155Z"
+      "$date": "2025-05-14T00:06:06.533Z"
     }
   },
   {
@@ -1884,17 +1884,17 @@
     "productId": "695b4b98ffa234560000005d",
     "userId": "60a1b2c3d4e5f6a700000035",
     "userName": "Robert Williams",
-    "rating": 3,
+    "rating": 5,
     "title": "Worth the price",
     "comment": "Good value for money. Very satisfied with my purchase.",
     "images": [],
-    "helpful": 18,
+    "helpful": 16,
     "verified": false,
     "createdAt": {
-      "$date": "2025-05-08T16:02:42.258Z"
+      "$date": "2025-06-16T05:36:13.221Z"
     },
     "updatedAt": {
-      "$date": "2025-12-21T17:14:59.976Z"
+      "$date": "2025-01-22T00:26:40.063Z"
     }
   },
   {
@@ -1908,13 +1908,13 @@
     "title": "Exactly as described",
     "comment": "Exactly as described in the listing. Very happy with it!",
     "images": [],
-    "helpful": 2,
+    "helpful": 6,
     "verified": false,
     "createdAt": {
-      "$date": "2025-07-30T09:14:06.099Z"
+      "$date": "2025-10-02T13:17:59.917Z"
     },
     "updatedAt": {
-      "$date": "2025-09-10T12:50:30.090Z"
+      "$date": "2025-06-12T10:05:17.758Z"
     }
   },
   {
@@ -1928,13 +1928,13 @@
     "title": "Perfect purchase",
     "comment": "Perfect! This is exactly what I was looking for.",
     "images": [],
-    "helpful": 0,
+    "helpful": 17,
     "verified": false,
     "createdAt": {
-      "$date": "2025-02-25T01:13:17.587Z"
+      "$date": "2025-09-11T05:52:12.939Z"
     },
     "updatedAt": {
-      "$date": "2025-05-12T03:17:45.089Z"
+      "$date": "2025-10-11T07:54:19.189Z"
     }
   },
   {
@@ -1944,19 +1944,19 @@
     "productId": "695b4b98ffa2345600000060",
     "userId": "60a1b2c3d4e5f6a700000038",
     "userName": "Jennifer Garcia",
-    "rating": 5,
+    "rating": 4,
     "title": "Good but slow shipping",
     "comment": "Nice product overall, but shipping took longer than expected.",
     "images": [
       "https://picsum.photos/seed/review95/200/200"
     ],
-    "helpful": 5,
+    "helpful": 13,
     "verified": false,
     "createdAt": {
-      "$date": "2025-04-12T19:37:44.841Z"
+      "$date": "2025-05-23T15:11:32.626Z"
     },
     "updatedAt": {
-      "$date": "2025-01-23T00:24:35.269Z"
+      "$date": "2025-05-05T17:45:31.411Z"
     }
   },
   {
@@ -1970,13 +1970,13 @@
     "title": "Amazing quality!",
     "comment": "Amazing quality! The craftsmanship is superb.",
     "images": [],
-    "helpful": 12,
+    "helpful": 18,
     "verified": false,
     "createdAt": {
-      "$date": "2025-03-01T09:09:37.522Z"
+      "$date": "2025-10-01T15:24:49.675Z"
     },
     "updatedAt": {
-      "$date": "2025-04-08T22:14:04.196Z"
+      "$date": "2025-03-08T14:58:39.400Z"
     }
   },
   {
@@ -1986,17 +1986,17 @@
     "productId": "695b4b98ffa2345600000062",
     "userId": "60a1b2c3d4e5f6a70000003a",
     "userName": "Linda Davis",
-    "rating": 4,
+    "rating": 3,
     "title": "Works great",
     "comment": "Works great, no complaints at all. Very pleased.",
     "images": [],
     "helpful": 4,
     "verified": false,
     "createdAt": {
-      "$date": "2025-04-14T21:47:44.050Z"
+      "$date": "2025-04-16T23:56:18.302Z"
     },
     "updatedAt": {
-      "$date": "2025-02-05T17:24:48.819Z"
+      "$date": "2025-03-21T01:54:37.397Z"
     }
   },
   {
@@ -2006,17 +2006,17 @@
     "productId": "695b4b98ffa2345600000063",
     "userId": "60a1b2c3d4e5f6a70000003b",
     "userName": "David Rodriguez",
-    "rating": 5,
+    "rating": 4,
     "title": "Better than expected!",
     "comment": "Better than expected! The quality is top-notch.",
     "images": [],
-    "helpful": 8,
+    "helpful": 10,
     "verified": false,
     "createdAt": {
-      "$date": "2025-05-19T08:13:28.525Z"
+      "$date": "2025-05-23T15:46:39.302Z"
     },
     "updatedAt": {
-      "$date": "2025-03-02T18:25:43.272Z"
+      "$date": "2025-10-18T08:04:46.459Z"
     }
   },
   {
@@ -2026,17 +2026,17 @@
     "productId": "695b4b98ffa2345600000064",
     "userId": "60a1b2c3d4e5f6a70000003c",
     "userName": "Elizabeth Martinez",
-    "rating": 4,
+    "rating": 3,
     "title": "Highly recommend",
     "comment": "Solid product, would definitely recommend to others.",
     "images": [],
-    "helpful": 17,
+    "helpful": 12,
     "verified": false,
     "createdAt": {
-      "$date": "2025-11-18T07:02:54.835Z"
+      "$date": "2025-09-23T23:56:49.000Z"
     },
     "updatedAt": {
-      "$date": "2025-10-01T17:55:50.794Z"
+      "$date": "2025-06-22T23:53:30.608Z"
     }
   }
 ]

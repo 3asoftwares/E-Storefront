@@ -1,6 +1,6 @@
 /**
  * Sample Data Generator for E-Commerce Platform
- * Run with: node generate-sample-data.js
+ * Run with: node generate-data.js
  */
 
 const recordCount = {
