@@ -17,7 +17,7 @@ import {
   faBars,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
-import { storeAuth, clearAuth as clearAuthCookies, getCurrentUser } from '3a-ecommerce-utils';
+import { storeAuth, clearAuth as clearAuthCookies, getCurrentUser } from '3a-ecommerce-utils/client';
 
 export default function Header() {
   const router = useRouter();

@@ -1,12 +1,11 @@
-import { defineConfig, mergeConfig } from 'vite';
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 import federation from '@originjs/vite-plugin-federation';
 import * as path from 'path';
-import { createBaseViteConfig } from '../../packages/utils/src/config/vite.config';
 
-const baseConfig = createBaseViteConfig(__dirname);
-
-export default mergeConfig(baseConfig, defineConfig({
+export default defineConfig({
   plugins: [
+    react(),
     federation({
       name: 'adminApp',
       filename: 'remoteEntry.js',

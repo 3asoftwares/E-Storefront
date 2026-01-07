@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { apolloClient } from '../apollo/client';
 import { GQL_QUERIES } from '../apollo/queries/queries';
-import { getAccessToken, clearAuth, storeAuth, getStoredAuth } from '3a-ecommerce-utils';
+import { getAccessToken, clearAuth, storeAuth, getStoredAuth } from '3a-ecommerce-utils/client';
 
 // Check token validity every 5 minutes
 const TOKEN_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes

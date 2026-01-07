@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { useProductReviews, useCreateReview, useMarkReviewHelpful } from '../lib/hooks/useReviews';
 import { Button, Textarea } from '3a-ecommerce-ui-library';
-import { Logger } from '3a-ecommerce-utils';
+import { Logger } from '3a-ecommerce-utils/client';
 
 interface ProductReviewsProps {
   productId: string;

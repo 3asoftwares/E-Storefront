@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CartStore } from '3a-ecommerce-types';
-import { getCurrentUser } from '3a-ecommerce-utils';
+import { getCurrentUser } from '3a-ecommerce-utils/client';
 
 export const useCartStore = create<CartStore>()(
   persist(

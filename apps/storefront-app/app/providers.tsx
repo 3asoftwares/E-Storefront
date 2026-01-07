@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { ToastProvider } from '@/lib/hooks/useToast';
 import { useInitializeAuth } from '@/lib/hooks/useInitializeAuth';
 import { useTokenValidator } from '@/lib/hooks/useTokenValidator';
-import { storeAuth } from '3a-ecommerce-utils';
+import { storeAuth } from '3a-ecommerce-utils/client';
 import { apolloClient } from '@/lib/apollo/client';
 
 function AuthLoader({ children }: { children: React.ReactNode }) {

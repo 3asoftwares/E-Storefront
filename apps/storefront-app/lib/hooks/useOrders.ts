@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apolloClient } from '../apollo/client';
 import { GQL_QUERIES } from '../apollo/queries/queries';
-import { getAccessToken } from '3a-ecommerce-utils';
+import { getAccessToken } from '3a-ecommerce-utils/client';
 
 import type {
   OrdersResponse,

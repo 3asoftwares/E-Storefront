@@ -21,7 +21,7 @@ import {
   faPlus,
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
-import { formatPrice, Logger } from '3a-ecommerce-utils';
+import { formatPrice, Logger } from '3a-ecommerce-utils/client';
 import { PageHeader } from '@/components';
 
 interface Address {

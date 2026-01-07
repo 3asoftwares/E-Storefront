@@ -12,7 +12,7 @@ import type {
   RegisterResponse,
   MeResponse,
 } from '3a-ecommerce-types';
-import { storeAuth, clearAuth as clearAuthCookies, getAccessToken } from '3a-ecommerce-utils';
+import { storeAuth, clearAuth as clearAuthCookies, getAccessToken } from '3a-ecommerce-utils/client';
 
 export function useLogin() {
   const queryClient = useQueryClient();

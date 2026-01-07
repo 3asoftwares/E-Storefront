@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache, HttpLink, from, ApolloLink } from '@apollo/client';
 import { onError } from '@apollo/client/link/error';
 import { loadErrorMessages, loadDevMessages } from '@apollo/client/dev';
-import { getAccessToken, clearAuth, Logger } from '3a-ecommerce-utils';
+import { getAccessToken, clearAuth, Logger } from '3a-ecommerce-utils/client';
 
 // Load Apollo Client error messages in development
 if (process.env.NEXT_PUBLIC_ENV !== 'production') {

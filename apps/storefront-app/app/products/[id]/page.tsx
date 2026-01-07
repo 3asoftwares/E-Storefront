@@ -9,7 +9,7 @@ import { useToast } from '@/lib/hooks/useToast';
 import { Button, Input } from '3a-ecommerce-ui-library';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMinus, faPlus, faStar } from '@fortawesome/free-solid-svg-icons';
-import { formatPrice } from '3a-ecommerce-utils';
+import { formatPrice } from '3a-ecommerce-utils/client';
 
 export default function ProductDetailPage() {
   const params = useParams();

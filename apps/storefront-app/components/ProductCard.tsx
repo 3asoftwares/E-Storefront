@@ -8,7 +8,7 @@ import {
   faBox,
   faCheck,
 } from '@fortawesome/free-solid-svg-icons';
-import { formatPrice } from '3a-ecommerce-utils';
+import { formatPrice } from '3a-ecommerce-utils/client';
 import { Button } from '3a-ecommerce-ui-library';
 import { useCartStore } from '@/store/cartStore';
 

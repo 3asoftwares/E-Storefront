@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { formatPrice } from '3a-ecommerce-utils';
+import { formatPrice } from '3a-ecommerce-utils/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBox } from '@fortawesome/free-solid-svg-icons';
 
