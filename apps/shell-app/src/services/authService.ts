@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getAccessToken } from '@3asoftwares/utils';
 
-const API_BASE = import.meta.env.VITE_AUTH_API_BASE || 'http://localhost:3011/api/auth';
+const API_BASE = process.env.VITE_AUTH_API_BASE || 'http://localhost:3011/api/auth';
 
 // Create authenticated client
 const createAuthClient = () => {
@@ -57,7 +57,7 @@ export const validateResetToken = async (token: string) => {
 };
 
 export const getProfile = async () => {
-  const res = await authClient.get('/profile');
+  const res = await authClient.get('/me');
   return res.data;
 };
 

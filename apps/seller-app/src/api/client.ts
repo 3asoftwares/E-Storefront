@@ -35,7 +35,7 @@ export const authApi = {
   },
 
   getProfile: async () => {
-    const response = await authClient.get('/api/auth/profile');
+    const response = await authClient.get('/api/auth/me');
     return response.data;
   },
 
@@ -85,7 +85,7 @@ export const categoryApi = {
 export const handleApiError = (error: any): string => {
   if (axios.isAxiosError(error)) {
     if (error.response?.data?.message === 'Invalid or expired token') {
-      window.location.href = `${SHELL_APP_URL}?logout=true`;
+      // window.location.href = `${SHELL_APP_URL}?logout=true`;
     }
     return error.response?.data?.message || error.message;
   }

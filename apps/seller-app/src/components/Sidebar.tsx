@@ -89,7 +89,7 @@ export const Sidebar: React.FC = () => {
 
       <aside
         className={`
-          fixed left-0 top-0 lg:top-[69px] h-screen lg:h-[calc(100vh_-_69px)] bg-white border-r border-gray-200 
+          fixed left-0 top-0 lg:top-[72px] h-screen lg:h-[calc(100vh_-_72px)] bg-white border-r border-gray-200 
           shadow-lg z-40 transition-all duration-300 ease-in-out overflow-hidden
           ${isOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full lg:w-64 lg:translate-x-0'}
         `}

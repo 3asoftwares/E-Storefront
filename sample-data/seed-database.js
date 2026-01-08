@@ -8,7 +8,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 // ES Module __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -42,13 +42,14 @@ function readJsonFile(filename) {
     for (const [key, value] of Object.entries(item)) {
       if (value && typeof value === 'object') {
         if (value.$oid) {
-          converted[key] = value.$oid;
+          // Convert $oid to proper MongoDB ObjectId
+          converted[key] = new ObjectId(value.$oid);
         } else if (value.$date) {
           converted[key] = new Date(value.$date);
         } else if (Array.isArray(value)) {
           converted[key] = value.map((v) => {
             if (v && typeof v === 'object' && v.$oid) {
-              return v.$oid;
+              return new ObjectId(v.$oid);
             }
             return v;
           });
@@ -70,7 +71,7 @@ function convertNestedObject(obj) {
   }
 
   if (obj.$oid) {
-    return obj.$oid;
+    return new ObjectId(obj.$oid);
   }
 
   if (obj.$date) {
@@ -112,7 +113,7 @@ async function seedDatabase() {
         }
       }
     }
-   
+
     // Seed Users
     console.log('📦 Seeding collections...\n');
 

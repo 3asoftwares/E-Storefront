@@ -102,7 +102,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    Logger.info(`Login attempt for user: ${user}`, undefined, 'Auth');
+    Logger.info(`Login attempt for user: ${user.email}`, undefined, 'Auth');
 
     const tokens = generateTokens(user._id.toString(), user.email, user.role);
 

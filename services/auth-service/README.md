@@ -68,8 +68,8 @@ Authentication service providing JWT-based authentication, role-based access con
 
 ### Protected
 
-- `GET /api/auth/profile` - Get current user profile
-- `PUT /api/auth/profile` - Update user profile
+- `GET /api/auth/me` - Get current user profile
+- `PUT /api/auth/me` - Update user profile
 - `POST /api/auth/logout` - Logout user
 - `GET /api/auth/users` - Get all users (admin only)
 

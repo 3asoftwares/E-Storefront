@@ -104,7 +104,7 @@ export const API_ENDPOINTS = {
     LOGIN: '/api/auth/login',
     REGISTER: '/api/auth/register',
     LOGOUT: '/api/auth/logout',
-    PROFILE: '/api/auth/profile',
+    PROFILE: '/api/auth/me',
     REFRESH: '/api/auth/refresh',
     VERIFY: '/api/auth/verify',
   },

@@ -24,7 +24,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
   setAuthMode,
   onSuccess,
 }) => {
-  const [mode, setMode] = useState<AuthMode>(initialMode);
+  const [mode, setMode] = useState<AuthMode>(initialMode as AuthMode);
   const isLogin = mode === 'login';
   const isSignup = mode === 'signup';
   const isForgotPassword = mode === 'forgot-password';
