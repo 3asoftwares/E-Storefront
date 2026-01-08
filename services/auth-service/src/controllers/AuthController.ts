@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import crypto from 'crypto';
 import User from '../models/User';
 import { generateTokens, verifyRefreshToken } from '../utils/jwt';
-import { UserRole } from '3a-ecommerce-types';
-import { Logger } from '3a-ecommerce-utils/server';
+import { UserRole } from '@3asoftwares/types';
+import { Logger } from '@3asoftwares/utils/server';
 import {
   sendVerificationEmailTemplate,
   sendPasswordResetEmailTemplate,

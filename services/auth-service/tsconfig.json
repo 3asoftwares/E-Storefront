@@ -1,5 +1,5 @@
 {
-  "extends": "../../node_modules/3a-ecommerce-utils/src/config/tsconfig.base.json",
+  "extends": "../../node_modules/@3asoftwares/utils/src/config/tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": "src",
     "outDir": "dist",

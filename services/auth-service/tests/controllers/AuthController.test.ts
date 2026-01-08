@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import * as authController from '../../src/controllers/AuthController';
 import User from '../../src/models/User';
 import * as jwt from '../../src/utils/jwt';
-import { UserRole } from '3a-ecommerce-types';
+import { UserRole } from '@3asoftwares/types';
 
 // Mock dependencies
 jest.mock('../../src/models/User');

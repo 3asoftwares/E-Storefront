@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { Logger } from '3a-ecommerce-utils/server';
+import { Logger } from '@3asoftwares/utils/server';
 
 interface EmailOptions {
   to: string;

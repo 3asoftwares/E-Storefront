@@ -7,7 +7,7 @@ import {
   decodeToken,
   TokenPayload,
 } from '../../src/utils/jwt';
-import { UserRole } from '3a-ecommerce-types';
+import { UserRole } from '@3asoftwares/types';
 
 describe('JWT Utils', () => {
   const testUserId = '507f1f77bcf86cd799439011';

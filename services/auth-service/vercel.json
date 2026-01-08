@@ -3,7 +3,7 @@
   "version": 2,
   "name": "ecommerce-auth-service",
   "installCommand": "cd ../.. && yarn install",
-  "buildCommand": "cd ../.. && yarn workspace 3a-ecommerce-types build && yarn workspace 3a-ecommerce-utils build",
+  "buildCommand": "cd ../.. && yarn workspace @3asoftwares/types build && yarn workspace @3asoftwares/utils build",
   "builds": [
     {
       "src": "api/index.ts",

@@ -1,7 +1,7 @@
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { Application } from 'express';
-import { PORT_CONFIG } from '3a-ecommerce-utils';
+import { PORT_CONFIG } from '@3asoftwares/utils';
 
 const options: swaggerJsdoc.Options = {
   definition: {

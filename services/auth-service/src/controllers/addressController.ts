@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Address from '../models/Address';
 import mongoose from 'mongoose';
-import { Logger } from '3a-ecommerce-utils/server';
+import { Logger } from '@3asoftwares/utils/server';
 
 // Get all addresses for the current user
 export const getAddresses = async (req: Request, res: Response): Promise<void> => {

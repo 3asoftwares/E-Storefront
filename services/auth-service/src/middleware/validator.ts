@@ -1,3 +1,3 @@
-import { validate } from '3a-ecommerce-utils/server';
+import { validate } from '@3asoftwares/utils/server';
 
 export { validate };

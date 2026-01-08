@@ -1,14 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import { authenticate } from '../../src/middleware/auth';
 import { requireRole } from '../../src/middleware/rbac';
-import { UserRole } from '3a-ecommerce-types';
+import { UserRole } from '@3asoftwares/types';
 import * as jwt from '../../src/utils/jwt';
 
 // Mock the jwt module
 jest.mock('../../src/utils/jwt');
 
 // Mock the Logger
-jest.mock('3a-ecommerce-utils/server', () => ({
+jest.mock('@3asoftwares/utils/server', () => ({
   Logger: {
     info: jest.fn(),
     error: jest.fn(),

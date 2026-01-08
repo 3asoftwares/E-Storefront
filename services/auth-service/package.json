@@ -21,7 +21,7 @@
     "authentication"
   ],
   "dependencies": {
-    "3a-ecommerce-utils": "^1.0.1",
+    "@3asoftwares/utils": "^1.0.1",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

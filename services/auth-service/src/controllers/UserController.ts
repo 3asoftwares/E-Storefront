@@ -2,7 +2,7 @@
 
 import { Request, Response } from 'express';
 import User from '../models/User';
-import { Logger } from '3a-ecommerce-utils/server';
+import { Logger } from '@3asoftwares/utils/server';
 
 export const getUsers = async (req: Request, res: Response): Promise<void> => {
   try {

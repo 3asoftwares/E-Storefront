@@ -8,8 +8,8 @@ import { setupSwagger } from './config/swagger';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import addressRoutes from './routes/addressRoutes';
-import { PORT_CONFIG, DEFAULT_CORS_ORIGINS } from '3a-ecommerce-utils';
-import { Logger } from '3a-ecommerce-utils/server';
+import { PORT_CONFIG, DEFAULT_CORS_ORIGINS } from '@3asoftwares/utils';
+import { Logger } from '@3asoftwares/utils/server';
 
 dotenv.config();
 

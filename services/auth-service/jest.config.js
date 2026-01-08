@@ -1,10 +1,10 @@
 /** @type {import('jest').Config} */
-const baseConfig = require('3a-ecommerce-utils/config/jest.backend');
+const baseConfig = require('@3asoftwares/utils/config/jest.backend');
 
 module.exports = {
   ...baseConfig,
   moduleNameMapper: {
     ...baseConfig.moduleNameMapper,
-    '^3a-ecommerce-types$': '<rootDir>/../../packages/types/src/index.ts',
+    '^@3asoftwares/types$': '<rootDir>/../../packages/types/src/index.ts',
   },
 };
