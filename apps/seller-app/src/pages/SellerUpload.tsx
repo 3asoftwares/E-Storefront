@@ -18,7 +18,7 @@ export const SellerUpload: React.FC = () => {
     price: '',
     category: '',
     stock: '',
-    image: '',
+    imageUrl: '',
   });
 
   useEffect(() => {
@@ -112,7 +112,7 @@ export const SellerUpload: React.FC = () => {
             placeholder="0"
             required
             disabled={loading}
-          />{' '}
+          />
           <Select
             label="Category"
             options={getCategoryOptions()}
@@ -125,9 +125,9 @@ export const SellerUpload: React.FC = () => {
         </div>
 
         <ImageUpload
-          currentImage={formData.image}
-          onImageUpload={(imageUrl) => setFormData((prev) => ({ ...prev, image: imageUrl }))}
-          onRemove={() => setFormData((prev) => ({ ...prev, image: '' }))}
+          currentImage={formData.imageUrl}
+          onImageUpload={(imageUrl) => setFormData((prev) => ({ ...prev, imageUrl: imageUrl }))}
+          onRemove={() => setFormData((prev) => ({ ...prev, imageUrl: '' }))}
         />
 
         <div className="flex gap-4 pt-6">

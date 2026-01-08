@@ -5,10 +5,21 @@ import { useCartStore } from '@/store/cartStore';
 import Link from 'next/link';
 import { useToast } from '@/lib/hooks/useToast';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingCart, faBox, faSmile, faCheckCircle, faCreditCard, faBuilding, faMobileAlt, faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
+import {
+  faShoppingCart,
+  faBox,
+  faSmile,
+  faCheckCircle,
+  faCreditCard,
+  faBuilding,
+  faMobileAlt,
+  faMinus,
+  faPlus,
+} from '@fortawesome/free-solid-svg-icons';
 import { formatPrice } from '@3asoftwares/utils/client';
 import { PageHeader, EmptyState } from '@/components';
 import { Button } from '@3asoftwares/ui-library';
+import { handleImageError } from '@/components/ProductCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -65,7 +76,16 @@ export default function CartPage() {
                     >
                       <div className="flex-shrink-0">
                         <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
-                          <FontAwesomeIcon icon={faBox} className="w-10 h-10 text-gray-400" />
+                          {item.image ? (
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                              onError={handleImageError}
+                            />
+                          ) : (
+                            <FontAwesomeIcon icon={faBox} className="w-16 h-16 text-gray-400" />
+                          )}
                         </div>
                       </div>
 

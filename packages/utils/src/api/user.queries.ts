@@ -203,6 +203,34 @@ export const RESET_PASSWORD_MUTATION = `
   }
 `;
 
+export const VALIDATE_EMAIL_TOKEN_QUERY = `
+  query ValidateEmailToken($token: String!) {
+    validateEmailToken(token: $token) {
+      success
+      message
+      email
+    }
+  }
+`;
+
+export const VERIFY_EMAIL_BY_TOKEN_MUTATION = `
+  mutation VerifyEmailByToken($token: String!) {
+    verifyEmailByToken(token: $token) {
+      success
+      message
+      user {
+        id
+        name
+        email
+        role
+        isActive
+        emailVerified
+        createdAt
+      }
+    }
+  }
+`;
+
 export const VALIDATE_RESET_TOKEN_QUERY = `
   query ValidateResetToken($token: String!) {
     validateResetToken(token: $token) {

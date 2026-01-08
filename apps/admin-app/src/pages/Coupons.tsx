@@ -218,7 +218,7 @@ export const Coupons: React.FC = () => {
         />
       )}
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 className="ml-12 lg:ml-0 text-3xl font-bold text-gray-900 dark:text-white">
           Offers & Coupons Management
         </h1>
         <Button className="!w-auto" onClick={() => handleOpenModal()}>
@@ -233,7 +233,7 @@ export const Coupons: React.FC = () => {
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
               Total Coupons
             </h3>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white">
+            <p className="ml-12 lg:ml-0 text-3xl font-bold text-gray-900 dark:text-white">
               {data.coupons.pagination.total}
             </p>
           </div>

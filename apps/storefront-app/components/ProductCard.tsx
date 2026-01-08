@@ -30,6 +30,21 @@ interface ProductCardProps {
   variant?: 'default' | 'compact' | 'large';
 }
 
+ export const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+   e.currentTarget.style.display = 'none';
+   const parent = e.currentTarget.parentElement;
+   if (parent && !parent.querySelector('.fallback-icon')) {
+     const fallback = document.createElement('div');
+     fallback.className =
+       'fallback-icon absolute inset-0 flex items-center justify-center text-6xl text-gray-400';
+     const icon = document.createElement('i');
+     icon.className = 'fa fa-box';
+     fallback.appendChild(icon);
+     parent.appendChild(fallback);
+   }
+ };
+
+
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onAddToCart,
@@ -48,19 +63,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     large: 'h-64',
   };
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    e.currentTarget.style.display = 'none';
-    const parent = e.currentTarget.parentElement;
-    if (parent && !parent.querySelector('.fallback-icon')) {
-      const fallback = document.createElement('div');
-      fallback.className =
-        'fallback-icon absolute inset-0 flex items-center justify-center text-6xl text-gray-400';
-      const icon = document.createElement('i');
-      icon.className = 'fa fa-box';
-      fallback.appendChild(icon);
-      parent.appendChild(fallback);
-    }
-  };
 
   return (
     <div className="rounded-2xl overflow-hidden bg-white border border-gray-200 hover:border-gray-400 shadow-lg hover:shadow-2xl transition-all duration-300 group transform hover:-translate-y-2">

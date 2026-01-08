@@ -105,7 +105,7 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
               <div className="relative">
                 <div className="flex items-center">
                   {STATUS_STEPS.map((step, idx) => (
-                    <div key={step.key} className="flex-1">
+                    <div key={step.key} className="flex-1 relative">
                       <div className="flex flex-col items-center">
                         <div
                           className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition ${

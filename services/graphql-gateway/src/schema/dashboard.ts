@@ -28,35 +28,23 @@ export const dashboardResolvers = {
   Query: {
     dashboardStats: async (_: any, __: any, context: any) => {
       try {
-        // Fetch all orders (with higher limit) to properly calculate stats
-        const [ordersRes, authRes] = await Promise.all([
-          orderClient.get('/api/orders', { params: { page: 1, limit: 1000 } }),
+        const headers = context.token ? { Authorization: `Bearer ${context.token}` } : {};
+
+        const [orderStatsRes, authRes] = await Promise.all([
+          orderClient.get('/api/orders/admin-stats', { headers }),
           authClient
-            .get('/api/auth/stats', {
-              headers: context.token ? { Authorization: `Bearer ${context.token}` } : {},
-            })
+            .get('/api/auth/stats', { headers })
             .catch(() => ({ data: { data: { totalUsers: 0 } } })),
         ]);
 
-        const ordersData = ordersRes.data.data;
-        const orders = ordersData.orders || [];
-
-        const totalOrders = ordersData.pagination?.total || orders.length;
-        const totalRevenue = orders.reduce(
-          (sum: number, order: any) => sum + (order.total || 0),
-          0
-        );
-        // Count pending orders (case-insensitive check)
-        const pendingOrders = orders.filter(
-          (order: any) => (order.orderStatus || order.status || '').toUpperCase() === 'PENDING'
-        ).length;
+        const orderStats = orderStatsRes.data.data || {};
         const totalUsers = authRes.data.data?.totalUsers || 0;
 
         return {
           totalUsers,
-          totalOrders,
-          totalRevenue,
-          pendingOrders,
+          totalOrders: orderStats.totalOrders || 0,
+          totalRevenue: orderStats.totalRevenue || 0,
+          pendingOrders: orderStats.pendingOrders || 0,
         };
       } catch (error) {
         return {

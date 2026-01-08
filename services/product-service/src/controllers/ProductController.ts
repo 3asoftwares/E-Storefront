@@ -169,7 +169,7 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
 
 export const createProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    Logger.info('Creating new product', { name: req.body.name, sellerId: req.body.sellerId }, 'ProductController');
+    Logger.info('Creating new product', { name: req.body.name, sellerId: req.body.sellerId, image: req.body.image }, 'ProductController');
 
     const product = new Product(req.body);
     await product.save();

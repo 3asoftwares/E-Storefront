@@ -61,7 +61,9 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <h1 className="ml-12 lg:ml-0 text-3xl font-bold text-gray-900 dark:text-white">
+          Dashboard
+        </h1>
         <Button onClick={() => refetch()} variant="outline" size="sm" className="!w-auto">
           <FontAwesomeIcon icon={faSync} className="mr-1" />
           Refresh
@@ -101,7 +103,9 @@ export const Dashboard: React.FC = () => {
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Users</h3>
             <FontAwesomeIcon icon={faUsers} className="text-2xl text-blue-600" />
           </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">{totalUsers}</p>
+          <p className="ml-12 lg:ml-0 text-3xl font-bold text-gray-900 dark:text-white">
+            {totalUsers}
+          </p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Registered customers</p>
         </div>
 
@@ -110,7 +114,9 @@ export const Dashboard: React.FC = () => {
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Orders</h3>
             <FontAwesomeIcon icon={faShoppingCart} className="text-2xl text-green-600" />
           </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">{totalOrders}</p>
+          <p className="ml-12 lg:ml-0 text-3xl font-bold text-gray-900 dark:text-white">
+            {totalOrders}
+          </p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">All time orders</p>
         </div>
 
@@ -119,7 +125,7 @@ export const Dashboard: React.FC = () => {
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Revenue</h3>
             <span className="text-2xl text-purple-600">₹</span>
           </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">
+          <p className="ml-12 lg:ml-0 text-3xl font-bold text-gray-900 dark:text-white">
             {formatIndianCompact(Number(totalRevenue))}
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Total earnings</p>

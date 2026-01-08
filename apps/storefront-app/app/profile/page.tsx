@@ -40,7 +40,7 @@ export default function ProfilePage() {
     isLoading: isSendingEmail,
     data: sendEmailResult,
   } = useSendVerificationEmail();
-  const { verifyEmail, isLoading: isVerifying, data: verifyResult } = useVerifyEmail();
+  useVerifyEmail();
   const { updateProfile, isLoading: isUpdatingProfile } = useUpdateProfile();
 
   // Address hooks

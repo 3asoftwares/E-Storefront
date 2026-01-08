@@ -445,31 +445,16 @@ function main() {
   // Write files
   const outputDir = __dirname;
 
-  fs.writeFileSync(path.join(outputDir, 'data/users-linked.json'), JSON.stringify(users, null, 2));
+  fs.writeFileSync(path.join(outputDir, 'data/users.json'), JSON.stringify(users, null, 2));
   fs.writeFileSync(
-    path.join(outputDir, 'data/categories-linked.json'),
+    path.join(outputDir, 'data/categories.json'),
     JSON.stringify(categories, null, 2)
   );
-  fs.writeFileSync(
-    path.join(outputDir, 'data/products-linked.json'),
-    JSON.stringify(products, null, 2)
-  );
-  fs.writeFileSync(
-    path.join(outputDir, 'data/coupons-linked.json'),
-    JSON.stringify(coupons, null, 2)
-  );
-  fs.writeFileSync(
-    path.join(outputDir, 'data/orders-linked.json'),
-    JSON.stringify(orders, null, 2)
-  );
-  fs.writeFileSync(
-    path.join(outputDir, 'data/reviews-linked.json'),
-    JSON.stringify(reviews, null, 2)
-  );
-  fs.writeFileSync(
-    path.join(outputDir, 'data/addresses-linked.json'),
-    JSON.stringify(addresses, null, 2)
-  );
+  fs.writeFileSync(path.join(outputDir, 'data/products.json'), JSON.stringify(products, null, 2));
+  fs.writeFileSync(path.join(outputDir, 'data/coupons.json'), JSON.stringify(coupons, null, 2));
+  fs.writeFileSync(path.join(outputDir, 'data/orders.json'), JSON.stringify(orders, null, 2));
+  fs.writeFileSync(path.join(outputDir, 'data/reviews.json'), JSON.stringify(reviews, null, 2));
+  fs.writeFileSync(path.join(outputDir, 'data/addresses.json'), JSON.stringify(addresses, null, 2));
 
   console.log('\n✓ All files written to sample-data/ directory');
 }

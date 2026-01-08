@@ -60,7 +60,11 @@ export const getOrdersByCustomer = async (req: Request, res: Response): Promise<
       Order.countDocuments({ customerId }),
     ]);
 
-    Logger.info(`Fetched ${orders.length} orders for customer`, { customerId, total }, 'OrderController');
+    Logger.info(
+      `Fetched ${orders.length} orders for customer`,
+      { customerId, total },
+      'OrderController'
+    );
 
     res.status(200).json({
       success: true,
@@ -100,7 +104,11 @@ export const getOrderById = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    Logger.debug('Order fetched successfully', { orderId: id, orderNumber: order.orderNumber }, 'OrderController');
+    Logger.debug(
+      'Order fetched successfully',
+      { orderId: id, orderNumber: order.orderNumber },
+      'OrderController'
+    );
 
     res.status(200).json({
       success: true,
@@ -133,7 +141,11 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       notes,
     } = req.body;
 
-    Logger.info('Creating new order', { customerId, customerEmail, itemCount: items?.length, total }, 'OrderController');
+    Logger.info(
+      'Creating new order',
+      { customerId, customerEmail, itemCount: items?.length, total },
+      'OrderController'
+    );
 
     // Group items by sellerId to create separate orders per seller
     const itemsBySeller: Record<string, any[]> = {};
@@ -148,16 +160,24 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     const sellerIds = Object.keys(itemsBySeller);
     const createdOrders = [];
 
-    Logger.debug('Order items grouped by seller', { sellerCount: sellerIds.length }, 'OrderController');
+    Logger.debug(
+      'Order items grouped by seller',
+      { sellerCount: sellerIds.length },
+      'OrderController'
+    );
 
     // If only one seller (or no sellerId), create single order
     if (sellerIds.length === 1) {
       const singleSellerId = sellerIds[0];
       const orderCount = await Order.countDocuments();
       const orderNumber = `ORD-${Date.now()}-${orderCount + 1}`;
-      
-      Logger.debug('Creating single order', { orderNumber, sellerId: singleSellerId }, 'OrderController');
-      
+
+      Logger.debug(
+        'Creating single order',
+        { orderNumber, sellerId: singleSellerId },
+        'OrderController'
+      );
+
       const order = new Order({
         orderNumber,
         customerId,
@@ -179,14 +199,22 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
 
       await order.save();
       createdOrders.push(order);
-      
-      Logger.info('Order created successfully', { orderId: order._id, orderNumber }, 'OrderController');
+
+      Logger.info(
+        'Order created successfully',
+        { orderId: order._id, orderNumber },
+        'OrderController'
+      );
     } else {
       // Multiple sellers - create separate orders for each seller
       const orderCount = await Order.countDocuments();
       let orderIndex = 0;
 
-      Logger.info('Creating split orders for multiple sellers', { sellerCount: sellerIds.length }, 'OrderController');
+      Logger.info(
+        'Creating split orders for multiple sellers',
+        { sellerCount: sellerIds.length },
+        'OrderController'
+      );
 
       for (const sellerId of sellerIds) {
         const sellerItems = itemsBySeller[sellerId];
@@ -205,7 +233,11 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
 
         const orderNumber = `ORD-${Date.now()}-${orderCount + orderIndex + 1}`;
 
-        Logger.debug('Creating split order', { orderNumber, sellerId, sellerTotal }, 'OrderController');
+        Logger.debug(
+          'Creating split order',
+          { orderNumber, sellerId, sellerTotal },
+          'OrderController'
+        );
 
         const order = new Order({
           orderNumber,
@@ -231,12 +263,20 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         await order.save();
         createdOrders.push(order);
         orderIndex++;
-        
-        Logger.info('Split order created', { orderId: order._id, orderNumber, sellerId }, 'OrderController');
+
+        Logger.info(
+          'Split order created',
+          { orderId: order._id, orderNumber, sellerId },
+          'OrderController'
+        );
       }
     }
 
-    Logger.info('Order creation completed', { orderCount: createdOrders.length, customerId }, 'OrderController');
+    Logger.info(
+      'Order creation completed',
+      { orderCount: createdOrders.length, customerId },
+      'OrderController'
+    );
 
     res.status(201).json({
       success: true,
@@ -289,7 +329,11 @@ export const cancelOrder = async (req: Request, res: Response): Promise<void> =>
 
     // Only allow cancellation for pending or confirmed orders
     if (!['PENDING', 'CONFIRMED'].includes(currentStatus)) {
-      Logger.warn('Cannot cancel order with current status', { orderId: id, status: order.orderStatus }, 'OrderController');
+      Logger.warn(
+        'Cannot cancel order with current status',
+        { orderId: id, status: order.orderStatus },
+        'OrderController'
+      );
       res.status(400).json({
         success: false,
         message: `Cannot cancel order with status: ${order.orderStatus}`,
@@ -301,7 +345,11 @@ export const cancelOrder = async (req: Request, res: Response): Promise<void> =>
     order.updatedAt = new Date();
     await order.save();
 
-    Logger.info('Order cancelled successfully', { orderId: id, orderNumber: order.orderNumber }, 'OrderController');
+    Logger.info(
+      'Order cancelled successfully',
+      { orderId: id, orderNumber: order.orderNumber },
+      'OrderController'
+    );
 
     res.status(200).json({
       success: true,
@@ -355,7 +403,11 @@ export const getSellerOrders = async (req: Request, res: Response): Promise<void
       };
     });
 
-    Logger.info(`Fetched ${orders.length} orders for seller`, { sellerId, total }, 'OrderController');
+    Logger.info(
+      `Fetched ${orders.length} orders for seller`,
+      { sellerId, total },
+      'OrderController'
+    );
 
     res.status(200).json({
       success: true,
@@ -384,7 +436,11 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
     const { id } = req.params;
     const { orderStatus } = req.body;
 
-    Logger.info('Updating order status', { orderId: id, newStatus: orderStatus }, 'OrderController');
+    Logger.info(
+      'Updating order status',
+      { orderId: id, newStatus: orderStatus },
+      'OrderController'
+    );
 
     const order = await Order.findByIdAndUpdate(
       id,
@@ -401,7 +457,11 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    Logger.info('Order status updated successfully', { orderId: id, orderNumber: order.orderNumber, status: orderStatus }, 'OrderController');
+    Logger.info(
+      'Order status updated successfully',
+      { orderId: id, orderNumber: order.orderNumber, status: orderStatus },
+      'OrderController'
+    );
 
     res.status(200).json({
       success: true,
@@ -433,6 +493,59 @@ export const getAdminOrders = (_: Request, res: Response) => {
   res.status(200).json({ message: 'getAdminOrders stub' });
 };
 
+export const getAdminStats = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    Logger.debug('Fetching admin dashboard stats', undefined, 'OrderController');
+
+    // Get all orders to calculate stats
+    const orders = await Order.find().lean();
+
+    const totalOrders = orders.length;
+    const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
+
+    // Count pending orders (PENDING or CONFIRMED status)
+    const pendingOrders = orders.filter(
+      (o) => o.orderStatus === OrderStatus.PENDING || o.orderStatus === OrderStatus.CONFIRMED
+    ).length;
+
+    // Count completed orders (DELIVERED status)
+    const completedOrders = orders.filter((o) => o.orderStatus === OrderStatus.DELIVERED).length;
+
+    // Count processing orders (PROCESSING or SHIPPED status)
+    const processingOrders = orders.filter(
+      (o) => o.orderStatus === OrderStatus.PROCESSING || o.orderStatus === OrderStatus.SHIPPED
+    ).length;
+
+    // Count cancelled orders
+    const cancelledOrders = orders.filter((o) => o.orderStatus === OrderStatus.CANCELLED).length;
+
+    Logger.info(
+      'Admin stats calculated',
+      { totalOrders, totalRevenue, pendingOrders },
+      'OrderController'
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalOrders,
+        totalRevenue: Number(totalRevenue.toFixed(2)),
+        pendingOrders,
+        completedOrders,
+        processingOrders,
+        cancelledOrders,
+      },
+    });
+  } catch (error: any) {
+    Logger.error('Failed to get admin stats', error, 'OrderController');
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get admin stats',
+      error: error.message,
+    });
+  }
+};
+
 export const processRefund = (_: Request, res: Response) => {
   Logger.debug('processRefund stub called', undefined, 'OrderController');
   res.status(200).json({ message: 'processRefund stub' });
@@ -443,7 +556,11 @@ export const updatePaymentStatus = async (req: Request, res: Response): Promise<
     const { id } = req.params;
     const { paymentStatus } = req.body;
 
-    Logger.info('Updating payment status', { orderId: id, newStatus: paymentStatus }, 'OrderController');
+    Logger.info(
+      'Updating payment status',
+      { orderId: id, newStatus: paymentStatus },
+      'OrderController'
+    );
 
     const order = await Order.findByIdAndUpdate(
       id,
@@ -460,7 +577,11 @@ export const updatePaymentStatus = async (req: Request, res: Response): Promise<
       return;
     }
 
-    Logger.info('Payment status updated successfully', { orderId: id, orderNumber: order.orderNumber, paymentStatus }, 'OrderController');
+    Logger.info(
+      'Payment status updated successfully',
+      { orderId: id, orderNumber: order.orderNumber, paymentStatus },
+      'OrderController'
+    );
 
     res.status(200).json({
       success: true,
@@ -483,43 +604,55 @@ export const getSellerStats = async (req: Request, res: Response): Promise<void>
 
     Logger.debug('Fetching seller stats', { sellerId }, 'OrderController');
 
-    // Query for orders belonging to this seller
-    const query = { sellerId };
+    // Query for orders that have at least one item from this seller
+    const query = { 'items.sellerId': sellerId };
 
-    // Get all orders for this seller to calculate stats
+    // Get all orders containing items from this seller
     const orders = await Order.find(query).lean();
 
     const totalOrders = orders.length;
+    Logger.debug('Fetching seller stats', { totalOrders }, 'OrderController');
 
-    // Calculate stats
-    const pendingOrders = orders.filter(
-      (o) =>
-        o.orderStatus === OrderStatus.PENDING ||
-        o.orderStatus === OrderStatus.CONFIRMED
-    ).length;
+    // Calculate stats based on seller's items within each order
+    let totalRevenue = 0;
+    let pendingOrders = 0;
+    let completedOrders = 0;
+    let processingOrders = 0;
 
-    const completedOrders = orders.filter(
-      (o) => o.orderStatus === OrderStatus.DELIVERED
-    ).length;
+    orders.forEach((order) => {
+      // Calculate seller's revenue from their items in this order
+      const sellerItems = order.items.filter((item: any) => item.sellerId === sellerId);
+      const sellerSubtotal = sellerItems.reduce(
+        (sum: number, item: any) => sum + (item.subtotal || 0),
+        0
+      );
+      totalRevenue += sellerSubtotal;
 
-    const processingOrders = orders.filter(
-      (o) =>
-        o.orderStatus === OrderStatus.PROCESSING ||
-        o.orderStatus === OrderStatus.SHIPPED
-    ).length;
-
-    const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
+      // Count order statuses
+      const status = order.orderStatus;
+      if (status === OrderStatus.PENDING || status === OrderStatus.CONFIRMED) {
+        pendingOrders++;
+      } else if (status === OrderStatus.DELIVERED) {
+        completedOrders++;
+      } else if (status === OrderStatus.PROCESSING || status === OrderStatus.SHIPPED) {
+        processingOrders++;
+      }
+    });
 
     const completionRate = totalOrders > 0 ? (completedOrders / totalOrders) * 100 : 0;
     const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
     const successRate = totalOrders > 0 ? (completedOrders / totalOrders) * 100 : 0;
 
-    Logger.info('Seller stats calculated', { sellerId, totalOrders, totalRevenue }, 'OrderController');
+    Logger.info(
+      'Seller stats calculated',
+      { sellerId, totalOrders, totalRevenue },
+      'OrderController'
+    );
 
     res.status(200).json({
       success: true,
       data: {
-        totalRevenue,
+        totalRevenue: Number(totalRevenue.toFixed(2)),
         totalOrders,
         pendingOrders,
         completedOrders,
@@ -547,23 +680,31 @@ export const getSellerEarnings = async (req: Request, res: Response): Promise<vo
 
     Logger.debug('Fetching seller earnings', { sellerId }, 'OrderController');
 
-    // Query for orders belonging to this seller
-    const query = { sellerId };
+    // Query for orders that have at least one item from this seller
+    const query = { 'items.sellerId': sellerId };
 
-    // Get all orders for this seller
+    // Get all orders containing items from this seller
     const orders = await Order.find(query).sort({ createdAt: -1 }).lean();
 
+    // Calculate revenue based on seller's items only
+    let totalRevenue = 0;
     const totalOrders = orders.length;
-    const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
-    const totalCommission = totalRevenue * commissionRate;
-    const totalPayout = totalRevenue - totalCommission;
 
-    Logger.debug('Processing earnings data', { sellerId, totalOrders, totalRevenue }, 'OrderController');
-
-    // Calculate monthly breakdown
-    const monthlyData: Record<string, { revenue: number; orders: number; commission: number; payout: number }> = {};
+    // Calculate monthly breakdown based on seller's items
+    const monthlyData: Record<
+      string,
+      { revenue: number; orders: number; commission: number; payout: number }
+    > = {};
 
     orders.forEach((order) => {
+      // Get only this seller's items and calculate their revenue
+      const sellerItems = order.items.filter((item: any) => item.sellerId === sellerId);
+      const sellerSubtotal = sellerItems.reduce(
+        (sum: number, item: any) => sum + (item.subtotal || 0),
+        0
+      );
+      totalRevenue += sellerSubtotal;
+
       const date = new Date(order.createdAt);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
@@ -576,12 +717,21 @@ export const getSellerEarnings = async (req: Request, res: Response): Promise<vo
         };
       }
 
-      const orderTotal = order.total || 0;
-      monthlyData[monthKey].revenue += orderTotal;
+      monthlyData[monthKey].revenue += sellerSubtotal;
       monthlyData[monthKey].orders += 1;
       monthlyData[monthKey].commission = monthlyData[monthKey].revenue * commissionRate;
-      monthlyData[monthKey].payout = monthlyData[monthKey].revenue - monthlyData[monthKey].commission;
+      monthlyData[monthKey].payout =
+        monthlyData[monthKey].revenue - monthlyData[monthKey].commission;
     });
+
+    const totalCommission = totalRevenue * commissionRate;
+    const totalPayout = totalRevenue - totalCommission;
+
+    Logger.debug(
+      'Processing earnings data',
+      { sellerId, totalOrders, totalRevenue },
+      'OrderController'
+    );
 
     // Convert to array and sort by date (newest first)
     const monthlyEarnings = Object.entries(monthlyData)
@@ -599,7 +749,11 @@ export const getSellerEarnings = async (req: Request, res: Response): Promise<vo
         };
       });
 
-    Logger.info('Seller earnings fetched', { sellerId, totalRevenue, totalPayout }, 'OrderController');
+    Logger.info(
+      'Seller earnings fetched',
+      { sellerId, totalRevenue, totalPayout },
+      'OrderController'
+    );
 
     res.status(200).json({
       success: true,

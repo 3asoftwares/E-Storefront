@@ -10,10 +10,10 @@ import {
   faTicket,
   faBars,
   IconDefinition,
-  faXmark,
   faUserCircle,
   faChevronLeft,
   faChevronRight,
+  faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import { Button } from '@3asoftwares/ui-library';
 
@@ -68,12 +68,22 @@ export const Sidebar: React.FC = () => {
 
   return (
     <>
-      <Button className="!w-auto" size="md" onClick={toggleSidebar}>
-        <FontAwesomeIcon
-          icon={sidebarOpen ? faXmark : faBars}
-          className="w-5 h-5 text-gray-700 dark:text-gray-300"
-        />
-      </Button>
+      {!sidebarOpen && (
+        <Button
+          size="sm"
+          variant={sidebarOpen ? 'ghost' : 'outline'}
+          onClick={toggleSidebar}
+          className={`!w-auto fixed bg-white  ${
+            sidebarOpen ? 'top-4 left-48' : 'top-[98px] left-4'
+          } z-50 lg:hidden`}
+          aria-label={sidebarOpen ? 'Close menu' : 'Open menu'}
+        >
+          <FontAwesomeIcon
+            icon={sidebarOpen ? faTimes : faBars}
+            className="w-5 h-5 text-gray-700"
+          />
+        </Button>
+      )}
       <div
         className={`lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300 ${
           sidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
@@ -83,7 +93,7 @@ export const Sidebar: React.FC = () => {
       />
       <aside
         className={`
-          fixed top-[69px] left-0 z-40 h-[calc(100vh-69px)] bg-white dark:bg-gray-900 
+          fixed top-0 lg:top-[72px] left-0 z-40 h-screen lg:h-[calc(100vh-72px)] bg-white dark:bg-gray-900 
           border-r border-gray-200 dark:border-gray-800 
           transition-all duration-300 ease-in-out
           ${sidebarOpen ? 'w-64' : 'w-0 lg:w-20'}
@@ -110,8 +120,7 @@ export const Sidebar: React.FC = () => {
                   </div>
                 </div>
               )}
-              {/* Desktop Toggle Button */}
-              <Button className="!w-auto" size="md" onClick={toggleSidebar}>
+              <Button variant="outline" className="!w-auto" size="md" onClick={toggleSidebar}>
                 <FontAwesomeIcon
                   icon={sidebarOpen ? faChevronLeft : faChevronRight}
                   className="w-3 h-3 text-gray-600 dark:text-gray-400"
@@ -121,8 +130,12 @@ export const Sidebar: React.FC = () => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-3 overflow-y-auto">
-            <ul className="space-y-1">
+          <nav className="flex-1 mt-3 p-3 overflow-y-auto">
+            <ul
+              className={`flex flex-col ${
+                sidebarOpen ? 'justify-center' : 'justify-start items-center'
+              } space-y-2`}
+            >
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (
@@ -130,13 +143,13 @@ export const Sidebar: React.FC = () => {
                     <Link
                       to={item.path}
                       className={`
-                        group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
+                        group flex items-center gap-3 w-10 h-10 rounded-lg transition-all duration-200
                         ${
                           isActive
                             ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25'
                             : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
                         }
-                        ${!sidebarOpen ? 'lg:justify-center lg:px-0' : ''}
+                        ${!sidebarOpen ? 'lg:justify-center lg:px-0' : 'w-full'}
                       `}
                       title={!sidebarOpen ? item.label : undefined}
                     >
@@ -157,9 +170,6 @@ export const Sidebar: React.FC = () => {
                         />
                       </span>
                       {sidebarOpen && <span className="font-medium text-sm">{item.label}</span>}
-                      {isActive && sidebarOpen && (
-                        <span className="ml-auto w-2 h-2 rounded-full bg-white"></span>
-                      )}
                     </Link>
                   </li>
                 );

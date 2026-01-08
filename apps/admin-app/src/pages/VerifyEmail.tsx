@@ -3,7 +3,13 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../store/store';
 import { setUser } from '../store/authSlice';
 import { Button, Spinner } from '@3asoftwares/ui-library';
-import { storeAuth, getStoredAuth } from '@3asoftwares/utils';
+import {
+  storeAuth,
+  getStoredAuth,
+  VALIDATE_EMAIL_TOKEN_QUERY,
+  VERIFY_EMAIL_BY_TOKEN_MUTATION,
+} from '@3asoftwares/utils';
+import { graphqlRequest } from '../api/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCheckCircle,
@@ -11,10 +17,6 @@ import {
   faHome,
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
-
-const API_BASE = import.meta.env.VITE_API_URL
-  ? `${import.meta.env.VITE_API_URL}/auth`
-  : 'http://localhost:3011/api/auth';
 
 export const VerifyEmail: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -37,42 +39,35 @@ export const VerifyEmail: React.FC = () => {
       }
 
       try {
-        // First validate the token
-        const validateResponse = await fetch(`${API_BASE}/validate-email-token/${token}`);
-        const validateData = await validateResponse.json();
+        // First validate the token using GraphQL
+        const validateData = await graphqlRequest(VALIDATE_EMAIL_TOKEN_QUERY, { token });
+        const validateResult = validateData?.validateEmailToken;
 
-        if (!validateResponse.ok) {
-          if (validateData.message?.includes('already verified')) {
+        if (!validateResult?.success) {
+          if (validateResult?.message?.includes('already verified')) {
             setStatus('already-verified');
             setMessage('Your email has already been verified.');
           } else {
             setStatus('error');
-            setMessage(validateData.message || 'Invalid or expired verification link');
+            setMessage(validateResult?.message || 'Invalid or expired verification link');
           }
           return;
         }
 
-        setUserEmail(validateData.email);
+        setUserEmail(validateResult.email || '');
 
-        // Now verify the email
-        const verifyResponse = await fetch(`${API_BASE}/verify-email-token`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ token }),
-        });
+        // Now verify the email using GraphQL
+        const verifyData = await graphqlRequest(VERIFY_EMAIL_BY_TOKEN_MUTATION, { token });
+        const verifyResult = verifyData?.verifyEmailByToken;
 
-        const verifyData = await verifyResponse.json();
-
-        if (verifyResponse.ok && verifyData.success) {
+        if (verifyResult?.success) {
           setStatus('success');
           setMessage('Your email has been verified successfully!');
 
           // Update user data in store if user is logged in
           const storedAuth = getStoredAuth();
-          if (storedAuth && verifyData.data?.user) {
-            const updatedUser = verifyData.data.user;
+          if (storedAuth && verifyResult?.user) {
+            const updatedUser = verifyResult.user;
             storeAuth({
               user: updatedUser,
               accessToken: storedAuth.token,
@@ -80,12 +75,12 @@ export const VerifyEmail: React.FC = () => {
             dispatch(setUser({ user: updatedUser, token: storedAuth.token }));
           }
         } else {
-          if (verifyData.message?.includes('already verified')) {
+          if (verifyResult?.message?.includes('already verified')) {
             setStatus('already-verified');
             setMessage('Your email has already been verified.');
           } else {
             setStatus('error');
-            setMessage(verifyData.message || 'Failed to verify email');
+            setMessage(verifyResult?.message || 'Failed to verify email');
           }
         }
       } catch (error) {

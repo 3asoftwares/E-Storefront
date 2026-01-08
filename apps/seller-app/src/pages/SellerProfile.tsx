@@ -74,7 +74,7 @@ export const SellerProfile: React.FC = () => {
 
   return (
     <div className="max-w-7xl px-8 py-4 mx-auto">
-      <h1 className="ml-12 lg:ml-0 mt-2 text-3xl font-bold text-gray-900 dark:text-white mb-8">
+      <h1 className="ml-12 lg:ml-0 mt-2 ml-12 lg:ml-0 text-3xl font-bold text-gray-900 dark:text-white mb-8">
         Profile
       </h1>
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">

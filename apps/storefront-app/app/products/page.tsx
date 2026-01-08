@@ -8,7 +8,7 @@ import type { ProductGraphQL } from '@3asoftwares/types';
 import { useToast } from '@/lib/hooks/useToast';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilter, faRedo, faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { ProductCard, ProductCardSkeleton } from '@/components';
 import { Button, Input, Select } from '@3asoftwares/ui-library';
 
@@ -24,6 +24,7 @@ const SORT_OPTIONS = [
 
 export default function ProductsPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [tempSearch, setTempSearch] = useState('');
   const [category, setCategory] = useState('All');
@@ -298,11 +299,17 @@ export default function ProductsPage() {
                 <Button
                   size="sm"
                   onClick={() => {
+                    // Reset all filter states
                     setSearch('');
+                    setTempSearch('');
                     setCategory('All');
                     setPriceRange({ min: 0, max: 0 });
+                    setTempPriceRange({ min: 0, max: 0 });
                     setSortBy('newest');
+                    setFeatured(false);
                     setPage(1);
+                    // Clear URL parameters
+                    router.push('/products');
                   }}
                   className="w-full"
                 >

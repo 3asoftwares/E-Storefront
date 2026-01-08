@@ -89,7 +89,9 @@ export const Profile: React.FC = () => {
 
   return (
     <div className="mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Profile</h1>
+      <h1 className="ml-12 lg:ml-0 text-3xl font-bold text-gray-900 dark:text-white mb-8">
+        Profile
+      </h1>
 
       {/* Profile Card */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">

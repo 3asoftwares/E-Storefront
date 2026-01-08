@@ -29,6 +29,8 @@ router.get('/seller-stats/:sellerId', authenticate, orderController.getSellerSta
 
 router.get('/seller-earnings/:sellerId', authenticate, orderController.getSellerEarnings);
 
+router.get('/admin-stats', authenticate, orderController.getAdminStats);
+
 router.get('/', authenticate, orderController.getAllOrders);
 
 router.get('/:id', authenticate, orderController.getOrderById);

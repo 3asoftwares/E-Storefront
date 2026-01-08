@@ -86,7 +86,7 @@ export const Dashboard: React.FC = () => {
                   <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">
                     Total Revenue
                   </p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                  <p className="ml-12 lg:ml-0 text-3xl font-bold text-gray-900 dark:text-white mt-2">
                     {formatIndianCompact(Number(stats.totalRevenue.toFixed(2)))}
                   </p>
                 </div>
@@ -105,7 +105,7 @@ export const Dashboard: React.FC = () => {
                   <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">
                     Total Orders
                   </p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                  <p className="ml-12 lg:ml-0 text-3xl font-bold text-gray-900 dark:text-white mt-2">
                     {stats.totalOrders}
                   </p>
                 </div>
