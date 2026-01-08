@@ -2,7 +2,11 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "moduleResolution": "bundler",
     "strict": true,
     "esModuleInterop": true,
@@ -14,20 +18,54 @@
     "jsx": "react-jsx"
   },
   "references": [
-    { "path": "./apps/admin-app" },
-    { "path": "./apps/seller-app" },
-    { "path": "./apps/shell-app" },
-    { "path": "./apps/storefront-app" },
-    { "path": "./apps/mobile-app" },
-    { "path": "./packages/types" },
-    { "path": "./packages/utils" },
-    { "path": "./packages/ui-library" },
-    { "path": "./services/auth-service" },
-    { "path": "./services/category-service" },
-    { "path": "./services/coupon-service" },
-    { "path": "./services/product-service" },
-    { "path": "./services/order-service" },
-    { "path": "./services/graphql-gateway" }
+    {
+      "path": "./apps/admin-app"
+    },
+    {
+      "path": "./apps/seller-app"
+    },
+    {
+      "path": "./apps/shell-app"
+    },
+    {
+      "path": "./apps/storefront-app"
+    },
+    {
+      "path": "./apps/mobile-app"
+    },
+    {
+      "path": "./packages/types"
+    },
+    {
+      "path": "./packages/utils"
+    },
+    {
+      "path": "./packages/ui-library"
+    },
+    {
+      "path": "./services/auth-service"
+    },
+    {
+      "path": "./services/category-service"
+    },
+    {
+      "path": "./services/coupon-service"
+    },
+    {
+      "path": "./services/product-service"
+    },
+    {
+      "path": "./services/order-service"
+    },
+    {
+      "path": "./services/graphql-gateway"
+    }
   ],
-  "exclude": ["node_modules", "**/dist", "**/build", "**/.next"]
+  "exclude": [
+    "node_modules",
+    "**/dist",
+    "**/build",
+    "**/.next"
+  ],
+  "extends": "expo/tsconfig.base"
 }

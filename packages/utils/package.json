@@ -1,6 +1,6 @@
 {
   "name": "@3asoftwares/utils",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Utility functions for 3A Softwares E-Commerce",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -47,7 +47,8 @@
     "src"
   ],
   "scripts": {
-    "build": "tsup src/index.ts src/client.ts src/validation/server.ts --format cjs,esm --dts --clean --external @3asoftwares/types && tsup src/config/tailwind.config.ts src/config/vite.config.ts src/config/vitest.base.config.ts src/config/webpack.base.config.ts --format cjs,esm --no-dts --outDir dist/config --external @3asoftwares/types --external vite --external vitest --external webpack --external daisyui --external @vitejs/plugin-react --external html-webpack-plugin --external mini-css-extract-plugin --external webpack-dev-server --external @storybook/addon-vitest --external @vitest/browser-playwright",
+    "build": "tsup src/index.ts src/client.ts src/validation/server.ts --format cjs,esm --dts --clean --external @3asoftwares/types",
+    "build:full": "npm run build && tsup src/config/tailwind.config.ts src/config/vite.config.ts src/config/vitest.base.config.ts src/config/webpack.base.config.ts --format cjs,esm --no-dts --outDir dist/config --external @3asoftwares/types --external vite --external vitest --external webpack --external daisyui --external @vitejs/plugin-react --external html-webpack-plugin --external mini-css-extract-plugin --external webpack-dev-server --external @storybook/addon-vitest --external @vitest/browser-playwright",
     "prepublishOnly": "npm run build",
     "test": "vitest",
     "test:coverage": "vitest run --coverage"
