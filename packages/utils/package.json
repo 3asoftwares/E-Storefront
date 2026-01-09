@@ -1,6 +1,6 @@
 {
   "name": "@3asoftwares/utils",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Utility functions for 3A Softwares E-Commerce",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -44,7 +44,8 @@
   },
   "files": [
     "dist",
-    "src"
+    "src",
+    "config"
   ],
   "scripts": {
     "build": "tsup",

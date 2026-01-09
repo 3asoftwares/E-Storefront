@@ -55,7 +55,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/react-fontawesome": "^0.2.6",
-    "@3asoftwares/utils": "^1.0.2"
+    "@3asoftwares/utils": "^1.0.5"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^3.2.2",

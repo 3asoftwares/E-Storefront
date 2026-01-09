@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@3asoftwares/types": "^1.0.1",
-    "@3asoftwares/utils": "^1.0.4",
+    "@3asoftwares/utils": "^1.0.5",
     "@apollo/server": "^4.10.0",
     "@as-integrations/next": "^3.0.0",
     "graphql": "^16.8.1",
