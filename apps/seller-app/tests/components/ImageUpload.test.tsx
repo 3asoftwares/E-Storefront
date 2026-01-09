@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
-// Mock the ImageUpload component to avoid import.meta.env issues
-// Since the real component uses import.meta.env.VITE_CLOUDINARY_*, we create a mock
+// Mock the ImageUpload component to avoid process.env issues
+// Since the real component uses process.env.VITE_CLOUDINARY_*, we create a mock
 const MockImageUpload: React.FC<{
   currentImage?: string;
   onImageUpload: (url: string) => void;

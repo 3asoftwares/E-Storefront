@@ -19,11 +19,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const CLOUDINARY_CLOUD_NAME = String(
-    import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'your-cloud-name'
-  );
+  const CLOUDINARY_CLOUD_NAME = String(process.env.VITE_CLOUDINARY_CLOUD_NAME || 'your-cloud-name');
   const CLOUDINARY_UPLOAD_PRESET = String(
-    import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'your-upload-preset'
+    process.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'your-upload-preset'
   );
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {

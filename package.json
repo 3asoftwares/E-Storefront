@@ -71,7 +71,7 @@
     "test:coverage:gateway": "yarn workspace @3asoftwares/graphql-gateway run test -- --coverage",
     "test:coverage:order": "yarn workspace @3asoftwares/order-service run test -- --coverage",
     "test:coverage:product": "yarn workspace @3asoftwares/product-service run test -- --coverage",
-    "test:coverage:package":"yarn test:coverage:storybook && yarn test:coverage:types && yarn test:coverage:utils",
+    "test:coverage:package": "yarn test:coverage:storybook && yarn test:coverage:types && yarn test:coverage:utils",
     "test:coverage:frontend": "yarn test:coverage:admin && yarn test:coverage:shell && yarn test:coverage:seller && yarn test:coverage:storefront",
     "test:coverage:backend": "yarn test:coverage:auth && yarn test:coverage:category && yarn test:coverage:coupon && yarn test:coverage:order && yarn test:coverage:product",
     "test:coverage:all": "yarn test:coverage:frontend && yarn test:coverage:backend && yarn test:coverage:storybook",
@@ -87,6 +87,8 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
+    "expo": "^54.0.31",
+    "expo-router": "^6.0.21",
     "npm-run-all": "^4.1.5",
     "tsup": "^8.5.1",
     "typescript": "^5.3.0"

@@ -8,7 +8,7 @@ export const store = configureStore({
     sellerAuth: sellerAuthReducer,
     productDraft: productDraftReducer,
   },
-  devTools: import.meta.env.MODE !== 'production',
+  devTools: process.env.NODE_ENV !== 'production',
 });
 
 export type RootState = ReturnType<typeof store.getState>;

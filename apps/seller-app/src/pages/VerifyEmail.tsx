@@ -11,8 +11,8 @@ import {
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
 
-const API_BASE = import.meta.env.VITE_SERVICE_URL
-  ? `${import.meta.env.VITE_SERVICE_URL}/api/auth`
+const API_BASE = process.env.VITE_SERVICE_URL
+  ? `${process.env.VITE_SERVICE_URL}/api/auth`
   : 'http://localhost:3011/api/auth';
 
 export const VerifyEmail: React.FC = () => {
