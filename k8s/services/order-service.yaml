@@ -1,0 +1,123 @@
+# Order Service Deployment
+# =========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: ecommerce
+  labels:
+    app: order-service
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: order-service
+        tier: backend
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '3015'
+    spec:
+      imagePullSecrets:
+        - name: ghcr-credentials
+      containers:
+        - name: order-service
+          image: ghcr.io/your-org/ecommerce/backend:latest
+          imagePullPolicy: Always
+          command: ['node', 'services/order-service/dist/index.js']
+          ports:
+            - containerPort: 3015
+              name: http
+          envFrom:
+            - configMapRef:
+                name: ecommerce-config
+          env:
+            - name: SERVICE_NAME
+              value: 'order-service'
+            - name: PORT
+              value: '3015'
+            - name: MONGODB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: mongodb-uri
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: redis-password
+          resources:
+            requests:
+              cpu: '100m'
+              memory: '256Mi'
+            limits:
+              cpu: '500m'
+              memory: '512Mi'
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3015
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3015
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: ecommerce
+spec:
+  selector:
+    app: order-service
+  ports:
+    - port: 3015
+      targetPort: 3015
+      name: http
+  type: ClusterIP
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: order-service-hpa
+  namespace: ecommerce
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: order-service
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

@@ -1,0 +1,50 @@
+# Resource Quotas
+# ================
+# Limit total resources used by the namespace
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: ecommerce-quota
+  namespace: ecommerce
+spec:
+  hard:
+    requests.cpu: '10'
+    requests.memory: 20Gi
+    limits.cpu: '20'
+    limits.memory: 40Gi
+    pods: '50'
+    services: '20'
+    secrets: '20'
+    configmaps: '20'
+    persistentvolumeclaims: '10'
+
+---
+# Limit Ranges
+# =============
+# Default resource limits for pods
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: ecommerce-limits
+  namespace: ecommerce
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: '500m'
+        memory: '512Mi'
+      defaultRequest:
+        cpu: '100m'
+        memory: '128Mi'
+      max:
+        cpu: '2'
+        memory: '4Gi'
+      min:
+        cpu: '50m'
+        memory: '64Mi'
+    - type: Pod
+      max:
+        cpu: '4'
+        memory: '8Gi'

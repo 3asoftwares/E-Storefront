@@ -1,0 +1,270 @@
+# Deploy to Kubernetes
+name: Deploy to Kubernetes
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment Environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      services:
+        description: 'Services to deploy'
+        required: true
+        type: choice
+        options:
+          - all
+          - backend-only
+          - frontend-only
+          - databases-only
+      confirm_production:
+        description: 'Type "CONFIRM" to deploy to production'
+        required: false
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository }}
+
+jobs:
+  # ===========================================
+  # VALIDATE DEPLOYMENT
+  # ===========================================
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      proceed: ${{ steps.validate.outputs.proceed }}
+    steps:
+      - name: Validate Production Deployment
+        id: validate
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "production" ]; then
+            if [ "${{ github.event.inputs.confirm_production }}" != "CONFIRM" ]; then
+              echo "❌ Production deployment requires typing 'CONFIRM'"
+              echo "proceed=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          fi
+          echo "proceed=true" >> $GITHUB_OUTPUT
+
+      - name: Log Deployment Request
+        if: steps.validate.outputs.proceed == 'true'
+        run: |
+          echo "🚀 =============================================="
+          echo "🚀 KUBERNETES DEPLOYMENT REQUEST"
+          echo "🚀 =============================================="
+          echo "🚀 Requested by: ${{ github.actor }}"
+          echo "🚀 Environment: ${{ github.event.inputs.environment }}"
+          echo "🚀 Services: ${{ github.event.inputs.services }}"
+          echo "🚀 Timestamp: $(date -u)"
+          echo "🚀 =============================================="
+
+  # ===========================================
+  # BUILD DOCKER IMAGES
+  # ===========================================
+  build-backend:
+    runs-on: ubuntu-latest
+    needs: validate
+    if: needs.validate.outputs.proceed == 'true' && (github.event.inputs.services == 'all' || github.event.inputs.services == 'backend-only')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.backend
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/backend:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-storefront:
+    runs-on: ubuntu-latest
+    needs: validate
+    if: needs.validate.outputs.proceed == 'true' && (github.event.inputs.services == 'all' || github.event.inputs.services == 'frontend-only')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push storefront image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./apps/storefront-app/Dockerfile.prod
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/storefront:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/storefront:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ===========================================
+  # DEPLOY TO KUBERNETES
+  # ===========================================
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [validate, build-backend, build-storefront]
+    if: |
+      always() && 
+      needs.validate.outputs.proceed == 'true' &&
+      (needs.build-backend.result == 'success' || needs.build-backend.result == 'skipped') &&
+      (needs.build-storefront.result == 'success' || needs.build-storefront.result == 'skipped')
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Verify cluster connection
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+
+      - name: Update image tags in manifests
+        run: |
+          # Update backend image tag
+          find k8s/services -name "*.yaml" -exec sed -i \
+            "s|ghcr.io/your-org/ecommerce/backend:latest|${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/backend:${{ github.sha }}|g" {} \;
+          
+          # Update storefront image tag
+          sed -i "s|ghcr.io/your-org/ecommerce/storefront:latest|${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/storefront:${{ github.sha }}|g" k8s/apps/storefront.yaml
+
+      - name: Deploy namespace and config
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/configmap.yaml
+          kubectl apply -f k8s/resource-quotas.yaml
+
+      - name: Deploy databases
+        if: github.event.inputs.services == 'all' || github.event.inputs.services == 'databases-only'
+        run: |
+          kubectl apply -f k8s/database/
+
+      - name: Wait for databases
+        if: github.event.inputs.services == 'all' || github.event.inputs.services == 'databases-only'
+        run: |
+          echo "Waiting for MongoDB..."
+          kubectl -n ecommerce wait --for=condition=ready pod -l app=mongodb --timeout=120s || true
+          echo "Waiting for Redis..."
+          kubectl -n ecommerce wait --for=condition=ready pod -l app=redis --timeout=60s || true
+
+      - name: Deploy backend services
+        if: github.event.inputs.services == 'all' || github.event.inputs.services == 'backend-only'
+        run: |
+          kubectl apply -f k8s/services/
+
+      - name: Deploy frontend apps
+        if: github.event.inputs.services == 'all' || github.event.inputs.services == 'frontend-only'
+        run: |
+          kubectl apply -f k8s/apps/
+          kubectl apply -f k8s/nginx/
+
+      - name: Apply network policies and PDBs
+        if: github.event.inputs.services == 'all'
+        run: |
+          kubectl apply -f k8s/network-policies.yaml
+          kubectl apply -f k8s/pod-disruption-budgets.yaml
+          kubectl apply -f k8s/ingress.yaml
+
+      - name: Wait for rollout
+        run: |
+          echo "Waiting for deployments to be ready..."
+          kubectl -n ecommerce rollout status deployment --timeout=300s || true
+
+      - name: Deployment Status
+        run: |
+          echo "📊 =============================================="
+          echo "📊 DEPLOYMENT STATUS"
+          echo "📊 =============================================="
+          echo ""
+          echo "=== Pods ==="
+          kubectl -n ecommerce get pods
+          echo ""
+          echo "=== Services ==="
+          kubectl -n ecommerce get services
+          echo ""
+          echo "=== Ingress ==="
+          kubectl -n ecommerce get ingress
+          echo ""
+          echo "=== HPA ==="
+          kubectl -n ecommerce get hpa
+
+  # ===========================================
+  # POST-DEPLOYMENT VERIFICATION
+  # ===========================================
+  verify:
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: needs.deploy.result == 'success'
+    steps:
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+
+      - name: Health Check
+        run: |
+          echo "🏥 Running health checks..."
+          
+          # Check if all pods are running
+          PENDING=$(kubectl -n ecommerce get pods --field-selector=status.phase!=Running -o name | wc -l)
+          if [ "$PENDING" -gt 0 ]; then
+            echo "⚠️ Some pods are not running:"
+            kubectl -n ecommerce get pods --field-selector=status.phase!=Running
+          else
+            echo "✅ All pods are running!"
+          fi
+          
+          # Check for restarts
+          RESTARTS=$(kubectl -n ecommerce get pods -o jsonpath='{range .items[*]}{.metadata.name}{": "}{range .status.containerStatuses[*]}{.restartCount}{end}{"\n"}{end}')
+          echo "📊 Pod restart counts:"
+          echo "$RESTARTS"
+
+      - name: Notify Success
+        run: |
+          echo "✅ =============================================="
+          echo "✅ DEPLOYMENT SUCCESSFUL"
+          echo "✅ =============================================="
+          echo "✅ Environment: ${{ github.event.inputs.environment }}"
+          echo "✅ Services: ${{ github.event.inputs.services }}"
+          echo "✅ Commit: ${{ github.sha }}"
+          echo "✅ =============================================="

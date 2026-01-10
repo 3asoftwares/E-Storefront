@@ -1,0 +1,133 @@
+# GraphQL Gateway Deployment
+# ===========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graphql-gateway
+  namespace: ecommerce
+  labels:
+    app: graphql-gateway
+    tier: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: graphql-gateway
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: graphql-gateway
+        tier: api
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '4000'
+    spec:
+      imagePullSecrets:
+        - name: ghcr-credentials
+      containers:
+        - name: graphql-gateway
+          image: ghcr.io/your-org/ecommerce/backend:latest
+          imagePullPolicy: Always
+          command: ['node', 'services/graphql-gateway/dist/index.js']
+          ports:
+            - containerPort: 4000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: ecommerce-config
+          env:
+            - name: SERVICE_NAME
+              value: 'graphql-gateway'
+            - name: PORT
+              value: '4000'
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: redis-password
+          resources:
+            requests:
+              cpu: '200m'
+              memory: '512Mi'
+            limits:
+              cpu: '1000m'
+              memory: '1Gi'
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: graphql-gateway
+                topologyKey: kubernetes.io/hostname
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: graphql-gateway
+  namespace: ecommerce
+spec:
+  selector:
+    app: graphql-gateway
+  ports:
+    - port: 4000
+      targetPort: 4000
+      name: http
+  type: ClusterIP
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: graphql-gateway-hpa
+  namespace: ecommerce
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: graphql-gateway
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80

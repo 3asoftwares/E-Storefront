@@ -8,8 +8,10 @@
 | **Package Manager** | Yarn Workspaces                            |
 | **Language**        | TypeScript 5.x                             |
 | **Container**       | Docker + Docker Compose                    |
+| **Orchestration**   | Kubernetes (K8s)                           |
+| **Reverse Proxy**   | NGINX                                      |
 | **CI/CD**           | GitHub Actions                             |
-| **Deployment**      | Vercel                                     |
+| **Deployment**      | Vercel (Frontend) / Kubernetes (Full)      |
 
 ---
 
@@ -169,6 +171,65 @@
 
 ---
 
+## 🏗️ Infrastructure & DevOps
+
+### Container Orchestration
+
+| Technology      | Purpose                                |
+| --------------- | -------------------------------------- |
+| **Docker**      | Containerization                       |
+| **Docker Compose** | Local development & simple production |
+| **Kubernetes**  | Production-grade orchestration         |
+| **Helm**        | K8s package management (optional)      |
+
+### NGINX (Reverse Proxy & Load Balancer)
+
+| Feature              | Implementation                          |
+| -------------------- | --------------------------------------- |
+| **Reverse Proxy**    | Routes traffic to microservices         |
+| **Load Balancing**   | Distributes load across service replicas |
+| **Rate Limiting**    | API: 10 req/s, Auth: 5 req/s            |
+| **Gzip Compression** | Reduces bandwidth, faster responses     |
+| **Security Headers** | XSS, CSRF, Clickjacking protection      |
+| **Static Serving**   | Admin & Seller app static files         |
+| **WebSocket**        | GraphQL subscriptions support           |
+
+### Kubernetes Features
+
+| Feature                    | Purpose                              |
+| -------------------------- | ------------------------------------ |
+| **Deployments**            | Declarative pod management           |
+| **Services**               | Internal networking & discovery      |
+| **Ingress**                | External traffic routing             |
+| **ConfigMaps**             | Configuration management             |
+| **Secrets**                | Sensitive data storage               |
+| **HPA**                    | Horizontal Pod Autoscaling           |
+| **Network Policies**       | Pod-to-pod traffic control           |
+| **PodDisruptionBudgets**   | High availability during updates     |
+| **Resource Quotas**        | Namespace resource limits            |
+
+### CI/CD Pipeline (GitHub Actions)
+
+| Workflow               | Trigger                    | Purpose                           |
+| ---------------------- | -------------------------- | --------------------------------- |
+| **CI Pipeline**        | Push to any branch         | Build, test, lint all apps        |
+| **Deploy to Vercel**   | Push to main (6hr throttle)| Deploy frontend apps              |
+| **Deploy to K8s**      | Manual trigger             | Deploy to Kubernetes cluster      |
+| **Manual Deploy**      | Manual trigger             | Deploy specific app to env        |
+| **Team Notifications** | Workflow completion        | Notify team on success/failure    |
+| **PR Labeler**         | PR opened                  | Auto-label based on files changed |
+| **Stale Handler**      | Daily schedule             | Mark/close stale issues & PRs     |
+
+### Deployment Options
+
+| Option          | Use Case                    | Technology                    |
+| --------------- | --------------------------- | ----------------------------- |
+| **Vercel**      | Frontend apps (serverless)  | Automatic, edge deployment    |
+| **Docker Compose** | Local dev, small production | Single-host deployment        |
+| **Kubernetes**  | Large-scale production      | Multi-node, auto-scaling      |
+
+---
+
 ## 📈 Technology Summary
 
 ```
@@ -179,7 +240,7 @@
 │  ─────────────────           │  ──────────────────             │
 │  • Next.js 16 (Storefront)   │  • Express.js 4.18              │
 │  • Vite 4.5 (Admin, Seller)  │  • Apollo Server 4 (Gateway)    │
-│  • Webpack 5 (Shell)         │  • MongoDB 8 + Mongoose         │
+│  • Webpack 5 (Shell)         │  • MongoDB 7 + Mongoose 8       │
 │  • React 18 + TypeScript     │  • Redis 7 (ioredis)            │
 │  • Tailwind + DaisyUI        │  • JWT Authentication           │
 │  • Redux Toolkit / Zustand   │  • Swagger API Docs             │
@@ -187,25 +248,84 @@
 ├─────────────────────────────────────────────────────────────────┤
 │  SHARED PACKAGES             │  INFRASTRUCTURE                 │
 │  ────────────────            │  ──────────────                 │
-│  • @3asoftwares/types        │  • Docker + Compose             │
-│  • @3asoftwares/utils        │  • Kubernetes (k8s)             │
-│  • @3asoftwares/ui           │  • GitHub Actions CI/CD         │
-│  • Storybook                 │  • Vercel Deployment            │
-│  • tsup Build Tool           │  • Nginx Reverse Proxy          │
+│  • @3asoftwares/types        │  • Docker + Docker Compose      │
+│  • @3asoftwares/utils        │  • Kubernetes (K8s)             │
+│  • @3asoftwares/ui           │  • NGINX (Reverse Proxy/LB)     │
+│  • Storybook                 │  • GitHub Actions CI/CD         │
+│  • tsup Build Tool           │  • Vercel (Frontend Deploy)     │
+├─────────────────────────────────────────────────────────────────┤
+│  DEVOPS & TEAM TOOLS                                            │
+│  ───────────────────                                            │
+│  • CODEOWNERS (Auto-assign reviewers)                           │
+│  • PR Templates (Standardized PRs)                              │
+│  • Issue Templates (Bug reports, Features)                      │
+│  • Branch Protection Rules                                      │
+│  • Deployment Environments (Staging, Production)                │
+│  • Auto-labeling PRs                                            │
+│  • Stale issue/PR management                                    │
 └─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📁 Project Structure
+
+```
+E-Commerce/
+├── apps/                    # Frontend applications
+│   ├── storefront-app/      # Next.js 16 (Customer store)
+│   ├── admin-app/           # Vite + React (Platform admin)
+│   ├── seller-app/          # Vite + React (Seller portal)
+│   └── shell-app/           # Webpack + React (MFE container)
+│
+├── services/                # Backend microservices
+│   ├── auth-service/        # Authentication & JWT
+│   ├── product-service/     # Products & inventory
+│   ├── order-service/       # Orders & checkout
+│   ├── category-service/    # Product categories
+│   ├── coupon-service/      # Discounts & coupons
+│   └── graphql-gateway/     # Apollo GraphQL aggregator
+│
+├── packages/                # Shared libraries
+│   ├── types/               # TypeScript definitions
+│   ├── utils/               # Shared utilities
+│   └── ui-library/          # React component library
+│
+├── k8s/                     # Kubernetes configurations
+│   ├── apps/                # Frontend deployments
+│   ├── services/            # Backend deployments
+│   ├── database/            # MongoDB & Redis
+│   ├── nginx/               # NGINX deployment
+│   ├── ingress.yaml         # Ingress rules
+│   ├── network-policies.yaml
+│   └── deploy.ps1 / .sh     # Deploy scripts
+│
+├── nginx/                   # NGINX for Docker Compose
+│   ├── Dockerfile
+│   └── nginx.conf
+│
+├── .github/                 # GitHub configurations
+│   ├── workflows/           # CI/CD pipelines
+│   ├── CODEOWNERS           # Auto-assign reviewers
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   ├── CONTRIBUTING.md
+│   └── ISSUE_TEMPLATE/      # Bug & feature templates
+│
+└── docs/                    # Documentation
 ```
 
 ---
 
 ## 📊 Technology Count
 
-| Category                   | Count                                      |
-| -------------------------- | ------------------------------------------ |
-| **Languages**              | 2 (TypeScript, JavaScript)                 |
-| **Frontend Frameworks**    | 2 (React, Next.js)                         |
-| **Build Tools**            | 4 (Vite, Webpack, tsup, Next.js)           |
-| **State Management**       | 4 (Redux, Zustand, Recoil, TanStack Query) |
-| **Databases**              | 2 (MongoDB, Redis)                         |
-| **Testing Frameworks**     | 2 (Jest, Vitest)                           |
-| **CI/CD Workflows**        | 5                                          |
-| **Total npm Dependencies** | ~100+ packages                             |
+| Category                   | Count                                       |
+| -------------------------- | ------------------------------------------- |
+| **Languages**              | 2 (TypeScript, JavaScript)                  |
+| **Frontend Frameworks**    | 2 (React, Next.js)                          |
+| **Build Tools**            | 4 (Vite, Webpack, tsup, Next.js)            |
+| **State Management**       | 4 (Redux, Zustand, Recoil, TanStack Query)  |
+| **Databases**              | 2 (MongoDB, Redis)                          |
+| **Testing Frameworks**     | 2 (Jest, Vitest)                            |
+| **Infrastructure**         | 4 (Docker, K8s, NGINX, Vercel)              |
+| **CI/CD Workflows**        | 8                                           |
+| **Total npm Dependencies** | ~100+ packages                              |

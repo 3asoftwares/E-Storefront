@@ -1,0 +1,154 @@
+# Network Policies
+# =================
+# Restrict traffic between pods for security
+
+# Default deny all ingress traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: ecommerce
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+
+---
+# Allow traffic to NGINX from anywhere
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-nginx-ingress
+  namespace: ecommerce
+spec:
+  podSelector:
+    matchLabels:
+      app: nginx
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - port: 80
+        - port: 443
+
+---
+# Allow traffic to GraphQL Gateway from NGINX
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-graphql-gateway
+  namespace: ecommerce
+spec:
+  podSelector:
+    matchLabels:
+      app: graphql-gateway
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: nginx
+        - podSelector:
+            matchLabels:
+              tier: frontend
+      ports:
+        - port: 4000
+
+---
+# Allow traffic to backend services from GraphQL Gateway
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-backend-services
+  namespace: ecommerce
+spec:
+  podSelector:
+    matchLabels:
+      tier: backend
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: graphql-gateway
+        - podSelector:
+            matchLabels:
+              app: nginx
+      ports:
+        - port: 3011
+        - port: 3012
+        - port: 3013
+        - port: 3014
+        - port: 3015
+
+---
+# Allow traffic to databases from backend services only
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-database-access
+  namespace: ecommerce
+spec:
+  podSelector:
+    matchLabels:
+      tier: database
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              tier: backend
+        - podSelector:
+            matchLabels:
+              tier: api
+      ports:
+        - port: 27017  # MongoDB
+        - port: 6379   # Redis
+
+---
+# Allow traffic to cache from backend and API tier
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-cache-access
+  namespace: ecommerce
+spec:
+  podSelector:
+    matchLabels:
+      tier: cache
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              tier: backend
+        - podSelector:
+            matchLabels:
+              tier: api
+      ports:
+        - port: 6379
+
+---
+# Allow traffic to frontend apps
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend
+  namespace: ecommerce
+spec:
+  podSelector:
+    matchLabels:
+      tier: frontend
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: nginx
+      ports:
+        - port: 3003

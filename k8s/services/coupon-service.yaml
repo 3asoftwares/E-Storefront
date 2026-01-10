@@ -1,0 +1,102 @@
+# Coupon Service Deployment
+# ==========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coupon-service
+  namespace: ecommerce
+  labels:
+    app: coupon-service
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: coupon-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: coupon-service
+        tier: backend
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '3013'
+    spec:
+      imagePullSecrets:
+        - name: ghcr-credentials
+      containers:
+        - name: coupon-service
+          image: ghcr.io/your-org/ecommerce/backend:latest
+          imagePullPolicy: Always
+          command: ['node', 'services/coupon-service/dist/index.js']
+          ports:
+            - containerPort: 3013
+              name: http
+          envFrom:
+            - configMapRef:
+                name: ecommerce-config
+          env:
+            - name: SERVICE_NAME
+              value: 'coupon-service'
+            - name: PORT
+              value: '3013'
+            - name: MONGODB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: mongodb-uri
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: redis-password
+          resources:
+            requests:
+              cpu: '50m'
+              memory: '128Mi'
+            limits:
+              cpu: '250m'
+              memory: '256Mi'
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3013
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3013
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: coupon-service
+  namespace: ecommerce
+spec:
+  selector:
+    app: coupon-service
+  ports:
+    - port: 3013
+      targetPort: 3013
+      name: http
+  type: ClusterIP

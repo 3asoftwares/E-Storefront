@@ -1,0 +1,102 @@
+# Category Service Deployment
+# ============================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: category-service
+  namespace: ecommerce
+  labels:
+    app: category-service
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: category-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: category-service
+        tier: backend
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '3012'
+    spec:
+      imagePullSecrets:
+        - name: ghcr-credentials
+      containers:
+        - name: category-service
+          image: ghcr.io/your-org/ecommerce/backend:latest
+          imagePullPolicy: Always
+          command: ['node', 'services/category-service/dist/index.js']
+          ports:
+            - containerPort: 3012
+              name: http
+          envFrom:
+            - configMapRef:
+                name: ecommerce-config
+          env:
+            - name: SERVICE_NAME
+              value: 'category-service'
+            - name: PORT
+              value: '3012'
+            - name: MONGODB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: mongodb-uri
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: redis-password
+          resources:
+            requests:
+              cpu: '50m'
+              memory: '128Mi'
+            limits:
+              cpu: '250m'
+              memory: '256Mi'
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3012
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3012
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: category-service
+  namespace: ecommerce
+spec:
+  selector:
+    app: category-service
+  ports:
+    - port: 3012
+      targetPort: 3012
+      name: http
+  type: ClusterIP

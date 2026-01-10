@@ -1,0 +1,100 @@
+# Storefront App Deployment (Next.js)
+# ====================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storefront
+  namespace: ecommerce
+  labels:
+    app: storefront
+    tier: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: storefront
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: storefront
+        tier: frontend
+    spec:
+      imagePullSecrets:
+        - name: ghcr-credentials
+      containers:
+        - name: storefront
+          image: ghcr.io/your-org/ecommerce/storefront:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3003
+              name: http
+          env:
+            - name: NODE_ENV
+              value: 'production'
+            - name: NEXT_PUBLIC_SERVICE_URL
+              value: 'https://api.yourdomain.com/graphql'
+            - name: NEXT_PUBLIC_AUTH_URL
+              value: 'https://api.yourdomain.com/api/auth'
+          resources:
+            requests:
+              cpu: '100m'
+              memory: '256Mi'
+            limits:
+              cpu: '500m'
+              memory: '512Mi'
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3003
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3003
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: storefront
+  namespace: ecommerce
+spec:
+  selector:
+    app: storefront
+  ports:
+    - port: 3003
+      targetPort: 3003
+      name: http
+  type: ClusterIP
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: storefront-hpa
+  namespace: ecommerce
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: storefront
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

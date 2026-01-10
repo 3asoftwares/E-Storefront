@@ -1,0 +1,80 @@
+# Pod Disruption Budgets
+# =======================
+# Ensure minimum availability during updates/maintenance
+
+# GraphQL Gateway PDB
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: graphql-gateway-pdb
+  namespace: ecommerce
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: graphql-gateway
+
+---
+# Auth Service PDB
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: auth-service-pdb
+  namespace: ecommerce
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: auth-service
+
+---
+# Product Service PDB
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: product-service-pdb
+  namespace: ecommerce
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: product-service
+
+---
+# Order Service PDB
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: order-service-pdb
+  namespace: ecommerce
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: order-service
+
+---
+# Storefront PDB
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: storefront-pdb
+  namespace: ecommerce
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: storefront
+
+---
+# NGINX PDB
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nginx-pdb
+  namespace: ecommerce
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: nginx
