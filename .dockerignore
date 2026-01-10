@@ -19,10 +19,14 @@ storybook-static
 .env
 .env.local
 .env.*.local
+.env.example
+.env.docker.example
 *.log
 *.md
 !README.md
 !DOCKER_README.md
+DEPLOYMENT.md
+QUICK_COMMANDS.txt
 
 # IDE
 .vscode

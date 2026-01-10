@@ -2,22 +2,24 @@ version: '3.8'
 
 # ===========================================
 # E-COMMERCE DEVELOPMENT DOCKER COMPOSE
-# Simple setup for local development
+# Complete setup for local development
 # ===========================================
 
 services:
   # MongoDB for databases
   mongodb:
     image: mongo:7.0
-    container_name: ecommerce-mongodb
+    container_name: ecommerce
     restart: unless-stopped
     ports:
       - '27017:27017'
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: ecommerce
     volumes:
       - mongodb_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d
     networks:
       - ecommerce-network
     healthcheck:
@@ -57,31 +59,25 @@ services:
       - '3002:3002' # Seller App
       - '3003:3003' # Storefront
       - '3011:3011' # Auth Service
-      - '3011:3011' # Auth Service
       - '3012:3012' # Category Service
       - '3013:3013' # Coupon Service
       - '3014:3014' # Product Service
       - '3015:3015' # Order Service
       - '4000:4000' # GraphQL Gateway
       - '6006:6006' # Storybook
+    env_file:
+      - .env.docker
     environment:
       NODE_ENV: development
-      # MongoDB
       MONGODB_URL: mongodb://admin:password@mongodb:27017/ecommerce?authSource=admin
-      # Redis
       REDIS_URL: redis://redis:6379
-      # CORS
-      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:3003
-      # Service URLs (internal)
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:6006
       AUTH_SERVICE_URL: http://localhost:3011
       CATEGORY_SERVICE_URL: http://localhost:3012
       COUPON_SERVICE_URL: http://localhost:3013
       PRODUCT_SERVICE_URL: http://localhost:3014
       ORDER_SERVICE_URL: http://localhost:3015
-      # JWT
-      JWT_SECRET: dev-jwt-secret-change-in-production
-      JWT_EXPIRES_IN: 24h
-      # API URLs for frontend
+      GRAPHQL_GATEWAY_URL: http://localhost:4000
       VITE_API_URL: http://localhost:4000/graphql
       NEXT_PUBLIC_API_URL: http://localhost:4000/graphql
     depends_on:
