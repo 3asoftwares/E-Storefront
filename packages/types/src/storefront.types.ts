@@ -4,6 +4,9 @@
 export interface AddressData {
   id: string;
   userId: string;
+  name?: string;
+  mobile?: string;
+  email?: string;
   street: string;
   city: string;
   state: string;
@@ -16,6 +19,9 @@ export interface AddressData {
 }
 
 export interface AddAddressInput {
+  name: string;
+  mobile: string;
+  email?: string;
   street: string;
   city: string;
   state: string;
@@ -26,6 +32,9 @@ export interface AddAddressInput {
 }
 
 export interface UpdateAddressInput {
+  name?: string;
+  mobile?: string;
+  email?: string;
   street?: string;
   city?: string;
   state?: string;

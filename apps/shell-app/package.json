@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@3asoftwares/ui": "^1.0.1",
-    "@3asoftwares/utils": "^1.0.5",
+    "@3asoftwares/utils": "^1.0.7",
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/react-fontawesome": "^0.2.6",

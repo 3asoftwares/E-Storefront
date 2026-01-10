@@ -21,8 +21,8 @@
     "authentication"
   ],
   "dependencies": {
-    "@3asoftwares/types": "^1.0.1",
-    "@3asoftwares/utils": "^1.0.5",
+    "@3asoftwares/types": "^1.0.2",
+    "@3asoftwares/utils": "^1.0.7",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

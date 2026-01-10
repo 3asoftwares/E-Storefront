@@ -75,6 +75,9 @@ export default function ProfilePage() {
   });
 
   const [newAddress, setNewAddress] = useState<Partial<Address>>({
+    name: '',
+    mobile: '',
+    email: '',
     street: '',
     city: '',
     state: '',
@@ -145,13 +148,16 @@ export default function ProfilePage() {
   };
 
   const handleAddAddress = async () => {
-    if (!newAddress.street || !newAddress.city || !newAddress.state || !newAddress.zip) {
-      alert('Please fill in all address fields');
+    if (!newAddress.name || !newAddress.mobile || !newAddress.street || !newAddress.city || !newAddress.state || !newAddress.zip) {
+      alert('Please fill in all required fields (Name, Mobile, Street, City, State, ZIP)');
       return;
     }
 
     try {
       const result = await addAddressMutation({
+        name: newAddress.name,
+        mobile: newAddress.mobile,
+        email: newAddress.email || undefined,
         street: newAddress.street,
         city: newAddress.city,
         state: newAddress.state,
@@ -161,7 +167,7 @@ export default function ProfilePage() {
       });
 
       if (result?.success) {
-        setNewAddress({ street: '', city: '', state: '', zip: '', country: '' });
+        setNewAddress({ name: '', mobile: '', email: '', street: '', city: '', state: '', zip: '', country: '' });
         setIsAddingAddress(false);
         alert('Address added successfully!');
       } else {
@@ -487,10 +493,39 @@ export default function ProfilePage() {
                   <div className="mb-8 p-6 bg-gray-50 rounded-lg border-2 border-gray-300">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Address</h3>
                     <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input
+                          size="md"
+                          type="text"
+                          placeholder="Full Name *"
+                          value={newAddress.name || ''}
+                          onChange={(e: any) =>
+                            setNewAddress({ ...newAddress, name: e.target.value })
+                          }
+                        />
+                        <Input
+                          size="md"
+                          type="tel"
+                          placeholder="Mobile Number *"
+                          value={newAddress.mobile || ''}
+                          onChange={(e: any) =>
+                            setNewAddress({ ...newAddress, mobile: e.target.value })
+                          }
+                        />
+                      </div>
+                      <Input
+                        size="md"
+                        type="email"
+                        placeholder="Email Address (Optional)"
+                        value={newAddress.email || ''}
+                        onChange={(e: any) =>
+                          setNewAddress({ ...newAddress, email: e.target.value })
+                        }
+                      />
                       <Input
                         size="md"
                         type="text"
-                        placeholder="Street Address"
+                        placeholder="Street Address *"
                         value={newAddress.street || ''}
                         onChange={(e: any) =>
                           setNewAddress({ ...newAddress, street: e.target.value })
@@ -582,7 +617,12 @@ export default function ProfilePage() {
                                 {address.label}
                               </span>
                             )}
-                            <p className="font-semibold text-gray-900">{address.street}</p>
+                            <p className="font-semibold text-gray-900">{address.name || 'No name'}</p>
+                            <p className="text-gray-600 text-sm">
+                              {address.mobile && <span className="mr-2">📱 {address.mobile}</span>}
+                              {address.email && <span>✉️ {address.email}</span>}
+                            </p>
+                            <p className="text-gray-700 text-sm mt-1">{address.street}</p>
                             <p className="text-gray-600 text-sm">
                               {address.city}, {address.state} {address.zip}
                             </p>

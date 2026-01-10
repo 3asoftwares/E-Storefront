@@ -2,6 +2,9 @@ export const addressTypeDefs = `#graphql
   type Address {
     id: ID!
     userId: ID!
+    name: String
+    mobile: String
+    email: String
     street: String
     city: String
     state: String
@@ -29,6 +32,9 @@ export const addressTypeDefs = `#graphql
   }
 
   input AddAddressInput {
+    name: String!
+    mobile: String!
+    email: String
     street: String!
     city: String!
     state: String!
@@ -39,6 +45,9 @@ export const addressTypeDefs = `#graphql
   }
 
   input UpdateAddressInput {
+    name: String
+    mobile: String
+    email: String
     street: String
     city: String
     state: String

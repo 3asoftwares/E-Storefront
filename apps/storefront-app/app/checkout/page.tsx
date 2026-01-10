@@ -27,6 +27,9 @@ import { PageHeader } from '@/components';
 interface Address {
   id: string;
   userId?: string;
+  name?: string;
+  mobile?: string;
+  email?: string;
   street: string;
   city: string;
   state: string;
@@ -73,6 +76,9 @@ export default function CheckoutPage() {
   const [addressErrors, setAddressErrors] = useState<Record<string, string>>({});
 
   const [newAddress, setNewAddress] = useState({
+    name: '',
+    mobile: '',
+    email: '',
     street: '',
     city: '',
     state: '',
@@ -106,6 +112,17 @@ export default function CheckoutPage() {
   const validateNewAddress = (): boolean => {
     const errors: Record<string, string> = {};
 
+    if (!newAddress.name.trim()) {
+      errors.name = 'Name is required';
+    }
+    if (!newAddress.mobile.trim()) {
+      errors.mobile = 'Mobile number is required';
+    } else if (!/^\d{10}$/.test(newAddress.mobile.trim())) {
+      errors.mobile = 'Invalid mobile number (10 digits required)';
+    }
+    if (newAddress.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newAddress.email.trim())) {
+      errors.email = 'Invalid email address';
+    }
     if (!newAddress.street.trim()) {
       errors.street = 'Street address is required';
     }
@@ -136,6 +153,9 @@ export default function CheckoutPage() {
 
     try {
       const result = await addAddressMutation({
+        name: newAddress.name.trim(),
+        mobile: newAddress.mobile.trim(),
+        email: newAddress.email.trim() || undefined,
         street: newAddress.street.trim(),
         city: newAddress.city.trim(),
         state: newAddress.state.trim(),
@@ -147,7 +167,7 @@ export default function CheckoutPage() {
       if (result?.success && result?.address) {
         setSelectedAddressId(result.address.id);
         setUseNewAddress(false);
-        setNewAddress({ street: '', city: '', state: '', zip: '', country: '' });
+        setNewAddress({ name: '', mobile: '', email: '', street: '', city: '', state: '', zip: '', country: '' });
         setAddressErrors({});
         showToastMessage('Address added successfully!', 'success');
       } else {
@@ -227,6 +247,9 @@ export default function CheckoutPage() {
       shippingAddress = {
         id: `temp_${Date.now()}`,
         userId: userProfile.id,
+        name: newAddress.name.trim(),
+        mobile: newAddress.mobile.trim(),
+        email: newAddress.email.trim() || undefined,
         street: newAddress.street.trim(),
         city: newAddress.city.trim(),
         state: newAddress.state.trim(),
@@ -271,6 +294,9 @@ export default function CheckoutPage() {
         discount,
         total,
         shippingAddress: {
+          name: shippingAddress.name,
+          mobile: shippingAddress.mobile,
+          email: shippingAddress.email,
           street: shippingAddress.street,
           city: shippingAddress.city,
           state: shippingAddress.state,
@@ -362,6 +388,13 @@ export default function CheckoutPage() {
                           {address.label && (
                             <span className="text-indigo-600 mr-2">[{address.label}]</span>
                           )}
+                          {address.name || 'No name'}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {address.mobile && <span className="mr-2">📱 {address.mobile}</span>}
+                          {address.email && <span>✉️ {address.email}</span>}
+                        </p>
+                        <p className="text-sm text-gray-700 mt-1">
                           {address.street}, {address.city}
                         </p>
                         <p className="text-sm text-gray-600">
@@ -396,10 +429,33 @@ export default function CheckoutPage() {
 
               {useNewAddress && (
                 <div className="space-y-4 pt-4 border-t">
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      size="md"
+                      type="text"
+                      placeholder="Full Name *"
+                      value={newAddress.name}
+                      onChange={(e: any) => setNewAddress({ ...newAddress, name: e.target.value })}
+                    />
+                    <Input
+                      size="md"
+                      type="tel"
+                      placeholder="Mobile Number *"
+                      value={newAddress.mobile}
+                      onChange={(e: any) => setNewAddress({ ...newAddress, mobile: e.target.value })}
+                    />
+                  </div>
+                  <Input
+                    size="md"
+                    type="email"
+                    placeholder="Email Address (Optional)"
+                    value={newAddress.email}
+                    onChange={(e: any) => setNewAddress({ ...newAddress, email: e.target.value })}
+                  />
                   <Input
                     size="md"
                     type="text"
-                    placeholder="Street Address"
+                    placeholder="Street Address *"
                     value={newAddress.street}
                     onChange={(e: any) => setNewAddress({ ...newAddress, street: e.target.value })}
                   />

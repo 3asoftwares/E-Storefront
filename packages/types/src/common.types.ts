@@ -36,6 +36,9 @@ export interface MutationResponse {
 export interface Address {
   id?: string;
   userId?: string;
+  name?: string;
+  mobile?: string;
+  email?: string;
   street: string;
   city: string;
   state: string;
@@ -45,8 +48,6 @@ export interface Address {
   landmark?: string;
   type?: 'shipping' | 'billing' | 'both';
   isDefault?: boolean;
-  fullName?: string;
-  phone?: string;
   addressLine1?: string;
   addressLine2?: string;
   createdAt?: Date;

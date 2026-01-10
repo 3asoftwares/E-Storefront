@@ -62,7 +62,8 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
     }
 
     if (category && category !== 'All') {
-      query.category = category;
+      // Case-insensitive category match (supports both name and slug)
+      query.category = { $regex: new RegExp(`^${category}$`, 'i') };
     }
 
     if (sellerId) {

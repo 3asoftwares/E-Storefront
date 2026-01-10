@@ -5,6 +5,9 @@ export const GET_MY_ADDRESSES_QUERY = `
       addresses {
         id
         userId
+        name
+        mobile
+        email
         street
         city
         state
@@ -28,6 +31,9 @@ export const ADD_ADDRESS_MUTATION = `
       address {
         id
         userId
+        name
+        mobile
+        email
         street
         city
         state
@@ -50,6 +56,9 @@ export const UPDATE_ADDRESS_MUTATION = `
       address {
         id
         userId
+        name
+        mobile
+        email
         street
         city
         state
@@ -81,6 +90,9 @@ export const SET_DEFAULT_ADDRESS_MUTATION = `
       address {
         id
         userId
+        name
+        mobile
+        email
         street
         city
         state

@@ -14,9 +14,9 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@3asoftwares/types": "^1.0.1",
+    "@3asoftwares/types": "^1.0.2",
     "@3asoftwares/ui": "^1.0.1",
-    "@3asoftwares/utils": "^1.0.5",
+    "@3asoftwares/utils": "^1.0.7",
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
     "@fortawesome/free-solid-svg-icons": "^7.1.0",
     "@fortawesome/react-fontawesome": "^3.1.1",

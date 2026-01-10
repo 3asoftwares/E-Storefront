@@ -184,7 +184,16 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
               <h2 className="text-lg font-semibold text-gray-900 mb-6">Shipping Address</h2>
 
               <div className="p-4 bg-gray-50 rounded-lg">
-                <p className="font-semibold text-gray-900">{order.shippingAddress.street}</p>
+                {order.shippingAddress.name && (
+                  <p className="font-semibold text-gray-900">{order.shippingAddress.name}</p>
+                )}
+                {(order.shippingAddress.mobile || order.shippingAddress.email) && (
+                  <p className="text-gray-600 text-sm mb-2">
+                    {order.shippingAddress.mobile && <span className="mr-3">📱 {order.shippingAddress.mobile}</span>}
+                    {order.shippingAddress.email && <span>✉️ {order.shippingAddress.email}</span>}
+                  </p>
+                )}
+                <p className="text-gray-700">{order.shippingAddress.street}</p>
                 <p className="text-gray-700">
                   {order.shippingAddress.city}, {order.shippingAddress.state}{' '}
                   {order.shippingAddress.zip}
