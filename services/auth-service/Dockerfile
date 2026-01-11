@@ -25,10 +25,10 @@ COPY packages/utils ./packages/utils
 COPY services/auth-service ./services/auth-service
 COPY tsconfig.json ./
 
-# Build packages and service
-RUN yarn workspace @3asoftwares/types build && \
-    yarn workspace @3asoftwares/utils build:backend && \
-    cd services/auth-service && yarn build
+# Build packages and service (using cd instead of yarn workspace)
+RUN cd packages/types && yarn build && \
+    cd ../utils && yarn build:backend && \
+    cd ../../services/auth-service && yarn build
 
 # Production image
 FROM node:20-alpine

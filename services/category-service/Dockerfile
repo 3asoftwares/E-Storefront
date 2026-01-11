@@ -17,9 +17,9 @@ COPY packages/utils ./packages/utils
 COPY services/category-service ./services/category-service
 COPY tsconfig.json ./
 
-RUN yarn workspace @3asoftwares/types build && \
-    yarn workspace @3asoftwares/utils build:backend && \
-    cd services/category-service && yarn build
+RUN cd packages/types && yarn build && \
+    cd ../utils && yarn build:backend && \
+    cd ../../services/category-service && yarn build
 
 FROM node:20-alpine
 

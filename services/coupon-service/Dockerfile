@@ -5,21 +5,27 @@ WORKDIR /app
 
 RUN apk add --no-cache python3 make g++
 
+# Copy root package.json with workspaces config
 COPY package.json yarn.lock ./
+
+# Copy package.json files for dependency resolution
 COPY packages/types/package.json ./packages/types/
 COPY packages/utils/package.json ./packages/utils/
 COPY services/coupon-service/package.json ./services/coupon-service/
 
+# Install all dependencies
 RUN yarn install --frozen-lockfile
 
+# Copy source files
 COPY packages/types ./packages/types
 COPY packages/utils ./packages/utils
 COPY services/coupon-service ./services/coupon-service
 COPY tsconfig.json ./
 
-RUN yarn workspace @3asoftwares/types build && \
-    yarn workspace @3asoftwares/utils build:backend && \
-    cd services/coupon-service && yarn build
+# Build packages in order (using cd instead of yarn workspace)
+RUN cd packages/types && yarn build && \
+    cd ../utils && yarn build:backend && \
+    cd ../../services/coupon-service && yarn build
 
 FROM node:20-alpine
 

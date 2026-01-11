@@ -17,9 +17,9 @@ COPY packages/utils ./packages/utils
 COPY services/graphql-gateway ./services/graphql-gateway
 COPY tsconfig.json ./
 
-RUN yarn workspace @3asoftwares/types build && \
-    yarn workspace @3asoftwares/utils build:backend && \
-    cd services/graphql-gateway && yarn build
+RUN cd packages/types && yarn build && \
+    cd ../utils && yarn build:backend && \
+    cd ../../services/graphql-gateway && yarn build
 
 FROM node:20-alpine
 
