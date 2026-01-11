@@ -1,0 +1,23 @@
+# Render Configuration for Coupon Service
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: coupon-service
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: services/coupon-service
+    buildCommand: |
+      cd ../.. && yarn install && yarn build:types && yarn build:utils && cd services/coupon-service && yarn build
+    startCommand: yarn start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+    healthCheckPath: /health

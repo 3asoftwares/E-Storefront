@@ -3,17 +3,18 @@
   "version": 2,
   "framework": null,
   "installCommand": "cd ../.. && yarn install && yarn build:types && yarn build:utils",
-  "buildCommand": "yarn build",
+  "buildCommand": "yarn build:vercel",
+  "outputDirectory": ".",
   "builds": [
     {
-      "src": "api/index.ts",
+      "src": ".vercel-build/index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "api/index.ts"
+      "dest": ".vercel-build/index.js"
     }
   ]
 }

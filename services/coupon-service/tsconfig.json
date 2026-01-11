@@ -25,16 +25,19 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "baseUrl": "src",
+    "baseUrl": ".",
     "outDir": "dist",
     "paths": {
-      "@controllers/*": ["controllers/*"],
-      "@use-cases/*": ["use-cases/*"],
-      "@domain/*": ["domain/*"],
-      "@infrastructure/*": ["infrastructure/*"],
-      "@middleware/*": ["middleware/*"],
-      "@routes/*": ["routes/*"],
-      "@config/*": ["config/*"]
+      "@3asoftwares/utils": ["../../packages/utils/dist/index"],
+      "@3asoftwares/utils/*": ["../../packages/utils/dist/*"],
+      "@3asoftwares/types": ["../../packages/types/dist/index"],
+      "@controllers/*": ["src/controllers/*"],
+      "@use-cases/*": ["src/use-cases/*"],
+      "@domain/*": ["src/domain/*"],
+      "@infrastructure/*": ["src/infrastructure/*"],
+      "@middleware/*": ["src/middleware/*"],
+      "@routes/*": ["src/routes/*"],
+      "@config/*": ["src/config/*"]
     }
   },
   "include": ["src/**/*", "api/**/*"],
