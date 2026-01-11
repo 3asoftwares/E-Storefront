@@ -2,8 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "framework": null,
-  "installCommand": "cd ../.. && yarn install",
-  "buildCommand": "cd ../.. && yarn build:types && yarn build:utils && cd services/coupon-service && yarn build",
+  "installCommand": "cd ../.. && yarn install && yarn build:types && yarn build:utils",
+  "buildCommand": "yarn build",
   "builds": [
     {
       "src": "api/index.ts",
