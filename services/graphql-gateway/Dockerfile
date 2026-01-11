@@ -36,8 +36,10 @@ COPY --from=builder /app/packages/types/package.json ./node_modules/@3asoftwares
 COPY --from=builder /app/packages/utils/dist ./node_modules/@3asoftwares/utils/dist
 COPY --from=builder /app/packages/utils/package.json ./node_modules/@3asoftwares/utils/
 
-# Install production dependencies only (no workspace)
-RUN yarn install --production --ignore-scripts
+# Install production dependencies using npm (avoids yarn workspace resolution)
+# First remove workspace deps from package.json, then install
+RUN sed -i 's/"@3asoftwares\/utils": "\*"/"@3asoftwares\/utils": "file:node_modules\/@3asoftwares\/utils"/g' package.json && \
+    npm install --omit=dev --ignore-scripts
 
 ENV NODE_ENV=production
 ENV PORT=3000
