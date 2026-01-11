@@ -2,8 +2,7 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "DOCKERFILE",
-    "dockerfilePath": "services/order-service/Dockerfile",
-    "watchPatterns": ["services/order-service/**", "packages/**"]
+    "dockerfilePath": "services/order-service/Dockerfile"
   },
   "deploy": {
     "numReplicas": 1,

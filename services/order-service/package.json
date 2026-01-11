@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "@3asoftwares/types": "*",
-    "@3asoftwares/utils": "*",
+    "@3asoftwares/types": "^1.0.3",
+    "@3asoftwares/utils": "^1.0.8",
     "jsonwebtoken": "^9.0.2",
     "express": "^4.18.2",
     "mongoose": "^8.0.3",

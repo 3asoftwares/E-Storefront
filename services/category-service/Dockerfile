@@ -1,44 +1,32 @@
 # Production Dockerfile for Category Service
+# Uses @3asoftwares packages from npm registry
+
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-RUN apk add --no-cache python3 make g++
+# Copy package files
+COPY services/category-service/package.json ./
+COPY services/category-service/tsconfig.json ./
 
-COPY package.json yarn.lock ./
-COPY packages/types/package.json ./packages/types/
-COPY packages/utils/package.json ./packages/utils/
-COPY services/category-service/package.json ./services/category-service/
+# Install dependencies (gets @3asoftwares packages from npm)
+RUN npm install
 
-RUN yarn install --frozen-lockfile
+# Copy source and build
+COPY services/category-service/src ./src
+RUN npm run build
 
-COPY packages/types ./packages/types
-COPY packages/utils ./packages/utils
-COPY services/category-service ./services/category-service
-COPY tsconfig.json ./
-
-RUN cd packages/types && yarn build && \
-    cd ../utils && yarn build:backend && \
-    cd ../../services/category-service && yarn build
-
-# Production image - standalone, no workspace
+# Production image
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy built service
-COPY --from=builder /app/services/category-service/dist ./dist
-COPY --from=builder /app/services/category-service/package.json ./
+# Copy built files and package.json
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./
 
-# Copy all production dependencies from builder
-COPY --from=builder /app/node_modules ./node_modules
-
-# Overwrite the workspace symlinks with actual built packages
-RUN rm -rf node_modules/@3asoftwares
-COPY --from=builder /app/packages/types/dist ./node_modules/@3asoftwares/types/dist
-COPY --from=builder /app/packages/types/package.json ./node_modules/@3asoftwares/types/
-COPY --from=builder /app/packages/utils/dist ./node_modules/@3asoftwares/utils/dist
-COPY --from=builder /app/packages/utils/package.json ./node_modules/@3asoftwares/utils/
+# Install production dependencies only
+RUN npm install --omit=dev
 
 ENV NODE_ENV=production
 ENV PORT=3000

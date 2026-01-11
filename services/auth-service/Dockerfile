@@ -1,55 +1,33 @@
-# Production Dockerfile for Microservices
-# Build from root: docker build -f services/auth-service/Dockerfile -t auth-service .
+# Production Dockerfile for Auth Service
+# Uses @3asoftwares packages from npm registry
 
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install build dependencies
-RUN apk add --no-cache python3 make g++
+# Copy package files
+COPY services/auth-service/package.json ./
+COPY services/auth-service/tsconfig.json ./
 
-# Copy root package files
-COPY package.json yarn.lock ./
+# Install dependencies (gets @3asoftwares packages from npm)
+RUN npm install
 
-# Copy workspace package.json files (only what exists)
-COPY packages/types/package.json ./packages/types/
-COPY packages/utils/package.json ./packages/utils/
-COPY services/auth-service/package.json ./services/auth-service/
+# Copy source and build
+COPY services/auth-service/src ./src
+RUN npm run build
 
-# Install all dependencies
-RUN yarn install --frozen-lockfile
-
-# Copy source files
-COPY packages/types ./packages/types
-COPY packages/utils ./packages/utils
-COPY services/auth-service ./services/auth-service
-COPY tsconfig.json ./
-
-# Build packages and service (using cd instead of yarn workspace)
-RUN cd packages/types && yarn build && \
-    cd ../utils && yarn build:backend && \
-    cd ../../services/auth-service && yarn build
-
-# Production image - standalone, no workspace
+# Production image
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy built service
-COPY --from=builder /app/services/auth-service/dist ./dist
-COPY --from=builder /app/services/auth-service/package.json ./
+# Copy built files and package.json
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./
 
-# Copy all production dependencies from builder
-COPY --from=builder /app/node_modules ./node_modules
+# Install production dependencies only
+RUN npm install --omit=dev
 
-# Overwrite the workspace symlinks with actual built packages
-RUN rm -rf node_modules/@3asoftwares
-COPY --from=builder /app/packages/types/dist ./node_modules/@3asoftwares/types/dist
-COPY --from=builder /app/packages/types/package.json ./node_modules/@3asoftwares/types/
-COPY --from=builder /app/packages/utils/dist ./node_modules/@3asoftwares/utils/dist
-COPY --from=builder /app/packages/utils/package.json ./node_modules/@3asoftwares/utils/
-
-# Set environment
 ENV NODE_ENV=production
 ENV PORT=3000
 
