@@ -25,28 +25,26 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Build shared packages
+      - name: Install shell-app dependencies from npm
         run: |
-          yarn workspace @3asoftwares/types run build
-          yarn workspace @3asoftwares/utils run build
-          yarn workspace @3asoftwares/ui run build
+          cd apps/shell-app
+          npm install
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Config
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          cd apps/shell-app
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SHELL }}
 
       - name: Build & Deploy to Vercel
         run: |
+          cd apps/shell-app
           vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
           vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
