@@ -250,7 +250,10 @@ jobs:
           yarn install --frozen-lockfile || yarn install
 
       - name: Build ui-library package
-        run: yarn build:storybook
+        run: |
+          yarn build:types
+          yarn build:utils
+          yarn build:storybook
 
       - name: Bump version (if specified)
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.version_bump != 'none'

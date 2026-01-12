@@ -140,8 +140,12 @@ jobs:
           yarn build:utils
           yarn build:storybook
 
+      - name: Build Admin App
+        run: yarn build:admin
+
       - name: Deploy Admin App to Vercel
         id: deploy
+        shell: bash
         run: |
           cd apps/admin-app
           
@@ -161,8 +165,7 @@ jobs:
           fi
           
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOY_URL=$(vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
           echo "### 🚀 Admin App Deployed" >> $GITHUB_STEP_SUMMARY
           echo "**URL:** $DEPLOY_URL" >> $GITHUB_STEP_SUMMARY
@@ -222,8 +225,12 @@ jobs:
           yarn build:utils
           yarn build:storybook
 
+      - name: Build Seller App
+        run: yarn build:seller
+
       - name: Deploy Seller App to Vercel
         id: deploy
+        shell: bash
         run: |
           cd apps/seller-app
           
@@ -243,8 +250,7 @@ jobs:
           fi
           
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOY_URL=$(vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
           echo "### 🚀 Seller App Deployed" >> $GITHUB_STEP_SUMMARY
           echo "**URL:** $DEPLOY_URL" >> $GITHUB_STEP_SUMMARY
@@ -304,8 +310,12 @@ jobs:
           yarn build:utils
           yarn build:storybook
 
+      - name: Build Shell App
+        run: yarn build:shell
+
       - name: Deploy Shell App to Vercel
         id: deploy
+        shell: bash
         run: |
           cd apps/shell-app
           
@@ -325,8 +335,7 @@ jobs:
           fi
           
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOY_URL=$(vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
           echo "### 🚀 Shell App Deployed" >> $GITHUB_STEP_SUMMARY
           echo "**URL:** $DEPLOY_URL" >> $GITHUB_STEP_SUMMARY
