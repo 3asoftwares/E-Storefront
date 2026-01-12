@@ -40,11 +40,15 @@ module.exports = {
     clean: true,
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.jsx', '.js'],
-    // Monorepo package aliases - resolve to built dist folders
+    extensions: ['.tsx', '.ts', '.jsx', '.js', '.css'],
+    // Monorepo package aliases - resolve to built dist folders with subpath support
     alias: {
-      '@3asoftwares/ui': path.resolve(__dirname, '../../packages/ui-library'),
-      '@3asoftwares/utils': path.resolve(__dirname, '../../packages/utils'),
+      '@3asoftwares/ui/styles.css': path.resolve(__dirname, '../../packages/ui-library/dist/style.css'),
+      '@3asoftwares/ui': path.resolve(__dirname, '../../packages/ui-library/dist/ui-library.es.js'),
+      '@3asoftwares/utils/client': path.resolve(__dirname, '../../packages/utils/dist/client.mjs'),
+      '@3asoftwares/utils/server': path.resolve(__dirname, '../../packages/utils/dist/server.mjs'),
+      '@3asoftwares/utils': path.resolve(__dirname, '../../packages/utils/dist/index.mjs'),
+      '@3asoftwares/types': path.resolve(__dirname, '../../packages/types/dist/index.mjs'),
     },
     fallback: {
       crypto: false,
@@ -134,15 +138,6 @@ module.exports = {
           singleton: true,
           requiredVersion: '^6.20.0',
           eager: true,
-        },
-        // Share monorepo packages across microfrontends
-        '@3asoftwares/ui': {
-          singleton: true,
-          requiredVersion: '1.0.0',
-        },
-        '@3asoftwares/utils': {
-          singleton: true,
-          requiredVersion: '1.0.0',
         },
         zustand: {
           singleton: true,
