@@ -28,9 +28,7 @@ jobs:
           cache: 'yarn'
 
       - name: Install dependencies
-        run: |
-          cd apps/shell-app
-          npm install --legacy-peer-deps --ignore-workspaces
+        run: yarn install --frozen-lockfile
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
