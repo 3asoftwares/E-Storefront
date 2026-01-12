@@ -36,6 +36,7 @@ jobs:
         run: |
           yarn workspace @3asoftwares/types run test:coverage
           yarn workspace @3asoftwares/utils run test:coverage
+          yarn workspace @3asoftwares/ui run test run
 
   # ===========================================
   # BUILD & TEST BACKEND SERVICES
@@ -65,12 +66,12 @@ jobs:
 
       - name: Test backend services
         run: |
-          yarn test:auth --passWithNoTests --coverage
-          yarn test:category --passWithNoTests --coverage
-          yarn test:coupon --passWithNoTests --coverage
-          yarn test:gateway --passWithNoTests --coverage
-          yarn test:order --passWithNoTests --coverage
-          yarn test:product --passWithNoTests --coverage
+          yarn test:auth --passWithNoTests
+          yarn test:category --passWithNoTests
+          yarn test:coupon --passWithNoTests
+          yarn test:gateway --passWithNoTests
+          yarn test:order --passWithNoTests
+          yarn test:product --passWithNoTests
 
   # ===========================================
   # BUILD & TEST FRONTEND APPS
@@ -101,6 +102,6 @@ jobs:
 
       - name: Test frontend apps
         run: |
-          yarn test:admin --passWithNoTests --coverage
-          yarn test:seller --passWithNoTests --coverage
-          yarn test:shell --passWithNoTests --coverage
+          yarn test:admin --passWithNoTests
+          yarn test:seller --passWithNoTests
+          yarn test:shell --passWithNoTests
