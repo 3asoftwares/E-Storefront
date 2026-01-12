@@ -121,7 +121,7 @@ jobs:
       - name: Link and Deploy to Railway
         working-directory: services/auth-service
         run: |
-          railway link ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
+          railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
           railway up --service ${{ secrets.RAILWAY_SERVICE_AUTH }} --detach
           echo "### Auth Service Deployed" >> $GITHUB_STEP_SUMMARY
 
@@ -146,7 +146,7 @@ jobs:
       - name: Link and Deploy to Railway
         working-directory: services/category-service
         run: |
-          railway link ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
+          railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
           railway up --service ${{ secrets.RAILWAY_SERVICE_CATEGORY }} --detach
           echo "### Category Service Deployed" >> $GITHUB_STEP_SUMMARY
 
@@ -171,7 +171,7 @@ jobs:
       - name: Link and Deploy to Railway
         working-directory: services/coupon-service
         run: |
-          railway link ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
+          railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
           railway up --service ${{ secrets.RAILWAY_SERVICE_COUPON }} --detach
           echo "### Coupon Service Deployed" >> $GITHUB_STEP_SUMMARY
 
@@ -196,7 +196,7 @@ jobs:
       - name: Link and Deploy to Railway
         working-directory: services/graphql-gateway
         run: |
-          railway link ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
+          railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
           railway up --service ${{ secrets.RAILWAY_SERVICE_GRAPHQL }} --detach
           echo "### GraphQL Gateway Deployed" >> $GITHUB_STEP_SUMMARY
 
@@ -221,7 +221,7 @@ jobs:
       - name: Link and Deploy to Railway
         working-directory: services/order-service
         run: |
-          railway link ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
+          railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
           railway up --service ${{ secrets.RAILWAY_SERVICE_ORDER }} --detach
           echo "### Order Service Deployed" >> $GITHUB_STEP_SUMMARY
 
@@ -246,7 +246,7 @@ jobs:
       - name: Link and Deploy to Railway
         working-directory: services/product-service
         run: |
-          railway link ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
+          railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
           railway up --service ${{ secrets.RAILWAY_SERVICE_PRODUCT }} --detach
           echo "### Product Service Deployed" >> $GITHUB_STEP_SUMMARY
 
