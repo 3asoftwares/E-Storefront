@@ -1,6 +1,6 @@
 {
   "installCommand": "cd ../.. && yarn install",
-  "buildCommand": "cd ../.. && yarn build:types && yarn build:utils && yarn build:storybook && cd apps/shell-app && yarn build",
+  "buildCommand": "cd ../.. && cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../ui-library && yarn build && cd ../../apps/shell-app && yarn build",
   "outputDirectory": "dist",
   "framework": null,
   "devCommand": "yarn dev",

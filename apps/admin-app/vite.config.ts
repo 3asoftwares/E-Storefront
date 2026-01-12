@@ -1,12 +1,17 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import federation from '@originjs/vite-plugin-federation';
 import * as path from 'path';
+import { SERVICE_URLS, SHELL_APP_URL } from '../../packages/utils/src/constants';
 
-export default defineConfig({
-  plugins: [
-    react(),
-    federation({
+export default defineConfig(({ mode }) => {
+  // Load env files based on mode (development, production, etc.)
+  const env = loadEnv(mode, process.cwd(), '');
+  
+  return {
+    plugins: [
+      react(),
+      federation({
       name: 'adminApp',
       filename: 'remoteEntry.js',
       exposes: {
@@ -21,9 +26,12 @@ export default defineConfig({
     }),
   ],
   define: {
-    'process.env': {
-      NODE_ENV: JSON.stringify(process.env.NODE_ENV || 'development'),
-    },
+    'process.env.VITE_ENV': JSON.stringify(env.VITE_ENV || mode),
+    'process.env.VITE_GRAPHQL_URL': JSON.stringify(env.VITE_GRAPHQL_URL || SERVICE_URLS.GRAPHQL_GATEWAY),
+    'process.env.VITE_AUTH_SERVICE': JSON.stringify(env.VITE_AUTH_SERVICE || SERVICE_URLS.AUTH_SERVICE),
+    'process.env.VITE_SHELL_APP_URL': JSON.stringify(env.VITE_SHELL_APP_URL || SHELL_APP_URL),
+    'process.env.VITE_CLOUDINARY_CLOUD_NAME': JSON.stringify(env.VITE_CLOUDINARY_CLOUD_NAME || 'dpdfyou3r'),
+    'process.env.VITE_CLOUDINARY_UPLOAD_PRESET': JSON.stringify(env.VITE_CLOUDINARY_UPLOAD_PRESET || 'ECommerce'),
   },
   build: {
     modulePreload: false,
@@ -48,4 +56,5 @@ export default defineConfig({
   css: {
     postcss: path.resolve(__dirname, 'postcss.config.js'),
   },
+  };
 });

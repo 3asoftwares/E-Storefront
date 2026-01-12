@@ -1,7 +1,23 @@
 # Deploy Frontend Apps to Vercel
+# Triggers on: push to main branch only (with 6-hour interval check), manual dispatch
+# Required secrets:
+#   - VERCEL_TOKEN: Vercel API token
+#   - VERCEL_ORG_ID: Vercel organization/team ID
+#   - VERCEL_PROJECT_ID_ADMIN: Project ID for admin-app
+#   - VERCEL_PROJECT_ID_SELLER: Project ID for seller-app
+#   - VERCEL_PROJECT_ID_SHELL: Project ID for shell-app
+
 name: Deploy to Vercel
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/admin-app/**'
+      - 'apps/seller-app/**'
+      - 'apps/shell-app/**'
+      - 'packages/**'
   workflow_dispatch:
     inputs:
       app:
@@ -13,22 +29,133 @@ on:
           - seller-app
           - shell-app
           - all
+      force_deploy:
+        description: 'Force deployment (ignore 6-hour check)'
+        required: false
+        type: boolean
+        default: false
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  NODE_VERSION: '20'
 
 jobs:
-  deploy-admin:
-    if: github.event.inputs.app == 'admin-app' || github.event.inputs.app == 'all'
+  # ===========================================
+  # CHECK DEPLOYMENT INTERVAL (6 hours)
+  # ===========================================
+  check-interval:
     runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+    steps:
+      - name: Check last deployment time
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const forceDeploy = '${{ github.event.inputs.force_deploy }}' === 'true';
+            
+            if (forceDeploy) {
+              console.log('Force deploy requested, proceeding...');
+              core.setOutput('should_deploy', 'true');
+              return;
+            }
+            
+            // Get workflow runs for this workflow
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy-vercel.yml',
+              status: 'success',
+              per_page: 1
+            });
+            
+            if (runs.data.workflow_runs.length === 0) {
+              console.log('No previous successful deployments, proceeding...');
+              core.setOutput('should_deploy', 'true');
+              return;
+            }
+            
+            const lastRun = runs.data.workflow_runs[0];
+            const lastRunTime = new Date(lastRun.updated_at);
+            const now = new Date();
+            const hoursSinceLastRun = (now - lastRunTime) / (1000 * 60 * 60);
+            
+            console.log(`Last deployment: ${lastRunTime.toISOString()}`);
+            console.log(`Hours since last deployment: ${hoursSinceLastRun.toFixed(2)}`);
+            
+            if (hoursSinceLastRun >= 6) {
+              console.log('More than 6 hours since last deployment, proceeding...');
+              core.setOutput('should_deploy', 'true');
+            } else {
+              console.log('Less than 6 hours since last deployment, skipping...');
+              core.setOutput('should_deploy', 'false');
+            }
+
+  # ===========================================
+  # DETECT CHANGES (for push events)
+  # ===========================================
+  detect-changes:
+    needs: check-interval
+    if: needs.check-interval.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      admin-app: ${{ steps.changes.outputs.admin-app }}
+      seller-app: ${{ steps.changes.outputs.seller-app }}
+      shell-app: ${{ steps.changes.outputs.shell-app }}
+      packages: ${{ steps.changes.outputs.packages }}
     steps:
       - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            admin-app:
+              - 'apps/admin-app/**'
+            seller-app:
+              - 'apps/seller-app/**'
+            shell-app:
+              - 'apps/shell-app/**'
+            packages:
+              - 'packages/**'
+
+  # ===========================================
+  # DEPLOY ADMIN APP
+  # ===========================================
+  deploy-admin:
+    needs: [check-interval, detect-changes]
+    if: |
+      needs.check-interval.outputs.should_deploy == 'true' &&
+      ((github.event_name == 'push' && (needs.detect-changes.outputs.admin-app == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.app == 'admin-app' || github.event.inputs.app == 'all')))
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Vercel secrets
+        run: |
+          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
+            echo "::error::VERCEL_ORG_ID secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VERCEL_PROJECT_ID_ADMIN }}" ]; then
+            echo "::error::VERCEL_PROJECT_ID_ADMIN secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "::error::VERCEL_TOKEN secret is not set"
+            exit 1
+          fi
+          echo "✅ All required Vercel secrets are configured"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
       - name: Install Vercel CLI
@@ -39,30 +166,76 @@ jobs:
 
       - name: Build packages
         run: |
-          yarn build:types
-          yarn build:utils
+          cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
           yarn build:storybook
 
       - name: Deploy Admin App to Vercel
+        id: deploy
         run: |
           cd apps/admin-app
+          
+          # Sync environment variables from .env.production to Vercel
+          echo "📦 Syncing environment variables to Vercel..."
+          if [ -f ".env.production" ]; then
+            while IFS= read -r line || [[ -n "$line" ]]; do
+              # Skip comments and empty lines
+              if [[ ! "$line" =~ ^# ]] && [[ -n "$line" ]] && [[ "$line" == *"="* ]]; then
+                key=$(echo "$line" | cut -d '=' -f 1)
+                value=$(echo "$line" | cut -d '=' -f 2-)
+                echo "Setting $key..."
+                vercel env rm "$key" production --yes --token=${{ secrets.VERCEL_TOKEN }} 2>/dev/null || true
+                echo "$value" | vercel env add "$key" production --token=${{ secrets.VERCEL_TOKEN }}
+              fi
+            done < .env.production
+          fi
+          
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "### 🚀 Admin App Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** $DEPLOY_URL" >> $GITHUB_STEP_SUMMARY
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
 
+  # ===========================================
+  # DEPLOY SELLER APP
+  # ===========================================
   deploy-seller:
-    if: github.event.inputs.app == 'seller-app' || github.event.inputs.app == 'all'
+    needs: [check-interval, detect-changes]
+    if: |
+      needs.check-interval.outputs.should_deploy == 'true' &&
+      ((github.event_name == 'push' && (needs.detect-changes.outputs.seller-app == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.app == 'seller-app' || github.event.inputs.app == 'all')))
     runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Validate Vercel secrets
+        run: |
+          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
+            echo "::error::VERCEL_ORG_ID secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VERCEL_PROJECT_ID_SELLER }}" ]; then
+            echo "::error::VERCEL_PROJECT_ID_SELLER secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "::error::VERCEL_TOKEN secret is not set"
+            exit 1
+          fi
+          echo "✅ All required Vercel secrets are configured"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
       - name: Install Vercel CLI
@@ -73,30 +246,76 @@ jobs:
 
       - name: Build packages
         run: |
-          yarn build:types
-          yarn build:utils
+          cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
           yarn build:storybook
 
       - name: Deploy Seller App to Vercel
+        id: deploy
         run: |
           cd apps/seller-app
+          
+          # Sync environment variables from .env.production to Vercel
+          echo "📦 Syncing environment variables to Vercel..."
+          if [ -f ".env.production" ]; then
+            while IFS= read -r line || [[ -n "$line" ]]; do
+              # Skip comments and empty lines
+              if [[ ! "$line" =~ ^# ]] && [[ -n "$line" ]] && [[ "$line" == *"="* ]]; then
+                key=$(echo "$line" | cut -d '=' -f 1)
+                value=$(echo "$line" | cut -d '=' -f 2-)
+                echo "Setting $key..."
+                vercel env rm "$key" production --yes --token=${{ secrets.VERCEL_TOKEN }} 2>/dev/null || true
+                echo "$value" | vercel env add "$key" production --token=${{ secrets.VERCEL_TOKEN }}
+              fi
+            done < .env.production
+          fi
+          
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "### 🚀 Seller App Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** $DEPLOY_URL" >> $GITHUB_STEP_SUMMARY
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SELLER }}
 
+  # ===========================================
+  # DEPLOY SHELL APP
+  # ===========================================
   deploy-shell:
-    if: github.event.inputs.app == 'shell-app' || github.event.inputs.app == 'all'
+    needs: [check-interval, detect-changes]
+    if: |
+      needs.check-interval.outputs.should_deploy == 'true' &&
+      ((github.event_name == 'push' && (needs.detect-changes.outputs.shell-app == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.app == 'shell-app' || github.event.inputs.app == 'all')))
     runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Validate Vercel secrets
+        run: |
+          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
+            echo "::error::VERCEL_ORG_ID secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VERCEL_PROJECT_ID_SHELL }}" ]; then
+            echo "::error::VERCEL_PROJECT_ID_SHELL secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "::error::VERCEL_TOKEN secret is not set"
+            exit 1
+          fi
+          echo "✅ All required Vercel secrets are configured"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
       - name: Install Vercel CLI
@@ -107,16 +326,69 @@ jobs:
 
       - name: Build packages
         run: |
-          yarn build:types
-          yarn build:utils
+          cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
           yarn build:storybook
 
       - name: Deploy Shell App to Vercel
+        id: deploy
         run: |
           cd apps/shell-app
+          
+          # Sync environment variables from .env.production to Vercel
+          echo "📦 Syncing environment variables to Vercel..."
+          if [ -f ".env.production" ]; then
+            while IFS= read -r line || [[ -n "$line" ]]; do
+              # Skip comments and empty lines
+              if [[ ! "$line" =~ ^# ]] && [[ -n "$line" ]] && [[ "$line" == *"="* ]]; then
+                key=$(echo "$line" | cut -d '=' -f 1)
+                value=$(echo "$line" | cut -d '=' -f 2-)
+                echo "Setting $key..."
+                vercel env rm "$key" production --yes --token=${{ secrets.VERCEL_TOKEN }} 2>/dev/null || true
+                echo "$value" | vercel env add "$key" production --token=${{ secrets.VERCEL_TOKEN }}
+              fi
+            done < .env.production
+          fi
+          
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "### 🚀 Shell App Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** $DEPLOY_URL" >> $GITHUB_STEP_SUMMARY
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SHELL }}
+
+  # ===========================================
+  # DEPLOYMENT SKIPPED
+  # ===========================================
+  skip-notification:
+    needs: check-interval
+    if: needs.check-interval.outputs.should_deploy == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment Skipped
+        run: |
+          echo "## ⏭️ Vercel Deployment Skipped" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Last deployment was less than 6 hours ago." >> $GITHUB_STEP_SUMMARY
+          echo "To force a deployment, run the workflow manually with 'Force deployment' checked." >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================
+  # DEPLOYMENT SUMMARY
+  # ===========================================
+  summary:
+    needs: [check-interval, deploy-admin, deploy-seller, deploy-shell]
+    if: always() && needs.check-interval.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment Summary
+        run: |
+          echo "## 📊 Vercel Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| App | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| admin-app | ${{ needs.deploy-admin.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| seller-app | ${{ needs.deploy-seller.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| shell-app | ${{ needs.deploy-shell.result }} |" >> $GITHUB_STEP_SUMMARY

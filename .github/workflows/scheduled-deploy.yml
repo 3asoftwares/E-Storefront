@@ -1,8 +1,8 @@
 # Scheduled Deployment Workflow
-# Deploys frontend to Vercel and backend to Railway
-# Runs every 6 hours but skips if last deployment was less than 6 hours ago
+# Deploys all apps and services on a schedule or when triggered manually
+# Use individual deploy-vercel.yml and deploy-railway.yml for push-triggered deploys
 
-name: Scheduled Deploy
+name: Scheduled Deploy All
 
 on:
   # Run every 6 hours
@@ -12,26 +12,30 @@ on:
   workflow_dispatch:
     inputs:
       force_deploy:
-        description: 'Force deployment (ignore 6-hour check)'
+        description: 'Force deployment (ignore interval check)'
         required: false
         type: boolean
         default: false
-  # Deploy on push to main
-  push:
-    branches:
-      - main
-    paths:
-      - 'apps/**'
-      - 'services/**'
-      - 'packages/**'
+      deploy_target:
+        description: 'What to deploy'
+        required: true
+        type: choice
+        options:
+          - all
+          - frontend-only
+          - backend-only
+        default: 'all'
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+  NODE_VERSION: '20'
 
 jobs:
-  # Check if deployment should proceed (6-hour interval)
+  # ===========================================
+  # CHECK DEPLOYMENT INTERVAL
+  # ===========================================
   check-deployment-interval:
     runs-on: ubuntu-latest
     outputs:
@@ -45,8 +49,8 @@ jobs:
             const forceDeployInput = '${{ github.event.inputs.force_deploy }}';
             const forceDeploy = forceDeployInput === 'true';
             
-            if (forceDeploy) {
-              console.log('Force deploy requested, proceeding...');
+            if (forceDeploy || context.eventName === 'workflow_dispatch') {
+              console.log('Manual trigger or force deploy requested, proceeding...');
               core.setOutput('should_deploy', 'true');
               return;
             }
@@ -82,14 +86,116 @@ jobs:
               core.setOutput('should_deploy', 'false');
             }
 
-  # Deploy Frontend Apps to Vercel
-  deploy-frontend:
+  # ===========================================
+  # VALIDATE ALL SECRETS
+  # ===========================================
+  validate-secrets:
     needs: check-deployment-interval
     if: needs.check-deployment-interval.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
+    outputs:
+      vercel_ready: ${{ steps.validate.outputs.vercel_ready }}
+      railway_ready: ${{ steps.validate.outputs.railway_ready }}
+    steps:
+      - name: Validate secrets
+        id: validate
+        run: |
+          VERCEL_READY="true"
+          RAILWAY_READY="true"
+          
+          # Check Vercel secrets
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "::warning::VERCEL_TOKEN is not set - skipping frontend deployment"
+            VERCEL_READY="false"
+          fi
+          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
+            echo "::warning::VERCEL_ORG_ID is not set - skipping frontend deployment"
+            VERCEL_READY="false"
+          fi
+          if [ -z "${{ secrets.VERCEL_PROJECT_ID_ADMIN }}" ]; then
+            echo "::warning::VERCEL_PROJECT_ID_ADMIN is not set"
+            VERCEL_READY="false"
+          fi
+          if [ -z "${{ secrets.VERCEL_PROJECT_ID_SELLER }}" ]; then
+            echo "::warning::VERCEL_PROJECT_ID_SELLER is not set"
+            VERCEL_READY="false"
+          fi
+          if [ -z "${{ secrets.VERCEL_PROJECT_ID_SHELL }}" ]; then
+            echo "::warning::VERCEL_PROJECT_ID_SHELL is not set"
+            VERCEL_READY="false"
+          fi
+          
+          # Check Railway secrets
+          if [ -z "${{ secrets.RAILWAY_TOKEN }}" ]; then
+            echo "::warning::RAILWAY_TOKEN is not set - skipping backend deployment"
+            RAILWAY_READY="false"
+          fi
+          if [ -z "${{ secrets.RAILWAY_PROJECT_ID }}" ]; then
+            echo "::warning::RAILWAY_PROJECT_ID is not set - skipping backend deployment"
+            RAILWAY_READY="false"
+          fi
+          
+          echo "vercel_ready=$VERCEL_READY" >> $GITHUB_OUTPUT
+          echo "railway_ready=$RAILWAY_READY" >> $GITHUB_OUTPUT
+          
+          if [ "$VERCEL_READY" == "true" ]; then
+            echo "✅ Vercel secrets are configured"
+          fi
+          if [ "$RAILWAY_READY" == "true" ]; then
+            echo "✅ Railway secrets are configured"
+          fi
+
+  # ===========================================
+  # BUILD SHARED PACKAGES
+  # ===========================================
+  build-packages:
+    needs: validate-secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build packages
+        run: |
+          cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          yarn build:storybook
+
+      - name: Cache built packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/types/dist
+            packages/utils/dist
+            packages/ui-library/dist
+          key: packages-scheduled-${{ github.sha }}
+
+  # ===========================================
+  # DEPLOY FRONTEND APPS TO VERCEL
+  # ===========================================
+  deploy-frontend:
+    needs: [validate-secrets, build-packages]
+    if: |
+      needs.validate-secrets.outputs.vercel_ready == 'true' &&
+      (github.event.inputs.deploy_target != 'backend-only')
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [admin-app, seller-app, shell-app]
+        include:
+          - app: admin-app
+            project_id_secret: VERCEL_PROJECT_ID_ADMIN
+          - app: seller-app
+            project_id_secret: VERCEL_PROJECT_ID_SELLER
+          - app: shell-app
+            project_id_secret: VERCEL_PROJECT_ID_SHELL
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
@@ -97,25 +203,57 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Restore built packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/types/dist
+            packages/utils/dist
+            packages/ui-library/dist
+          key: packages-scheduled-${{ github.sha }}
+
+      - name: Build packages (if cache miss)
+        run: |
+          if [ ! -d "packages/types/dist" ]; then
+            yarn build:types
+            yarn build:utils
+            yarn build:storybook
+          fi
+
       - name: Deploy ${{ matrix.app }} to Vercel
+        id: deploy
         run: |
           cd apps/${{ matrix.app }}
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
         env:
-          VERCEL_PROJECT_ID: ${{ secrets[format('VERCEL_{0}_PROJECT_ID', matrix.app)] }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets[matrix.project_id_secret] }}
 
-  # Deploy Backend Services to Railway
+      - name: Deployment Summary
+        run: |
+          echo "### 🚀 ${{ matrix.app }} Deployed to Vercel" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** ${{ steps.deploy.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================
+  # DEPLOY BACKEND SERVICES TO RAILWAY
+  # ===========================================
   deploy-backend:
-    needs: check-deployment-interval
-    if: needs.check-deployment-interval.outputs.should_deploy == 'true'
+    needs: [validate-secrets, build-packages]
+    if: |
+      needs.validate-secrets.outputs.railway_ready == 'true' &&
+      (github.event.inputs.deploy_target != 'frontend-only')
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -124,41 +262,78 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Restore built packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/types/dist
+            packages/utils/dist
+            packages/ui-library/dist
+          key: packages-scheduled-${{ github.sha }}
+
+      - name: Build packages (if cache miss)
+        run: |
+          if [ ! -d "packages/types/dist" ]; then
+            yarn build:types
+            yarn build:utils
+          fi
+
       - name: Deploy ${{ matrix.service }} to Railway
         run: |
-          railway link --environment production
+          cd services/${{ matrix.service }}
+          railway link ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
           railway up --service ${{ matrix.service }} --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
 
-  # Summary job
+      - name: Deployment Summary
+        run: |
+          echo "### 🚀 ${{ matrix.service }} Deployed to Railway" >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================
+  # DEPLOYMENT SUMMARY
+  # ===========================================
   deployment-summary:
-    needs: [deploy-frontend, deploy-backend]
+    needs: [check-deployment-interval, deploy-frontend, deploy-backend]
     if: always() && needs.check-deployment-interval.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Deployment Summary
         run: |
-          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 Scheduled Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Frontend (Vercel)" >> $GITHUB_STEP_SUMMARY
-          echo "- admin-app: ${{ needs.deploy-frontend.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- seller-app: ${{ needs.deploy-frontend.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- shell-app: ${{ needs.deploy-frontend.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "| App | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| admin-app | ${{ needs.deploy-frontend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| seller-app | ${{ needs.deploy-frontend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| shell-app | ${{ needs.deploy-frontend.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Backend (Railway)" >> $GITHUB_STEP_SUMMARY
-          echo "- auth-service: ${{ needs.deploy-backend.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- category-service: ${{ needs.deploy-backend.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- coupon-service: ${{ needs.deploy-backend.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- graphql-gateway: ${{ needs.deploy-backend.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- order-service: ${{ needs.deploy-backend.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- product-service: ${{ needs.deploy-backend.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| auth-service | ${{ needs.deploy-backend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| category-service | ${{ needs.deploy-backend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| coupon-service | ${{ needs.deploy-backend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| graphql-gateway | ${{ needs.deploy-backend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| order-service | ${{ needs.deploy-backend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| product-service | ${{ needs.deploy-backend.result }} |" >> $GITHUB_STEP_SUMMARY
 
-  # Skip notification
+  # ===========================================
+  # SKIP NOTIFICATION
+  # ===========================================
   skip-notification:
     needs: check-deployment-interval
     if: needs.check-deployment-interval.outputs.should_deploy == 'false'
@@ -166,7 +341,7 @@ jobs:
     steps:
       - name: Deployment Skipped
         run: |
-          echo "## Deployment Skipped" >> $GITHUB_STEP_SUMMARY
+          echo "## ⏭️ Deployment Skipped" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Last deployment was less than 6 hours ago." >> $GITHUB_STEP_SUMMARY
           echo "To force a deployment, run the workflow manually with 'Force deployment' checked." >> $GITHUB_STEP_SUMMARY

@@ -1,7 +1,7 @@
 
 
 interface ImportMetaEnv {
-  readonly VITE_AUTH_SERVICE_BASE: string;
+  readonly AUTH_SERVICE_BASE: string;
 }
 
 interface ImportMeta {

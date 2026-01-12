@@ -199,7 +199,7 @@ describe('authService', () => {
 
   describe('environment variables', () => {
     it('should use default API_BASE when env variable is not set', () => {
-      // The default value is used when VITE_AUTH_SERVICE_BASE is not set
+      // The default value is used when AUTH_SERVICE_BASE is not set
       expect(API_BASE).toBe('http://localhost:3011/api/auth');
     });
   });

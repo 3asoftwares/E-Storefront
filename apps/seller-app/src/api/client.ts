@@ -85,7 +85,7 @@ export const categoryApi = {
 export const handleApiError = (error: any): string => {
   if (axios.isAxiosError(error)) {
     if (error.response?.data?.message === 'Invalid or expired token') {
-      window.location.href = `${process.env.SHELL_APP_URL || SHELL_APP_URL}?logout=true`;
+      window.location.href = `${process.env.VITE_SHELL_APP_URL || SHELL_APP_URL}?logout=true`;
     }
     return error.response?.data?.message || error.message;
   }

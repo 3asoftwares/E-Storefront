@@ -55,8 +55,8 @@ jobs:
 
       - name: Build packages
         run: |
-          yarn build:types
-          yarn build:utils
+          cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
 
       - name: Test packages
         run: |
@@ -84,8 +84,8 @@ jobs:
 
       - name: Build packages first
         run: |
-          yarn build:types
-          yarn build:utils
+          cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
 
       - name: Build all backend services
         run: yarn build:backend
@@ -114,8 +114,8 @@ jobs:
 
       - name: Build packages first
         run: |
-          yarn build:types
-          yarn build:utils
+          cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
           yarn build:storybook
 
       - name: Build frontend apps

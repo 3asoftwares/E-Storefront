@@ -165,7 +165,7 @@ export const setupAutoRefresh = (refreshFn: () => Promise<void>) => {
         await refreshFn();
       } catch (error) {
         clearAuth();
-        window.location.href = process.env.SHELL_APP_URL || SHELL_APP_URL;
+        window.location.href = process.env.VITE_SHELL_APP_URL || SHELL_APP_URL;
       }
     }
   };

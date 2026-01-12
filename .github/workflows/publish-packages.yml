@@ -1,12 +1,34 @@
+# Publish Packages to npm
+# Triggers on: push to main (with package changes), releases, manual dispatch
+# Required secrets:
+#   - NPM_TOKEN: npm access token with publish permissions
+#
+# To get NPM_TOKEN:
+#   1. Go to https://www.npmjs.com/settings/YOUR_USERNAME/tokens
+#   2. Generate New Token > Classic Token > Automation
+#   3. Add it to GitHub Secrets as NPM_TOKEN
+#
+# Version bumping:
+#   - On push to main: Publishes with current version (skips if already published)
+#   - On release: Publishes with release tag version
+#   - Manual dispatch: Can specify version bump type
+
 name: Publish Packages to npm
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/types/**'
+      - 'packages/utils/**'
+      - 'packages/ui-library/**'
   release:
     types: [published]
   workflow_dispatch:
     inputs:
       package:
-        description: 'Package to publish (types, utils, ui-library, all)'
+        description: 'Package to publish'
         required: true
         default: 'all'
         type: choice
@@ -15,21 +37,76 @@ on:
           - utils
           - ui-library
           - all
+      version_bump:
+        description: 'Version bump type (only for manual dispatch)'
+        required: false
+        type: choice
+        options:
+          - none
+          - patch
+          - minor
+          - major
+        default: 'none'
+
+env:
+  NODE_VERSION: '20'
 
 jobs:
   # ===========================================
-  # PUBLISH 3asoftwares/ecommerce-types
+  # DETECT CHANGES (for push events)
+  # ===========================================
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      types: ${{ steps.changes.outputs.types }}
+      utils: ${{ steps.changes.outputs.utils }}
+      ui-library: ${{ steps.changes.outputs.ui-library }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            types:
+              - 'packages/types/**'
+            utils:
+              - 'packages/utils/**'
+            ui-library:
+              - 'packages/ui-library/**'
+
+  # ===========================================
+  # VALIDATE SECRETS
+  # ===========================================
+  validate-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate npm token
+        run: |
+          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "::error::NPM_TOKEN secret is not set"
+            echo "Please add NPM_TOKEN to your GitHub repository secrets."
+            echo "Get your token from: https://www.npmjs.com/settings/YOUR_USERNAME/tokens"
+            exit 1
+          fi
+          echo "✅ NPM_TOKEN is configured"
+
+  # ===========================================
+  # PUBLISH @3asoftwares/types
   # ===========================================
   publish-types:
+    needs: [detect-changes, validate-secrets]
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' || github.event.inputs.package == 'types' || github.event.inputs.package == 'all'
+    if: |
+      (github.event_name == 'push' && needs.detect-changes.outputs.types == 'true') ||
+      github.event_name == 'release' ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.package == 'types' || github.event.inputs.package == 'all'))
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: ${{ env.NODE_VERSION }}
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
@@ -38,28 +115,66 @@ jobs:
 
       - name: Build
         working-directory: packages/types
-        run: npm run build
+        run: npx tsup src/index.ts --format cjs,esm --dts --clean
+
+      - name: Bump version (if specified)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.version_bump != 'none'
+        working-directory: packages/types
+        run: |
+          npm version ${{ github.event.inputs.version_bump }} --no-git-tag-version
+          echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Check if version exists
+        id: check-version
+        working-directory: packages/types
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version 2>/dev/null; then
+            echo "Version $PACKAGE_VERSION already exists on npm"
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version $PACKAGE_VERSION is new"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
+        if: steps.check-version.outputs.exists != 'true'
         working-directory: packages/types
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Publish Summary
+        run: |
+          if [ "${{ steps.check-version.outputs.exists }}" == "true" ]; then
+            echo "### ⏭️ Types Package Skipped" >> $GITHUB_STEP_SUMMARY
+            echo "Version already exists on npm" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### 📦 Types Package Published" >> $GITHUB_STEP_SUMMARY
+          fi
+
   # ===========================================
-  # PUBLISH 3asoftwares/ecommerce-utils
+  # PUBLISH @3asoftwares/utils
   # ===========================================
   publish-utils:
+    needs: [detect-changes, validate-secrets, publish-types]
     runs-on: ubuntu-latest
-    needs: publish-types
-    if: always() && (github.event_name == 'release' || github.event.inputs.package == 'utils' || github.event.inputs.package == 'all')
+    if: |
+      always() && needs.validate-secrets.result == 'success' &&
+      ((github.event_name == 'push' && needs.detect-changes.outputs.utils == 'true') ||
+      github.event_name == 'release' ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.package == 'utils' || github.event.inputs.package == 'all')))
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: ${{ env.NODE_VERSION }}
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
@@ -68,27 +183,65 @@ jobs:
 
       - name: Build
         working-directory: packages/utils
-        run: npm run build
+        run: npx tsup src/index.ts --format cjs,esm --dts --clean
+
+      - name: Bump version (if specified)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.version_bump != 'none'
+        working-directory: packages/utils
+        run: |
+          npm version ${{ github.event.inputs.version_bump }} --no-git-tag-version
+          echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Check if version exists
+        id: check-version
+        working-directory: packages/utils
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version 2>/dev/null; then
+            echo "Version $PACKAGE_VERSION already exists on npm"
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version $PACKAGE_VERSION is new"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
+        if: steps.check-version.outputs.exists != 'true'
         working-directory: packages/utils
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Publish Summary
+        run: |
+          if [ "${{ steps.check-version.outputs.exists }}" == "true" ]; then
+            echo "### ⏭️ Utils Package Skipped" >> $GITHUB_STEP_SUMMARY
+            echo "Version already exists on npm" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### 📦 Utils Package Published" >> $GITHUB_STEP_SUMMARY
+          fi
+
   # ===========================================
-  # PUBLISH 3asoftwares/ecommerce-ui-library
+  # PUBLISH @3asoftwares/ui-library
   # ===========================================
   publish-ui-library:
+    needs: [detect-changes, validate-secrets]
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' || github.event.inputs.package == 'ui-library' || github.event.inputs.package == 'all'
+    if: |
+      (github.event_name == 'push' && needs.detect-changes.outputs.ui-library == 'true') ||
+      github.event_name == 'release' ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.package == 'ui-library' || github.event.inputs.package == 'all'))
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: ${{ env.NODE_VERSION }}
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
@@ -99,8 +252,60 @@ jobs:
         working-directory: packages/ui-library
         run: npm run build:lib
 
+      - name: Bump version (if specified)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.version_bump != 'none'
+        working-directory: packages/ui-library
+        run: |
+          npm version ${{ github.event.inputs.version_bump }} --no-git-tag-version
+          echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Check if version exists
+        id: check-version
+        working-directory: packages/ui-library
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version 2>/dev/null; then
+            echo "Version $PACKAGE_VERSION already exists on npm"
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version $PACKAGE_VERSION is new"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Publish to npm
+        if: steps.check-version.outputs.exists != 'true'
         working-directory: packages/ui-library
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish Summary
+        run: |
+          if [ "${{ steps.check-version.outputs.exists }}" == "true" ]; then
+            echo "### ⏭️ UI Library Package Skipped" >> $GITHUB_STEP_SUMMARY
+            echo "Version already exists on npm" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### 📦 UI Library Package Published" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ===========================================
+  # PUBLISH SUMMARY
+  # ===========================================
+  summary:
+    needs: [publish-types, publish-utils, publish-ui-library]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish Summary
+        run: |
+          echo "## 📊 npm Publish Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| @3asoftwares/types | ${{ needs.publish-types.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| @3asoftwares/utils | ${{ needs.publish-utils.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| @3asoftwares/ui-library | ${{ needs.publish-ui-library.result }} |" >> $GITHUB_STEP_SUMMARY

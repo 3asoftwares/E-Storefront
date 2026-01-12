@@ -72,7 +72,7 @@ function App() {
 
         if (!storedAuth || !storedAuth.user || !storedAuth.token) {
           setTimeout(() => {
-            window.location.href = process.env.SHELL_APP_URL || SHELL_APP_URL;
+            window.location.href = process.env.VITE_SHELL_APP_URL || SHELL_APP_URL;
           }, 500);
         }
       } catch (error) {

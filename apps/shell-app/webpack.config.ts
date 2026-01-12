@@ -4,14 +4,23 @@ const fs = require('fs');
 const { ModuleFederationPlugin } = require('webpack').container;
 const { createBaseWebpackConfig } = require('@3asoftwares/utils/config/webpack');
 
-// Load environment variables from .env.local or .env
+// Load environment variables based on NODE_ENV
 const dotenv = require('dotenv');
-const envLocalPath = path.resolve(__dirname, '.env.local');
+const nodeEnv = process.env.NODE_ENV || 'development';
 
-// Prefer .env.local over .env
-if (fs.existsSync(envLocalPath)) {
-  dotenv.config({ path: envLocalPath });
-}
+// Load .env files in order of priority (later files override earlier ones)
+const envFiles = [
+  '.env.local',                    // Local defaults (optional)
+  `.env.${nodeEnv}`,               // Environment-specific (.env.development, .env.production)
+  '.env',                          // Base .env file (highest priority)
+];
+
+envFiles.forEach((file) => {
+  const envPath = path.resolve(__dirname, file);
+  if (fs.existsSync(envPath)) {
+    dotenv.config({ path: envPath, override: true });
+  }
+});
 
 // Remote app URLs - configurable via environment variables
 const ADMIN_APP_URL = process.env.ADMIN_APP_URL || 'http://localhost:3001';
@@ -27,6 +36,7 @@ const baseConfig = createBaseWebpackConfig({
 
 module.exports = {
   ...baseConfig,
+  mode: nodeEnv === 'production' ? 'production' : 'development',
   resolve: {
     ...baseConfig.resolve,
     fallback: {
@@ -81,6 +91,7 @@ module.exports = {
       },
     }),
     new webpack.DefinePlugin({
+      'process.env.AUTH_SERVICE_BASE': JSON.stringify(process.env.AUTH_SERVICE_BASE || 'http://localhost:3011/api/auth'),
       'process.env.ADMIN_APP_URL': JSON.stringify(ADMIN_APP_URL),
       'process.env.SELLER_APP_URL': JSON.stringify(SELLER_APP_URL),
     }),

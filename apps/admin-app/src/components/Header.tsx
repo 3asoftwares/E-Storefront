@@ -13,7 +13,7 @@ export const Header: React.FC = () => {
   const handleLogout = () => {
     dispatch(logout());
     clearAuth();
-    window.location.href = `${process.env.SHELL_APP_URL || SHELL_APP_URL}?logout=true`;
+    window.location.href = `${process.env.VITE_SHELL_APP_URL || SHELL_APP_URL}?logout=true`;
   };
 
   return (

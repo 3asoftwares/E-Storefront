@@ -1,7 +1,19 @@
 # Deploy Microservices to Railway
+# Triggers on: push to main branch only (with 6-hour interval check), manual dispatch
+# Required secrets:
+#   - RAILWAY_TOKEN: Railway API token
+#   - RAILWAY_PROJECT_ID: Railway project ID
+
 name: Deploy to Railway
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'services/**'
+      - 'packages/types/**'
+      - 'packages/utils/**'
   workflow_dispatch:
     inputs:
       service:
@@ -16,13 +28,132 @@ on:
           - order-service
           - product-service
           - all
+      force_deploy:
+        description: 'Force deployment (ignore 6-hour check)'
+        required: false
+        type: boolean
+        default: false
 
 env:
   RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+  NODE_VERSION: '20'
 
 jobs:
-  deploy-auth:
-    if: github.event.inputs.service == 'auth-service' || github.event.inputs.service == 'all'
+  # ===========================================
+  # CHECK DEPLOYMENT INTERVAL (6 hours)
+  # ===========================================
+  check-interval:
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+    steps:
+      - name: Check last deployment time
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const forceDeploy = '${{ github.event.inputs.force_deploy }}' === 'true';
+            
+            if (forceDeploy) {
+              console.log('Force deploy requested, proceeding...');
+              core.setOutput('should_deploy', 'true');
+              return;
+            }
+            
+            // Get workflow runs for this workflow
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy-railway.yml',
+              status: 'success',
+              per_page: 1
+            });
+            
+            if (runs.data.workflow_runs.length === 0) {
+              console.log('No previous successful deployments, proceeding...');
+              core.setOutput('should_deploy', 'true');
+              return;
+            }
+            
+            const lastRun = runs.data.workflow_runs[0];
+            const lastRunTime = new Date(lastRun.updated_at);
+            const now = new Date();
+            const hoursSinceLastRun = (now - lastRunTime) / (1000 * 60 * 60);
+            
+            console.log(`Last deployment: ${lastRunTime.toISOString()}`);
+            console.log(`Hours since last deployment: ${hoursSinceLastRun.toFixed(2)}`);
+            
+            if (hoursSinceLastRun >= 6) {
+              console.log('More than 6 hours since last deployment, proceeding...');
+              core.setOutput('should_deploy', 'true');
+            } else {
+              console.log('Less than 6 hours since last deployment, skipping...');
+              core.setOutput('should_deploy', 'false');
+            }
+
+  # ===========================================
+  # DETECT CHANGES (for push events)
+  # ===========================================
+  detect-changes:
+    needs: check-interval
+    if: needs.check-interval.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      auth-service: ${{ steps.changes.outputs.auth-service }}
+      category-service: ${{ steps.changes.outputs.category-service }}
+      coupon-service: ${{ steps.changes.outputs.coupon-service }}
+      graphql-gateway: ${{ steps.changes.outputs.graphql-gateway }}
+      order-service: ${{ steps.changes.outputs.order-service }}
+      product-service: ${{ steps.changes.outputs.product-service }}
+      packages: ${{ steps.changes.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            auth-service:
+              - 'services/auth-service/**'
+            category-service:
+              - 'services/category-service/**'
+            coupon-service:
+              - 'services/coupon-service/**'
+            graphql-gateway:
+              - 'services/graphql-gateway/**'
+            order-service:
+              - 'services/order-service/**'
+            product-service:
+              - 'services/product-service/**'
+            packages:
+              - 'packages/types/**'
+              - 'packages/utils/**'
+
+  # ===========================================
+  # VALIDATE SECRETS
+  # ===========================================
+  validate-secrets:
+    needs: check-interval
+    if: needs.check-interval.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Railway secrets
+        run: |
+          if [ -z "${{ secrets.RAILWAY_TOKEN }}" ]; then
+            echo "::error::RAILWAY_TOKEN secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.RAILWAY_PROJECT_ID }}" ]; then
+            echo "::error::RAILWAY_PROJECT_ID secret is not set"
+            exit 1
+          fi
+          echo "✅ All required Railway secrets are configured"
+
+  # ===========================================
+  # BUILD SHARED PACKAGES
+  # ===========================================
+  build-packages:
+    needs: [check-interval, validate-secrets]
+    if: needs.check-interval.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +161,42 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build shared packages
+        run: |
+          cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+
+      - name: Cache built packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/types/dist
+            packages/utils/dist
+          key: packages-${{ github.sha }}
+
+  # ===========================================
+  # DEPLOY AUTH SERVICE
+  # ===========================================
+  deploy-auth:
+    needs: [check-interval, detect-changes, build-packages]
+    if: |
+      needs.check-interval.outputs.should_deploy == 'true' &&
+      ((github.event_name == 'push' && (needs.detect-changes.outputs.auth-service == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'auth-service' || github.event.inputs.service == 'all')))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
       - name: Install Railway CLI
@@ -39,21 +205,60 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build packages
+      - name: Restore built packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/types/dist
+            packages/utils/dist
+          key: packages-${{ github.sha }}
+
+      - name: Build packages (if cache miss)
         run: |
-          yarn build:types
-          yarn build:utils
+          if [ ! -d "packages/types/dist" ]; then
+            cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+            cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          fi
 
       - name: Build service
         run: yarn build:auth
 
       - name: Deploy to Railway
-        run: railway up --service auth-service
+        run: |
+          cd services/auth-service
+          railway link ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
+          
+          # Sync environment variables from .env.production to Railway
+          echo "📦 Syncing environment variables to Railway..."
+          if [ -f ".env.production" ]; then
+            while IFS= read -r line || [[ -n "$line" ]]; do
+              # Skip comments and empty lines
+              if [[ ! "$line" =~ ^# ]] && [[ -n "$line" ]] && [[ "$line" == *"="* ]]; then
+                key=$(echo "$line" | cut -d '=' -f 1)
+                value=$(echo "$line" | cut -d '=' -f 2-)
+                echo "Setting $key..."
+                railway variables set "$key=$value" --service auth-service 2>/dev/null || true
+              fi
+            done < .env.production
+          fi
+          
+          railway up --service auth-service --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
+      - name: Deployment Summary
+        run: |
+          echo "### 🚀 Auth Service Deployed" >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================
+  # DEPLOY CATEGORY SERVICE
+  # ===========================================
   deploy-category:
-    if: github.event.inputs.service == 'category-service' || github.event.inputs.service == 'all'
+    needs: [check-interval, detect-changes, build-packages]
+    if: |
+      needs.check-interval.outputs.should_deploy == 'true' &&
+      ((github.event_name == 'push' && (needs.detect-changes.outputs.category-service == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'category-service' || github.event.inputs.service == 'all')))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -61,7 +266,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
       - name: Install Railway CLI
@@ -70,21 +275,59 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build packages
+      - name: Restore built packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/types/dist
+            packages/utils/dist
+          key: packages-${{ github.sha }}
+
+      - name: Build packages (if cache miss)
         run: |
-          yarn build:types
-          yarn build:utils
+          if [ ! -d "packages/types/dist" ]; then
+            cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+            cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          fi
 
       - name: Build service
         run: yarn build:category
 
       - name: Deploy to Railway
-        run: railway up --service category-service
+        run: |
+          cd services/category-service
+          railway link ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
+          
+          # Sync environment variables from .env.production to Railway
+          echo "📦 Syncing environment variables to Railway..."
+          if [ -f ".env.production" ]; then
+            while IFS= read -r line || [[ -n "$line" ]]; do
+              if [[ ! "$line" =~ ^# ]] && [[ -n "$line" ]] && [[ "$line" == *"="* ]]; then
+                key=$(echo "$line" | cut -d '=' -f 1)
+                value=$(echo "$line" | cut -d '=' -f 2-)
+                echo "Setting $key..."
+                railway variables set "$key=$value" --service category-service 2>/dev/null || true
+              fi
+            done < .env.production
+          fi
+          
+          railway up --service category-service --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
+      - name: Deployment Summary
+        run: |
+          echo "### 🚀 Category Service Deployed" >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================
+  # DEPLOY COUPON SERVICE
+  # ===========================================
   deploy-coupon:
-    if: github.event.inputs.service == 'coupon-service' || github.event.inputs.service == 'all'
+    needs: [check-interval, detect-changes, build-packages]
+    if: |
+      needs.check-interval.outputs.should_deploy == 'true' &&
+      ((github.event_name == 'push' && (needs.detect-changes.outputs.coupon-service == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'coupon-service' || github.event.inputs.service == 'all')))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -92,7 +335,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
       - name: Install Railway CLI
@@ -101,21 +344,59 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build packages
+      - name: Restore built packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/types/dist
+            packages/utils/dist
+          key: packages-${{ github.sha }}
+
+      - name: Build packages (if cache miss)
         run: |
-          yarn build:types
-          yarn build:utils
+          if [ ! -d "packages/types/dist" ]; then
+            cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+            cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          fi
 
       - name: Build service
         run: yarn build:coupon
 
       - name: Deploy to Railway
-        run: railway up --service coupon-service
+        run: |
+          cd services/coupon-service
+          railway link ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
+          
+          # Sync environment variables from .env.production to Railway
+          echo "📦 Syncing environment variables to Railway..."
+          if [ -f ".env.production" ]; then
+            while IFS= read -r line || [[ -n "$line" ]]; do
+              if [[ ! "$line" =~ ^# ]] && [[ -n "$line" ]] && [[ "$line" == *"="* ]]; then
+                key=$(echo "$line" | cut -d '=' -f 1)
+                value=$(echo "$line" | cut -d '=' -f 2-)
+                echo "Setting $key..."
+                railway variables set "$key=$value" --service coupon-service 2>/dev/null || true
+              fi
+            done < .env.production
+          fi
+          
+          railway up --service coupon-service --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
+      - name: Deployment Summary
+        run: |
+          echo "### 🚀 Coupon Service Deployed" >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================
+  # DEPLOY GRAPHQL GATEWAY
+  # ===========================================
   deploy-gateway:
-    if: github.event.inputs.service == 'graphql-gateway' || github.event.inputs.service == 'all'
+    needs: [check-interval, detect-changes, build-packages]
+    if: |
+      needs.check-interval.outputs.should_deploy == 'true' &&
+      ((github.event_name == 'push' && (needs.detect-changes.outputs.graphql-gateway == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'graphql-gateway' || github.event.inputs.service == 'all')))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -123,7 +404,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
       - name: Install Railway CLI
@@ -132,21 +413,59 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build packages
+      - name: Restore built packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/types/dist
+            packages/utils/dist
+          key: packages-${{ github.sha }}
+
+      - name: Build packages (if cache miss)
         run: |
-          yarn build:types
-          yarn build:utils
+          if [ ! -d "packages/types/dist" ]; then
+            cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+            cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          fi
 
       - name: Build service
         run: yarn build:gateway
 
       - name: Deploy to Railway
-        run: railway up --service graphql-gateway
+        run: |
+          cd services/graphql-gateway
+          railway link ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
+          
+          # Sync environment variables from .env.production to Railway
+          echo "📦 Syncing environment variables to Railway..."
+          if [ -f ".env.production" ]; then
+            while IFS= read -r line || [[ -n "$line" ]]; do
+              if [[ ! "$line" =~ ^# ]] && [[ -n "$line" ]] && [[ "$line" == *"="* ]]; then
+                key=$(echo "$line" | cut -d '=' -f 1)
+                value=$(echo "$line" | cut -d '=' -f 2-)
+                echo "Setting $key..."
+                railway variables set "$key=$value" --service graphql-gateway 2>/dev/null || true
+              fi
+            done < .env.production
+          fi
+          
+          railway up --service graphql-gateway --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
+      - name: Deployment Summary
+        run: |
+          echo "### 🚀 GraphQL Gateway Deployed" >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================
+  # DEPLOY ORDER SERVICE
+  # ===========================================
   deploy-order:
-    if: github.event.inputs.service == 'order-service' || github.event.inputs.service == 'all'
+    needs: [check-interval, detect-changes, build-packages]
+    if: |
+      needs.check-interval.outputs.should_deploy == 'true' &&
+      ((github.event_name == 'push' && (needs.detect-changes.outputs.order-service == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'order-service' || github.event.inputs.service == 'all')))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -154,7 +473,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
       - name: Install Railway CLI
@@ -163,21 +482,59 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build packages
+      - name: Restore built packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/types/dist
+            packages/utils/dist
+          key: packages-${{ github.sha }}
+
+      - name: Build packages (if cache miss)
         run: |
-          yarn build:types
-          yarn build:utils
+          if [ ! -d "packages/types/dist" ]; then
+            cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+            cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          fi
 
       - name: Build service
         run: yarn build:order
 
       - name: Deploy to Railway
-        run: railway up --service order-service
+        run: |
+          cd services/order-service
+          railway link ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
+          
+          # Sync environment variables from .env.production to Railway
+          echo "📦 Syncing environment variables to Railway..."
+          if [ -f ".env.production" ]; then
+            while IFS= read -r line || [[ -n "$line" ]]; do
+              if [[ ! "$line" =~ ^# ]] && [[ -n "$line" ]] && [[ "$line" == *"="* ]]; then
+                key=$(echo "$line" | cut -d '=' -f 1)
+                value=$(echo "$line" | cut -d '=' -f 2-)
+                echo "Setting $key..."
+                railway variables set "$key=$value" --service order-service 2>/dev/null || true
+              fi
+            done < .env.production
+          fi
+          
+          railway up --service order-service --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
+      - name: Deployment Summary
+        run: |
+          echo "### 🚀 Order Service Deployed" >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================
+  # DEPLOY PRODUCT SERVICE
+  # ===========================================
   deploy-product:
-    if: github.event.inputs.service == 'product-service' || github.event.inputs.service == 'all'
+    needs: [check-interval, detect-changes, build-packages]
+    if: |
+      needs.check-interval.outputs.should_deploy == 'true' &&
+      ((github.event_name == 'push' && (needs.detect-changes.outputs.product-service == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'product-service' || github.event.inputs.service == 'all')))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -185,7 +542,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
       - name: Install Railway CLI
@@ -194,15 +551,82 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build packages
+      - name: Restore built packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/types/dist
+            packages/utils/dist
+          key: packages-${{ github.sha }}
+
+      - name: Build packages (if cache miss)
         run: |
-          yarn build:types
-          yarn build:utils
+          if [ ! -d "packages/types/dist" ]; then
+            cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+            cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          fi
 
       - name: Build service
         run: yarn build:product
 
       - name: Deploy to Railway
-        run: railway up --service product-service
+        run: |
+          cd services/product-service
+          railway link ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
+          
+          # Sync environment variables from .env.production to Railway
+          echo "📦 Syncing environment variables to Railway..."
+          if [ -f ".env.production" ]; then
+            while IFS= read -r line || [[ -n "$line" ]]; do
+              if [[ ! "$line" =~ ^# ]] && [[ -n "$line" ]] && [[ "$line" == *"="* ]]; then
+                key=$(echo "$line" | cut -d '=' -f 1)
+                value=$(echo "$line" | cut -d '=' -f 2-)
+                echo "Setting $key..."
+                railway variables set "$key=$value" --service product-service 2>/dev/null || true
+              fi
+            done < .env.production
+          fi
+          
+          railway up --service product-service --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Deployment Summary
+        run: |
+          echo "### 🚀 Product Service Deployed" >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================
+  # DEPLOYMENT SKIPPED
+  # ===========================================
+  skip-notification:
+    needs: check-interval
+    if: needs.check-interval.outputs.should_deploy == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment Skipped
+        run: |
+          echo "## ⏭️ Railway Deployment Skipped" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Last deployment was less than 6 hours ago." >> $GITHUB_STEP_SUMMARY
+          echo "To force a deployment, run the workflow manually with 'Force deployment' checked." >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================
+  # DEPLOYMENT SUMMARY
+  # ===========================================
+  summary:
+    needs: [check-interval, deploy-auth, deploy-category, deploy-coupon, deploy-gateway, deploy-order, deploy-product]
+    if: always() && needs.check-interval.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment Summary
+        run: |
+          echo "## 📊 Railway Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| auth-service | ${{ needs.deploy-auth.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| category-service | ${{ needs.deploy-category.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| coupon-service | ${{ needs.deploy-coupon.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| graphql-gateway | ${{ needs.deploy-gateway.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| order-service | ${{ needs.deploy-order.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| product-service | ${{ needs.deploy-product.result }} |" >> $GITHUB_STEP_SUMMARY

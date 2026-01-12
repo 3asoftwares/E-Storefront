@@ -62,7 +62,7 @@ export const useSellerAuthStore = create<ExtendedSellerAuthStore>((set, get) => 
       isAuthenticated: false,
       error: null,
     });
-    window.location.href = `${SHELL_APP_URL}?logout=true`;
+    window.location.href = `${process.env.VITE_SHELL_APP_URL || SHELL_APP_URL}?logout=true`;
   },
 
   setLoading: (isLoading) => set({ isLoading }),

@@ -81,7 +81,7 @@ yarn test:coverage # Run tests with coverage
 ## Environment Variables
 
 ```env
-VITE_SERVICE_URL=http://localhost:4000
+VITE_AUTH_SERVICE=http://localhost:4000
 VITE_GRAPHQL_URL=http://localhost:4000/graphql
 VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
 VITE_CLOUDINARY_UPLOAD_PRESET=your-preset
