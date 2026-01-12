@@ -74,16 +74,16 @@ jobs:
         env:
           HAS_VERCEL_ORG: ${{ secrets.VERCEL_ORG_ID != '' }}
           HAS_VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN != '' }}
-          HAS_ADMIN_PROJECT: ${{ secrets.ADMIN_VERCEL_PROJECT_ID != '' }}
-          HAS_SELLER_PROJECT: ${{ secrets.SELLER_VERCEL_PROJECT_ID != '' }}
-          HAS_SHELL_PROJECT: ${{ secrets.SHELL_VERCEL_PROJECT_ID != '' }}
+          HAS_ADMIN_PROJECT: ${{ secrets.VERCEL_PROJECT_ID_ADMIN != '' }}
+          HAS_SELLER_PROJECT: ${{ secrets.VERCEL_PROJECT_ID_SELLER != '' }}
+          HAS_SHELL_PROJECT: ${{ secrets.VERCEL_PROJECT_ID_SHELL != '' }}
         run: |
           missing=""
           if [ "$HAS_VERCEL_ORG" != "true" ]; then missing="$missing VERCEL_ORG_ID"; fi
           if [ "$HAS_VERCEL_TOKEN" != "true" ]; then missing="$missing VERCEL_TOKEN"; fi
-          if [ "$HAS_ADMIN_PROJECT" != "true" ]; then missing="$missing ADMIN_VERCEL_PROJECT_ID"; fi
-          if [ "$HAS_SELLER_PROJECT" != "true" ]; then missing="$missing SELLER_VERCEL_PROJECT_ID"; fi
-          if [ "$HAS_SHELL_PROJECT" != "true" ]; then missing="$missing SHELL_VERCEL_PROJECT_ID"; fi
+          if [ "$HAS_ADMIN_PROJECT" != "true" ]; then missing="$missing VERCEL_PROJECT_ID_ADMIN"; fi
+          if [ "$HAS_SELLER_PROJECT" != "true" ]; then missing="$missing VERCEL_PROJECT_ID_SELLER"; fi
+          if [ "$HAS_SHELL_PROJECT" != "true" ]; then missing="$missing VERCEL_PROJECT_ID_SHELL"; fi
           
           if [ -n "$missing" ]; then
             echo "❌ Missing required secrets:$missing" >> $GITHUB_STEP_SUMMARY
@@ -166,14 +166,14 @@ jobs:
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.ADMIN_VERCEL_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
 
       - name: Build Admin App
         if: steps.check-cooldown.outputs.deploy == 'true'
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.ADMIN_VERCEL_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
 
       - name: Deploy to Vercel
         if: steps.check-cooldown.outputs.deploy == 'true'
@@ -185,7 +185,7 @@ jobs:
           echo "**URL:** $url" >> $GITHUB_STEP_SUMMARY
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.ADMIN_VERCEL_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
 
       - name: Save Deploy State (Success)
         if: steps.check-cooldown.outputs.deploy == 'true' && success()
@@ -279,14 +279,14 @@ jobs:
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.SELLER_VERCEL_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SELLER }}
 
       - name: Build Seller App
         if: steps.check-cooldown.outputs.deploy == 'true'
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.SELLER_VERCEL_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SELLER }}
 
       - name: Deploy to Vercel
         if: steps.check-cooldown.outputs.deploy == 'true'
@@ -298,7 +298,7 @@ jobs:
           echo "**URL:** $url" >> $GITHUB_STEP_SUMMARY
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.SELLER_VERCEL_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SELLER }}
 
       - name: Save Deploy State (Success)
         if: steps.check-cooldown.outputs.deploy == 'true' && success()
@@ -392,14 +392,14 @@ jobs:
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.SHELL_VERCEL_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SHELL }}
 
       - name: Build Shell App
         if: steps.check-cooldown.outputs.deploy == 'true'
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.SHELL_VERCEL_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SHELL }}
 
       - name: Deploy to Vercel
         if: steps.check-cooldown.outputs.deploy == 'true'
@@ -411,7 +411,7 @@ jobs:
           echo "**URL:** $url" >> $GITHUB_STEP_SUMMARY
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.SHELL_VERCEL_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SHELL }}
 
       - name: Save Deploy State (Success)
         if: steps.check-cooldown.outputs.deploy == 'true' && success()
