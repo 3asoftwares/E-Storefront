@@ -1,442 +1,371 @@
-name:PublishNPMPackages
+name: Publish Packages (NPM)
 
 on:
-workflow_run:
-workflows:['CIPipeline']
-types:[completed]
-branches:[main]
+  # Manual trigger only - requires CI to pass first
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package to publish'
+        required: true
+        type: choice
+        options:
+          - all
+          - types
+          - utils
+          - ui
+      version_bump:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        default: 'patch'
+        options:
+          - patch
+          - minor
+          - major
+      dry_run:
+        description: 'Dry run (test without publishing)'
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
-group:publish-packages-${{github.ref}}
-cancel-in-progress:false
+  group: publish-packages-${{ github.ref }}
+  cancel-in-progress: false
 
 env:
-NODE_VERSION:'20'
-DEPLOY_COOLDOWN_HOURS:3
+  NODE_VERSION: '20'
 
 jobs:
-#===========================================
-#VERIFYCIPASSED
-#===========================================
-verify-ci:
-name:✅VerifyCIPassed
-runs-on:ubuntu-latest
-if:github.event.workflow_run.conclusion=='success'
-steps:
--name:CIVerification
-run:|
-echo"##✅CIPipelinePassed">>$GITHUB_STEP_SUMMARY
-echo"ProceedingwithNPMpublishing...">>$GITHUB_STEP_SUMMARY
+  # ===========================================
+  # VERIFY CI PASSED
+  # ===========================================
+  verify-ci:
+    name: Verify CI Passed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-#===========================================
-#DETECTCHANGES
-#===========================================
-detect-changes:
-name:🔍DetectChanges
-runs-on:ubuntu-latest
-needs:verify-ci
-outputs:
-packages-types:${{steps.filter.outputs.packages-types}}
-packages-utils:${{steps.filter.outputs.packages-utils}}
-packages-ui:${{steps.filter.outputs.packages-ui}}
-steps:
--uses:actions/checkout@v4
-with:
-ref:${{github.event.workflow_run.head_sha}}
-fetch-depth:2
+      - name: Check Latest CI Status
+        run: |
+          echo "Checking CI status for branch: ${{ github.ref_name }}"
+          
+          # Get the latest CI workflow run status
+          CI_STATUS=$(gh run list --workflow=ci.yml --branch=${{ github.ref_name }} --limit=1 --json conclusion --jq '.[0].conclusion')
+          
+          echo "Latest CI status: $CI_STATUS"
+          
+          if [ "$CI_STATUS" != "success" ]; then
+            echo "❌ CI Pipeline has not passed on this branch!"
+            echo "Please ensure CI passes before publishing."
+            echo "## ❌ CI Check Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Latest CI status: $CI_STATUS" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          
+          echo "✅ CI Pipeline passed!"
+          echo "## ✅ CI Check Passed" >> $GITHUB_STEP_SUMMARY
+        env:
+          GH_TOKEN: ${{ github.token }}
 
--uses:dorny/paths-filter@v3
-id:filter
-with:
-filters:|
-packages-types:
--'packages/types/**'
-packages-utils:
--'packages/utils/**'
-packages-ui:
--'packages/ui-library/**'
+  # ===========================================
+  # SETUP
+  # ===========================================
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    needs: verify-ci
+    outputs:
+      publish-types: ${{ steps.determine.outputs.types }}
+      publish-utils: ${{ steps.determine.outputs.utils }}
+      publish-ui: ${{ steps.determine.outputs.ui }}
+    steps:
+      - uses: actions/checkout@v4
 
-#===========================================
-#VALIDATESECRETS
-#===========================================
-validate-secrets:
-name:🔐ValidateSecrets
-runs-on:ubuntu-latest
-needs:detect-changes
-steps:
--name:CheckNPMToken
-env:
-HAS_NPM_TOKEN:${{secrets.NPM_TOKEN!=''}}
-run:|
-if["$HAS_NPM_TOKEN"!="true"];then
-echo"❌MissingNPM_TOKENsecret">>$GITHUB_STEP_SUMMARY
-exit1
-fi
-echo"✅NPMtokenisconfigured">>$GITHUB_STEP_SUMMARY
+      - name: Determine Packages to Publish
+        id: determine
+        run: |
+          PACKAGE="${{ inputs.package }}"
+          if [ "$PACKAGE" == "all" ]; then
+            echo "types=true" >> $GITHUB_OUTPUT
+            echo "utils=true" >> $GITHUB_OUTPUT
+            echo "ui=true" >> $GITHUB_OUTPUT
+          else
+            echo "types=$([[ '$PACKAGE' == 'types' ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+            echo "utils=$([[ '$PACKAGE' == 'utils' ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+            echo "ui=$([[ '$PACKAGE' == 'ui' ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "## Publish Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- Package: $PACKAGE" >> $GITHUB_STEP_SUMMARY
+          echo "- Version Bump: ${{ inputs.version_bump }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Dry Run: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
 
-#===========================================
-#PUBLISHTYPESPACKAGE
-#===========================================
-publish-types:
-name:📦PublishTypesPackage
-runs-on:ubuntu-latest
-needs:[detect-changes,validate-secrets]
-if:needs.detect-changes.outputs.packages-types=='true'
-steps:
--uses:actions/checkout@v4
-with:
-ref:${{github.event.workflow_run.head_sha}}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+          registry-url: 'https://registry.npmjs.org'
 
--name:RestorePublishState
-uses:actions/cache/restore@v4
-with:
-path:.publish-state-types
-key:publish-state-types-
-restore-keys:publish-state-types-
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
 
--name:CheckCooldownandLastStatus
-id:check-cooldown
-run:|
-should_publish="true"
+      - name: Cache node_modules
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+          key: publish-node-modules-${{ github.sha }}
 
-if[-f.publish-state-types];then
-last_publish=$(sed-n'1p'.publish-state-types)
-last_status=$(sed-n'2p'.publish-state-types)
-current_time=$(date+%s)
-diff=$((current_time-last_publish))
-cooldown_seconds=$((${{env.DEPLOY_COOLDOWN_HOURS}}*3600))
+  # ===========================================
+  # BUILD PACKAGES
+  # ===========================================
+  build:
+    name: Build Packages
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
 
-if["$last_status"="success"]&&[$diff-lt$cooldown_seconds];then
-remaining=$(((cooldown_seconds-diff)/60))
-echo"⏳Publishcooldownactive.Wait$remainingmoreminutes.">>$GITHUB_STEP_SUMMARY
-should_publish="false"
-elif["$last_status"="failed"];then
-echo"🔄Lastpublishfailed,retrying...">>$GITHUB_STEP_SUMMARY
-fi
-fi
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
 
-echo"publish=$should_publish">>$GITHUB_OUTPUT
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+          key: publish-node-modules-${{ github.sha }}
 
--name:SetupNode.js
-if:steps.check-cooldown.outputs.publish=='true'
-uses:actions/setup-node@v4
-with:
-node-version:${{env.NODE_VERSION}}
-cache:'yarn'
-registry-url:'https://registry.npmjs.org'
+      - name: Build Types
+        if: needs.setup.outputs.publish-types == 'true'
+        run: yarn build:types
 
--name:Installdependencies
-if:steps.check-cooldown.outputs.publish=='true'
-run:yarninstall--frozen-lockfile
+      - name: Build Utils
+        if: needs.setup.outputs.publish-utils == 'true'
+        run: yarn build:utils
 
--name:Buildtypes
-if:steps.check-cooldown.outputs.publish=='true'
-run:yarnbuild:types
+      - name: Build UI
+        if: needs.setup.outputs.publish-ui == 'true'
+        run: yarn build:ui
 
--name:Runtests
-if:steps.check-cooldown.outputs.publish=='true'
-run:yarnworkspace@3asoftwares/typesruntest:coverage
+      - name: Cache build artifacts
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            packages/types/dist
+            packages/utils/dist
+            packages/ui-library/dist
+          key: publish-build-${{ github.sha }}
 
--name:Checkversionexists
-if:steps.check-cooldown.outputs.publish=='true'
-id:check
-run:|
-cdpackages/types
-PKG_NAME=$(node-p"require('./package.json').name")
-PKG_VERSION=$(node-p"require('./package.json').version")
-ifnpmview"$PKG_NAME@$PKG_VERSION"version2>/dev/null;then
-echo"exists=true">>$GITHUB_OUTPUT
-echo"⏭️Typesv$PKG_VERSIONalreadypublished">>$GITHUB_STEP_SUMMARY
-else
-echo"exists=false">>$GITHUB_OUTPUT
-fi
-env:
-NODE_AUTH_TOKEN:${{secrets.NPM_TOKEN}}
+  # ===========================================
+  # PUBLISH TYPES
+  # ===========================================
+  publish-types:
+    name: Publish @3asoftwares/types
+    runs-on: ubuntu-latest
+    needs: [setup, build]
+    if: needs.setup.outputs.publish-types == 'true'
+    steps:
+      - uses: actions/checkout@v4
 
--name:Publish
-if:steps.check-cooldown.outputs.publish=='true'&&steps.check.outputs.exists!='true'
-run:|
-cdpackages/types
-npmpublish--accesspublic
-PKG_VERSION=$(node-p"require('./package.json').version")
-echo"###✅Typesv$PKG_VERSIONpublished">>$GITHUB_STEP_SUMMARY
-env:
-NODE_AUTH_TOKEN:${{secrets.NPM_TOKEN}}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+          registry-url: 'https://registry.npmjs.org'
 
--name:SavePublishState(Success)
-if:steps.check-cooldown.outputs.publish=='true'&&success()
-run:|
-echo"$(date+%s)">.publish-state-types
-echo"success">>.publish-state-types
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+          key: publish-node-modules-${{ github.sha }}
 
--name:SavePublishState(Failed)
-if:steps.check-cooldown.outputs.publish=='true'&&failure()
-run:|
-echo"$(date+%s)">.publish-state-types
-echo"failed">>.publish-state-types
+      - name: Restore build artifacts
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            packages/types/dist
+            packages/utils/dist
+            packages/ui-library/dist
+          key: publish-build-${{ github.sha }}
 
--name:CachePublishState
-if:steps.check-cooldown.outputs.publish=='true'&&always()
-uses:actions/cache/save@v4
-with:
-path:.publish-state-types
-key:publish-state-types-${{github.run_id}}
+      - name: Bump Version
+        working-directory: packages/types
+        run: npm version ${{ inputs.version_bump }} --no-git-tag-version
 
-#===========================================
-#PUBLISHUTILSPACKAGE
-#===========================================
-publish-utils:
-name:📦PublishUtilsPackage
-runs-on:ubuntu-latest
-needs:[detect-changes,publish-types]
-if:always()&&needs.detect-changes.outputs.packages-utils=='true'
-steps:
--uses:actions/checkout@v4
-with:
-ref:${{github.event.workflow_run.head_sha}}
+      - name: Publish (Dry Run)
+        if: inputs.dry_run == true
+        working-directory: packages/types
+        run: |
+          echo "DRY RUN - Would publish @3asoftwares/types"
+          npm pack --dry-run
+          echo "### @3asoftwares/types - DRY RUN successful" >> $GITHUB_STEP_SUMMARY
 
--name:RestorePublishState
-uses:actions/cache/restore@v4
-with:
-path:.publish-state-utils
-key:publish-state-utils-
-restore-keys:publish-state-utils-
+      - name: Publish
+        if: inputs.dry_run != true
+        working-directory: packages/types
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
--name:CheckCooldownandLastStatus
-id:check-cooldown
-run:|
-should_publish="true"
+      - name: Summary
+        if: inputs.dry_run != true
+        run: echo "### @3asoftwares/types published successfully" >> $GITHUB_STEP_SUMMARY
 
-if[-f.publish-state-utils];then
-last_publish=$(sed-n'1p'.publish-state-utils)
-last_status=$(sed-n'2p'.publish-state-utils)
-current_time=$(date+%s)
-diff=$((current_time-last_publish))
-cooldown_seconds=$((${{env.DEPLOY_COOLDOWN_HOURS}}*3600))
+  # ===========================================
+  # PUBLISH UTILS
+  # ===========================================
+  publish-utils:
+    name: Publish @3asoftwares/utils
+    runs-on: ubuntu-latest
+    needs: [setup, build, publish-types]
+    if: always() && needs.setup.outputs.publish-utils == 'true' && needs.build.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
 
-if["$last_status"="success"]&&[$diff-lt$cooldown_seconds];then
-remaining=$(((cooldown_seconds-diff)/60))
-echo"⏳Publishcooldownactive.Wait$remainingmoreminutes.">>$GITHUB_STEP_SUMMARY
-should_publish="false"
-elif["$last_status"="failed"];then
-echo"🔄Lastpublishfailed,retrying...">>$GITHUB_STEP_SUMMARY
-fi
-fi
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+          registry-url: 'https://registry.npmjs.org'
 
-echo"publish=$should_publish">>$GITHUB_OUTPUT
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+          key: publish-node-modules-${{ github.sha }}
 
--name:SetupNode.js
-if:steps.check-cooldown.outputs.publish=='true'
-uses:actions/setup-node@v4
-with:
-node-version:${{env.NODE_VERSION}}
-cache:'yarn'
-registry-url:'https://registry.npmjs.org'
+      - name: Restore build artifacts
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            packages/types/dist
+            packages/utils/dist
+            packages/ui-library/dist
+          key: publish-build-${{ github.sha }}
 
--name:Installdependencies
-if:steps.check-cooldown.outputs.publish=='true'
-run:yarninstall--frozen-lockfile
+      - name: Bump Version
+        working-directory: packages/utils
+        run: npm version ${{ inputs.version_bump }} --no-git-tag-version
 
--name:Builddependencies
-if:steps.check-cooldown.outputs.publish=='true'
-run:|
-yarnbuild:types
-yarnbuild:utils
+      - name: Publish (Dry Run)
+        if: inputs.dry_run == true
+        working-directory: packages/utils
+        run: |
+          echo "DRY RUN - Would publish @3asoftwares/utils"
+          npm pack --dry-run
+          echo "### @3asoftwares/utils - DRY RUN successful" >> $GITHUB_STEP_SUMMARY
 
--name:Runtests
-if:steps.check-cooldown.outputs.publish=='true'
-run:yarnworkspace@3asoftwares/utilsruntest:coverage
+      - name: Publish
+        if: inputs.dry_run != true
+        working-directory: packages/utils
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
--name:Checkversionexists
-if:steps.check-cooldown.outputs.publish=='true'
-id:check
-run:|
-cdpackages/utils
-PKG_NAME=$(node-p"require('./package.json').name")
-PKG_VERSION=$(node-p"require('./package.json').version")
-ifnpmview"$PKG_NAME@$PKG_VERSION"version2>/dev/null;then
-echo"exists=true">>$GITHUB_OUTPUT
-echo"⏭️Utilsv$PKG_VERSIONalreadypublished">>$GITHUB_STEP_SUMMARY
-else
-echo"exists=false">>$GITHUB_OUTPUT
-fi
-env:
-NODE_AUTH_TOKEN:${{secrets.NPM_TOKEN}}
+      - name: Summary
+        if: inputs.dry_run != true
+        run: echo "### @3asoftwares/utils published successfully" >> $GITHUB_STEP_SUMMARY
 
--name:Publish
-if:steps.check-cooldown.outputs.publish=='true'&&steps.check.outputs.exists!='true'
-run:|
-cdpackages/utils
-npmpublish--accesspublic
-PKG_VERSION=$(node-p"require('./package.json').version")
-echo"###✅Utilsv$PKG_VERSIONpublished">>$GITHUB_STEP_SUMMARY
-env:
-NODE_AUTH_TOKEN:${{secrets.NPM_TOKEN}}
+  # ===========================================
+  # PUBLISH UI
+  # ===========================================
+  publish-ui:
+    name: Publish @3asoftwares/ui
+    runs-on: ubuntu-latest
+    needs: [setup, build, publish-utils]
+    if: always() && needs.setup.outputs.publish-ui == 'true' && needs.build.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
 
--name:SavePublishState(Success)
-if:steps.check-cooldown.outputs.publish=='true'&&success()
-run:|
-echo"$(date+%s)">.publish-state-utils
-echo"success">>.publish-state-utils
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+          registry-url: 'https://registry.npmjs.org'
 
--name:SavePublishState(Failed)
-if:steps.check-cooldown.outputs.publish=='true'&&failure()
-run:|
-echo"$(date+%s)">.publish-state-utils
-echo"failed">>.publish-state-utils
+      - name: Restore node_modules
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+          key: publish-node-modules-${{ github.sha }}
 
--name:CachePublishState
-if:steps.check-cooldown.outputs.publish=='true'&&always()
-uses:actions/cache/save@v4
-with:
-path:.publish-state-utils
-key:publish-state-utils-${{github.run_id}}
+      - name: Restore build artifacts
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            packages/types/dist
+            packages/utils/dist
+            packages/ui-library/dist
+          key: publish-build-${{ github.sha }}
 
-#===========================================
-#PUBLISHUILIBRARY
-#===========================================
-publish-ui:
-name:📦PublishUILibrary
-runs-on:ubuntu-latest
-needs:[detect-changes,publish-utils]
-if:always()&&needs.detect-changes.outputs.packages-ui=='true'
-steps:
--uses:actions/checkout@v4
-with:
-ref:${{github.event.workflow_run.head_sha}}
+      - name: Bump Version
+        working-directory: packages/ui-library
+        run: npm version ${{ inputs.version_bump }} --no-git-tag-version
 
--name:RestorePublishState
-uses:actions/cache/restore@v4
-with:
-path:.publish-state-ui
-key:publish-state-ui-
-restore-keys:publish-state-ui-
+      - name: Publish (Dry Run)
+        if: inputs.dry_run == true
+        working-directory: packages/ui-library
+        run: |
+          echo "DRY RUN - Would publish @3asoftwares/ui"
+          npm pack --dry-run
+          echo "### @3asoftwares/ui - DRY RUN successful" >> $GITHUB_STEP_SUMMARY
 
--name:CheckCooldownandLastStatus
-id:check-cooldown
-run:|
-should_publish="true"
+      - name: Publish
+        if: inputs.dry_run != true
+        working-directory: packages/ui-library
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-if[-f.publish-state-ui];then
-last_publish=$(sed-n'1p'.publish-state-ui)
-last_status=$(sed-n'2p'.publish-state-ui)
-current_time=$(date+%s)
-diff=$((current_time-last_publish))
-cooldown_seconds=$((${{env.DEPLOY_COOLDOWN_HOURS}}*3600))
+      - name: Summary
+        if: inputs.dry_run != true
+        run: echo "### @3asoftwares/ui published successfully" >> $GITHUB_STEP_SUMMARY
 
-if["$last_status"="success"]&&[$diff-lt$cooldown_seconds];then
-remaining=$(((cooldown_seconds-diff)/60))
-echo"⏳Publishcooldownactive.Wait$remainingmoreminutes.">>$GITHUB_STEP_SUMMARY
-should_publish="false"
-elif["$last_status"="failed"];then
-echo"🔄Lastpublishfailed,retrying...">>$GITHUB_STEP_SUMMARY
-fi
-fi
+  # ===========================================
+  # SUMMARY
+  # ===========================================
+  summary:
+    name: Publish Summary
+    runs-on: ubuntu-latest
+    needs: [setup, build, publish-types, publish-utils, publish-ui]
+    if: always()
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "## NPM Publish Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| @3asoftwares/types | ${{ needs.publish-types.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| @3asoftwares/utils | ${{ needs.publish-utils.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| @3asoftwares/ui | ${{ needs.publish-ui.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
 
-echo"publish=$should_publish">>$GITHUB_OUTPUT
-
--name:SetupNode.js
-if:steps.check-cooldown.outputs.publish=='true'
-uses:actions/setup-node@v4
-with:
-node-version:${{env.NODE_VERSION}}
-cache:'yarn'
-registry-url:'https://registry.npmjs.org'
-
--name:Installdependencies
-if:steps.check-cooldown.outputs.publish=='true'
-run:yarninstall--frozen-lockfile
-
--name:Builddependencies
-if:steps.check-cooldown.outputs.publish=='true'
-run:|
-yarnbuild:types
-yarnbuild:utils
-yarnbuild:storybook
-
--name:Runtests
-if:steps.check-cooldown.outputs.publish=='true'
-run:yarnworkspace@3asoftwares/uiruntestrun
-
--name:Checkversionexists
-if:steps.check-cooldown.outputs.publish=='true'
-id:check
-run:|
-cdpackages/ui-library
-PKG_NAME=$(node-p"require('./package.json').name")
-PKG_VERSION=$(node-p"require('./package.json').version")
-ifnpmview"$PKG_NAME@$PKG_VERSION"version2>/dev/null;then
-echo"exists=true">>$GITHUB_OUTPUT
-echo"⏭️UIv$PKG_VERSIONalreadypublished">>$GITHUB_STEP_SUMMARY
-else
-echo"exists=false">>$GITHUB_OUTPUT
-fi
-env:
-NODE_AUTH_TOKEN:${{secrets.NPM_TOKEN}}
-
--name:Publish
-if:steps.check-cooldown.outputs.publish=='true'&&steps.check.outputs.exists!='true'
-run:|
-cdpackages/ui-library
-npmpublish--accesspublic
-PKG_VERSION=$(node-p"require('./package.json').version")
-echo"###✅UIv$PKG_VERSIONpublished">>$GITHUB_STEP_SUMMARY
-env:
-NODE_AUTH_TOKEN:${{secrets.NPM_TOKEN}}
-
--name:SavePublishState(Success)
-if:steps.check-cooldown.outputs.publish=='true'&&success()
-run:|
-echo"$(date+%s)">.publish-state-ui
-echo"success">>.publish-state-ui
-
--name:SavePublishState(Failed)
-if:steps.check-cooldown.outputs.publish=='true'&&failure()
-run:|
-echo"$(date+%s)">.publish-state-ui
-echo"failed">>.publish-state-ui
-
--name:CachePublishState
-if:steps.check-cooldown.outputs.publish=='true'&&always()
-uses:actions/cache/save@v4
-with:
-path:.publish-state-ui
-key:publish-state-ui-${{github.run_id}}
-
-#===========================================
-#PUBLISHSUMMARY
-#===========================================
-publish-summary:
-name:📊PublishSummary
-runs-on:ubuntu-latest
-needs:[detect-changes,publish-types,publish-utils,publish-ui]
-if:always()
-steps:
--name:GenerateSummary
-run:|
-echo"##📊NPMPublishSummary">>$GITHUB_STEP_SUMMARY
-echo"">>$GITHUB_STEP_SUMMARY
-echo"###ChangesDetected">>$GITHUB_STEP_SUMMARY
-echo"|Package|Changed|">>$GITHUB_STEP_SUMMARY
-echo"|---------|---------|">>$GITHUB_STEP_SUMMARY
-echo"|types|${{needs.detect-changes.outputs.packages-types}}|">>$GITHUB_STEP_SUMMARY
-echo"|utils|${{needs.detect-changes.outputs.packages-utils}}|">>$GITHUB_STEP_SUMMARY
-echo"|ui|${{needs.detect-changes.outputs.packages-ui}}|">>$GITHUB_STEP_SUMMARY
-echo"">>$GITHUB_STEP_SUMMARY
-echo"###PublishStatus">>$GITHUB_STEP_SUMMARY
-echo"|Package|Status|">>$GITHUB_STEP_SUMMARY
-echo"|---------|--------|">>$GITHUB_STEP_SUMMARY
-echo"|@3asoftwares/types|${{needs.publish-types.result}}|">>$GITHUB_STEP_SUMMARY
-echo"|@3asoftwares/utils|${{needs.publish-utils.result}}|">>$GITHUB_STEP_SUMMARY
-echo"|@3asoftwares/ui|${{needs.publish-ui.result}}|">>$GITHUB_STEP_SUMMARY
-
-if["${{needs.publish-types.result}}"=="failure"]||\
-["${{needs.publish-utils.result}}"=="failure"]||\
-["${{needs.publish-ui.result}}"=="failure"];then
-echo"">>$GITHUB_STEP_SUMMARY
-echo"❌**Somepackagesfailedtopublish**">>$GITHUB_STEP_SUMMARY
-exit1
-fi
-
-echo"">>$GITHUB_STEP_SUMMARY
-echo"✅**NPMpublishworkflowcompleted**">>$GITHUB_STEP_SUMMARY
+      - name: Check for Failures
+        run: |
+          TYPES="${{ needs.publish-types.result }}"
+          UTILS="${{ needs.publish-utils.result }}"
+          UI="${{ needs.publish-ui.result }}"
+          
+          if [ "$TYPES" == "failure" ] || [ "$UTILS" == "failure" ] || [ "$UI" == "failure" ]; then
+            echo "Some packages failed to publish" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          
+          echo "All requested packages published successfully" >> $GITHUB_STEP_SUMMARY

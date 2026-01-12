@@ -1,7 +1,5 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
-  "project": "04f49d30-1baf-423a-9e6d-76ac8a867b93",
-  "service": "15b2b028-5b7f-495f-834c-18befd8883a9",
   "build": {
     "builder": "DOCKERFILE",
     "dockerfilePath": "services/graphql-gateway/Dockerfile"

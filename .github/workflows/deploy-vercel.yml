@@ -1,411 +1,168 @@
-name:DeployFrontend(Vercel)
+name: Deploy Frontend (Vercel)
 
 on:
-workflow_run:
-workflows:['CIPipeline']
-types:[completed]
-branches:[main]
+  workflow_run:
+    workflows: ['CI Pipeline']
+    types: [completed]
+    branches: [main]
 
 concurrency:
-group:deploy-vercel-${{github.ref}}
-cancel-in-progress:false
+  group: deploy-vercel-${{ github.ref }}
+  cancel-in-progress: false
 
 env:
-NODE_VERSION:'20'
-DEPLOY_COOLDOWN_HOURS:3
+  NODE_VERSION: '20'
 
 jobs:
-#===========================================
-#VERIFYCIPASSED
-#===========================================
-verify-ci:
-name:✅VerifyCIPassed
-runs-on:ubuntu-latest
-if:github.event.workflow_run.conclusion=='success'
-steps:
--name:CIVerification
-run:|
-echo"##✅CIPipelinePassed">>$GITHUB_STEP_SUMMARY
-echo"ProceedingwithVerceldeployments...">>$GITHUB_STEP_SUMMARY
+  # ===========================================
+  # VERIFY CI PASSED
+  # ===========================================
+  verify-ci:
+    name: Verify CI Passed
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: CI Verification
+        run: |
+          echo "## CI Pipeline Passed" >> $GITHUB_STEP_SUMMARY
+          echo "Proceeding with Vercel deployments..." >> $GITHUB_STEP_SUMMARY
 
-#===========================================
-#DETECTCHANGES
-#===========================================
-detect-changes:
-name:🔍DetectChanges
-runs-on:ubuntu-latest
-needs:verify-ci
-outputs:
-apps-admin:${{steps.filter.outputs.apps-admin}}
-apps-seller:${{steps.filter.outputs.apps-seller}}
-apps-shell:${{steps.filter.outputs.apps-shell}}
-packages:${{steps.filter.outputs.packages}}
-steps:
--uses:actions/checkout@v4
-with:
-ref:${{github.event.workflow_run.head_sha}}
-fetch-depth:2
+  # ===========================================
+  # DETECT CHANGES
+  # ===========================================
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    needs: verify-ci
+    outputs:
+      admin-app: ${{ steps.filter.outputs.admin-app }}
+      seller-app: ${{ steps.filter.outputs.seller-app }}
+      shell-app: ${{ steps.filter.outputs.shell-app }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 2
 
--uses:dorny/paths-filter@v3
-id:filter
-with:
-filters:|
-apps-admin:
--'apps/admin-app/**'
--'packages/**'
-apps-seller:
--'apps/seller-app/**'
--'packages/**'
-apps-shell:
--'apps/shell-app/**'
--'packages/**'
-packages:
--'packages/**'
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            admin-app:
+              - 'apps/admin-app/**'
+              - 'packages/**'
+            seller-app:
+              - 'apps/seller-app/**'
+              - 'packages/**'
+            shell-app:
+              - 'apps/shell-app/**'
+              - 'packages/**'
 
-#===========================================
-#VALIDATESECRETS
-#===========================================
-validate-secrets:
-name:🔐ValidateSecrets
-runs-on:ubuntu-latest
-needs:detect-changes
-steps:
--name:CheckRequiredSecrets
-env:
-HAS_VERCEL_ORG:${{secrets.VERCEL_ORG_ID!=''}}
-HAS_VERCEL_TOKEN:${{secrets.VERCEL_TOKEN!=''}}
-HAS_ADMIN_PROJECT:${{secrets.VERCEL_PROJECT_ID_ADMIN!=''}}
-HAS_SELLER_PROJECT:${{secrets.VERCEL_PROJECT_ID_SELLER!=''}}
-HAS_SHELL_PROJECT:${{secrets.VERCEL_PROJECT_ID_SHELL!=''}}
-run:|
-missing=""
-if["$HAS_VERCEL_ORG"!="true"];thenmissing="$missingVERCEL_ORG_ID";fi
-if["$HAS_VERCEL_TOKEN"!="true"];thenmissing="$missingVERCEL_TOKEN";fi
-if["$HAS_ADMIN_PROJECT"!="true"];thenmissing="$missingVERCEL_PROJECT_ID_ADMIN";fi
-if["$HAS_SELLER_PROJECT"!="true"];thenmissing="$missingVERCEL_PROJECT_ID_SELLER";fi
-if["$HAS_SHELL_PROJECT"!="true"];thenmissing="$missingVERCEL_PROJECT_ID_SHELL";fi
+  # ===========================================
+  # DEPLOY ADMIN APP
+  # ===========================================
+  deploy-admin:
+    name: Deploy Admin App
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.admin-app == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
-if[-n"$missing"];then
-echo"❌Missingrequiredsecrets:$missing">>$GITHUB_STEP_SUMMARY
-exit1
-fi
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
 
-echo"✅Allrequiredsecretsareconfigured">>$GITHUB_STEP_SUMMARY
+      - name: Pull Vercel Environment
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
-#===========================================
-#DEPLOYADMINAPP
-#===========================================
-deploy-admin:
-name:🚀DeployAdminApp
-runs-on:ubuntu-latest
-needs:[detect-changes,validate-secrets]
-if:needs.detect-changes.outputs.apps-admin=='true'
-steps:
--uses:actions/checkout@v4
-with:
-ref:${{github.event.workflow_run.head_sha}}
+      - name: Build Project
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
--name:RestoreDeployState
-id:restore-state
-uses:actions/cache/restore@v4
-with:
-path:.deploy-state-admin
-key:deploy-state-admin-
-restore-keys:deploy-state-admin-
+      - name: Deploy to Vercel
+        run: |
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+          echo "### Admin App Deployed" >> $GITHUB_STEP_SUMMARY
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
 
--name:CheckCooldownandLastStatus
-id:check-cooldown
-run:|
-should_deploy="true"
+  # ===========================================
+  # DEPLOY SELLER APP
+  # ===========================================
+  deploy-seller:
+    name: Deploy Seller App
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.seller-app == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
-if[-f.deploy-state-admin];then
-last_deploy=$(sed-n'1p'.deploy-state-admin)
-last_status=$(sed-n'2p'.deploy-state-admin)
-current_time=$(date+%s)
-diff=$((current_time-last_deploy))
-cooldown_seconds=$((${{env.DEPLOY_COOLDOWN_HOURS}}*3600))
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
 
-echo"Lastdeploy:$((diff/60))minutesago,status:$last_status"
+      - name: Pull Vercel Environment
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
-#Deployif:lastfailedORolderthancooldown
-if["$last_status"="success"]&&[$diff-lt$cooldown_seconds];then
-remaining=$(((cooldown_seconds-diff)/60))
-echo"⏳Deploycooldownactive.Lastsuccessfuldeploywas$((diff/60))minutesago.Wait$remainingmoreminutes.">>$GITHUB_STEP_SUMMARY
-should_deploy="false"
-elif["$last_status"="failed"];then
-echo"🔄Lastdeployfailed,retrying...">>$GITHUB_STEP_SUMMARY
-fi
-fi
+      - name: Build Project
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
-echo"deploy=$should_deploy">>$GITHUB_OUTPUT
+      - name: Deploy to Vercel
+        run: |
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+          echo "### Seller App Deployed" >> $GITHUB_STEP_SUMMARY
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SELLER }}
 
--name:SetupNode.js
-if:steps.check-cooldown.outputs.deploy=='true'
-uses:actions/setup-node@v4
-with:
-node-version:${{env.NODE_VERSION}}
-cache:'yarn'
+  # ===========================================
+  # DEPLOY SHELL APP
+  # ===========================================
+  deploy-shell:
+    name: Deploy Shell App
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.shell-app == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
--name:Installdependencies
-if:steps.check-cooldown.outputs.deploy=='true'
-run:yarninstall--frozen-lockfile
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
 
--name:Buildpackages
-if:steps.check-cooldown.outputs.deploy=='true'
-run:|
-yarnbuild:types
-yarnbuild:utils
-yarnbuild:storybook
+      - name: Pull Vercel Environment
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
--name:InstallVercelCLI
-if:steps.check-cooldown.outputs.deploy=='true'
-run:npminstall--globalvercel@latest
+      - name: Build Project
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
--name:PullVercelConfig
-if:steps.check-cooldown.outputs.deploy=='true'
-run:vercelpull--yes--environment=production--token=${{secrets.VERCEL_TOKEN}}
-env:
-VERCEL_ORG_ID:${{secrets.VERCEL_ORG_ID}}
-VERCEL_PROJECT_ID:${{secrets.VERCEL_PROJECT_ID_ADMIN}}
+      - name: Deploy to Vercel
+        run: |
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+          echo "### Shell App Deployed" >> $GITHUB_STEP_SUMMARY
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SHELL }}
 
--name:BuildAdminApp
-if:steps.check-cooldown.outputs.deploy=='true'
-run:vercelbuild--prod--token=${{secrets.VERCEL_TOKEN}}
-env:
-VERCEL_ORG_ID:${{secrets.VERCEL_ORG_ID}}
-VERCEL_PROJECT_ID:${{secrets.VERCEL_PROJECT_ID_ADMIN}}
-
--name:DeploytoVercel
-if:steps.check-cooldown.outputs.deploy=='true'
-id:deploy
-run:|
-url=$(verceldeploy--prebuilt--prod--token=${{secrets.VERCEL_TOKEN}})
-echo"url=$url">>$GITHUB_OUTPUT
-echo"###🚀AdminAppDeployed">>$GITHUB_STEP_SUMMARY
-echo"**URL:**$url">>$GITHUB_STEP_SUMMARY
-env:
-VERCEL_ORG_ID:${{secrets.VERCEL_ORG_ID}}
-VERCEL_PROJECT_ID:${{secrets.VERCEL_PROJECT_ID_ADMIN}}
-
--name:SaveDeployState(Success)
-if:steps.check-cooldown.outputs.deploy=='true'&&success()
-run:|
-echo"$(date+%s)">.deploy-state-admin
-echo"success">>.deploy-state-admin
-
--name:SaveDeployState(Failed)
-if:steps.check-cooldown.outputs.deploy=='true'&&failure()
-run:|
-echo"$(date+%s)">.deploy-state-admin
-echo"failed">>.deploy-state-admin
-
--name:CacheDeployState
-if:steps.check-cooldown.outputs.deploy=='true'&&always()
-uses:actions/cache/save@v4
-with:
-path:.deploy-state-admin
-key:deploy-state-admin-${{github.run_id}}
-
-#===========================================
-#DEPLOYSELLERAPP
-#===========================================
-deploy-seller:
-name:🚀DeploySellerApp
-runs-on:ubuntu-latest
-needs:[detect-changes,validate-secrets]
-if:needs.detect-changes.outputs.apps-seller=='true'
-steps:
--uses:actions/checkout@v4
-with:
-ref:${{github.event.workflow_run.head_sha}}
-
--name:RestoreDeployState
-id:restore-state
-uses:actions/cache/restore@v4
-with:
-path:.deploy-state-seller
-key:deploy-state-seller-
-restore-keys:deploy-state-seller-
-
--name:CheckCooldownandLastStatus
-id:check-cooldown
-run:|
-should_deploy="true"
-
-if[-f.deploy-state-seller];then
-last_deploy=$(sed-n'1p'.deploy-state-seller)
-last_status=$(sed-n'2p'.deploy-state-seller)
-current_time=$(date+%s)
-diff=$((current_time-last_deploy))
-cooldown_seconds=$((${{env.DEPLOY_COOLDOWN_HOURS}}*3600))
-
-echo"Lastdeploy:$((diff/60))minutesago,status:$last_status"
-
-if["$last_status"="success"]&&[$diff-lt$cooldown_seconds];then
-remaining=$(((cooldown_seconds-diff)/60))
-echo"⏳Deploycooldownactive.Lastsuccessfuldeploywas$((diff/60))minutesago.Wait$remainingmoreminutes.">>$GITHUB_STEP_SUMMARY
-should_deploy="false"
-elif["$last_status"="failed"];then
-echo"🔄Lastdeployfailed,retrying...">>$GITHUB_STEP_SUMMARY
-fi
-fi
-
-echo"deploy=$should_deploy">>$GITHUB_OUTPUT
-
--name:SetupNode.js
-if:steps.check-cooldown.outputs.deploy=='true'
-uses:actions/setup-node@v4
-with:
-node-version:${{env.NODE_VERSION}}
-cache:'yarn'
-
--name:Installdependencies
-if:steps.check-cooldown.outputs.deploy=='true'
-run:yarninstall--frozen-lockfile
-
--name:Buildpackages
-if:steps.check-cooldown.outputs.deploy=='true'
-run:|
-yarnbuild:types
-yarnbuild:utils
-yarnbuild:storybook
-
--name:InstallVercelCLI
-if:steps.check-cooldown.outputs.deploy=='true'
-run:npminstall--globalvercel@latest
-
--name:PullVercelConfig
-if:steps.check-cooldown.outputs.deploy=='true'
-run:vercelpull--yes--environment=production--token=${{secrets.VERCEL_TOKEN}}
-env:
-VERCEL_ORG_ID:${{secrets.VERCEL_ORG_ID}}
-VERCEL_PROJECT_ID:${{secrets.VERCEL_PROJECT_ID_SELLER}}
-
--name:BuildSellerApp
-if:steps.check-cooldown.outputs.deploy=='true'
-run:vercelbuild--prod--token=${{secrets.VERCEL_TOKEN}}
-env:
-VERCEL_ORG_ID:${{secrets.VERCEL_ORG_ID}}
-VERCEL_PROJECT_ID:${{secrets.VERCEL_PROJECT_ID_SELLER}}
-
--name:DeploytoVercel
-if:steps.check-cooldown.outputs.deploy=='true'
-id:deploy
-run:|
-url=$(verceldeploy--prebuilt--prod--token=${{secrets.VERCEL_TOKEN}})
-echo"url=$url">>$GITHUB_OUTPUT
-echo"###🚀SellerAppDeployed">>$GITHUB_STEP_SUMMARY
-echo"**URL:**$url">>$GITHUB_STEP_SUMMARY
-env:
-VERCEL_ORG_ID:${{secrets.VERCEL_ORG_ID}}
-VERCEL_PROJECT_ID:${{secrets.VERCEL_PROJECT_ID_SELLER}}
-
--name:SaveDeployState(Success)
-if:steps.check-cooldown.outputs.deploy=='true'&&success()
-run:|
-echo"$(date+%s)">.deploy-state-seller
-echo"success">>.deploy-state-seller
-
--name:SaveDeployState(Failed)
-if:steps.check-cooldown.outputs.deploy=='true'&&failure()
-run:|
-echo"$(date+%s)">.deploy-state-seller
-echo"failed">>.deploy-state-seller
-
--name:CacheDeployState
-if:steps.check-cooldown.outputs.deploy=='true'&&always()
-uses:actions/cache/save@v4
-with:
-path:.deploy-state-seller
-key:deploy-state-seller-${{github.run_id}}
-
-#===========================================
-#DEPLOYSHELLAPP(ALWAYSDEPLOYS)
-#===========================================
-deploy-shell:
-name:🚀DeployShellApp(Always)
-runs-on:ubuntu-latest
-needs:[validate-secrets]
-steps:
--uses:actions/checkout@v4
-with:
-ref:${{github.event.workflow_run.head_sha}}
-
--name:SetupNode.js
-uses:actions/setup-node@v4
-with:
-node-version:${{env.NODE_VERSION}}
-cache:'yarn'
-
--name:Installdependencies
-run:yarninstall--frozen-lockfile
-
--name:Buildpackages
-run:|
-yarnbuild:types
-yarnbuild:utils
-yarnbuild:storybook
-
--name:InstallVercelCLI
-run:npminstall--globalvercel@latest
-
--name:PullVercelConfig
-run:vercelpull--yes--environment=production--token=${{secrets.VERCEL_TOKEN}}
-env:
-VERCEL_ORG_ID:${{secrets.VERCEL_ORG_ID}}
-VERCEL_PROJECT_ID:${{secrets.VERCEL_PROJECT_ID_SHELL}}
-
--name:BuildShellApp
-run:vercelbuild--prod--token=${{secrets.VERCEL_TOKEN}}
-env:
-VERCEL_ORG_ID:${{secrets.VERCEL_ORG_ID}}
-VERCEL_PROJECT_ID:${{secrets.VERCEL_PROJECT_ID_SHELL}}
-
--name:DeploytoVercel
-id:deploy
-run:|
-url=$(verceldeploy--prebuilt--prod--token=${{secrets.VERCEL_TOKEN}})
-echo"url=$url">>$GITHUB_OUTPUT
-echo"###🚀ShellAppDeployed">>$GITHUB_STEP_SUMMARY
-echo"**URL:**$url">>$GITHUB_STEP_SUMMARY
-env:
-VERCEL_ORG_ID:${{secrets.VERCEL_ORG_ID}}
-VERCEL_PROJECT_ID:${{secrets.VERCEL_PROJECT_ID_SHELL}}
-
-#===========================================
-#DEPLOYMENTSUMMARY
-#===========================================
-deployment-summary:
-name:📊DeploymentSummary
-runs-on:ubuntu-latest
-needs:[detect-changes,deploy-admin,deploy-seller,deploy-shell]
-if:always()
-steps:
--name:GenerateSummary
-run:|
-echo"##📊VercelDeploymentSummary">>$GITHUB_STEP_SUMMARY
-echo"">>$GITHUB_STEP_SUMMARY
-echo"###ChangesDetected">>$GITHUB_STEP_SUMMARY
-echo"|App|Changed|">>$GITHUB_STEP_SUMMARY
-echo"|-----|---------|">>$GITHUB_STEP_SUMMARY
-echo"|Admin|${{needs.detect-changes.outputs.apps-admin}}|">>$GITHUB_STEP_SUMMARY
-echo"|Seller|${{needs.detect-changes.outputs.apps-seller}}|">>$GITHUB_STEP_SUMMARY
-echo"|Shell|Always|">>$GITHUB_STEP_SUMMARY
-echo"">>$GITHUB_STEP_SUMMARY
-echo"###DeploymentStatus">>$GITHUB_STEP_SUMMARY
-echo"|App|Status|">>$GITHUB_STEP_SUMMARY
-echo"|-----|--------|">>$GITHUB_STEP_SUMMARY
-echo"|Admin|${{needs.deploy-admin.result}}|">>$GITHUB_STEP_SUMMARY
-echo"|Seller|${{needs.deploy-seller.result}}|">>$GITHUB_STEP_SUMMARY
-echo"|Shell(Always)|${{needs.deploy-shell.result}}|">>$GITHUB_STEP_SUMMARY
-
-if["${{needs.deploy-admin.result}}"=="failure"]||\
-["${{needs.deploy-seller.result}}"=="failure"]||\
-["${{needs.deploy-shell.result}}"=="failure"];then
-echo"">>$GITHUB_STEP_SUMMARY
-echo"❌**Somedeploymentsfailed**">>$GITHUB_STEP_SUMMARY
-exit1
-fi
-
-echo"">>$GITHUB_STEP_SUMMARY
-echo"✅**Verceldeploymentworkflowcompleted**">>$GITHUB_STEP_SUMMARY
+  # ===========================================
+  # DEPLOYMENT SUMMARY
+  # ===========================================
+  summary:
+    name: Deployment Summary
+    runs-on: ubuntu-latest
+    needs: [deploy-admin, deploy-seller, deploy-shell]
+    if: always()
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "## Vercel Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| App | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Admin | ${{ needs.deploy-admin.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Seller | ${{ needs.deploy-seller.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Shell | ${{ needs.deploy-shell.result }} |" >> $GITHUB_STEP_SUMMARY

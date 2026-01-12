@@ -1,7 +1,5 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
-  "project": "04f49d30-1baf-423a-9e6d-76ac8a867b93",
-  "service": "d1e9ea8d-a9e2-4e7a-b4e2-083301804aa5",
   "build": {
     "builder": "DOCKERFILE",
     "dockerfilePath": "services/order-service/Dockerfile"

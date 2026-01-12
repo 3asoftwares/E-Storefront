@@ -12,27 +12,26 @@ concurrency:
 
 env:
   NODE_VERSION: '20'
-  DEPLOY_COOLDOWN_HOURS: 3
 
 jobs:
   # ===========================================
   # VERIFY CI PASSED
   # ===========================================
   verify-ci:
-    name: ✅ Verify CI Passed
+    name: Verify CI Passed
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion == 'success'
     steps:
       - name: CI Verification
         run: |
-          echo "## ✅ CI Pipeline Passed" >> $GITHUB_STEP_SUMMARY
+          echo "## CI Pipeline Passed" >> $GITHUB_STEP_SUMMARY
           echo "Proceeding with Railway deployments..." >> $GITHUB_STEP_SUMMARY
 
   # ===========================================
   # DETECT CHANGES
   # ===========================================
   detect-changes:
-    name: 🔍 Detect Changes
+    name: Detect Changes
     runs-on: ubuntu-latest
     needs: verify-ci
     outputs:
@@ -42,7 +41,6 @@ jobs:
       services-gateway: ${{ steps.filter.outputs.services-gateway }}
       services-order: ${{ steps.filter.outputs.services-order }}
       services-product: ${{ steps.filter.outputs.services-product }}
-      packages: ${{ steps.filter.outputs.packages }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -71,508 +69,170 @@ jobs:
             services-product:
               - 'services/product-service/**'
               - 'packages/**'
-            packages:
-              - 'packages/**'
-
-  # ===========================================
-  # VALIDATE SECRETS
-  # ===========================================
-  validate-secrets:
-    name: 🔐 Validate Secrets
-    runs-on: ubuntu-latest
-    needs: detect-changes
-    steps:
-      - name: Check Required Secrets
-        env:
-          HAS_RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN != '' }}
-        run: |
-          if [ "$HAS_RAILWAY_TOKEN" != "true" ]; then
-            echo "❌ Missing RAILWAY_TOKEN secret" >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
-          echo "✅ Railway token is configured" >> $GITHUB_STEP_SUMMARY
 
   # ===========================================
   # DEPLOY AUTH SERVICE
   # ===========================================
   deploy-auth:
-    name: 🚀 Deploy Auth Service
+    name: Deploy Auth Service
     runs-on: ubuntu-latest
-    needs: [detect-changes, validate-secrets]
+    needs: detect-changes
     if: needs.detect-changes.outputs.services-auth == 'true'
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Restore Deploy State
-        uses: actions/cache/restore@v4
-        with:
-          path: .deploy-state-auth
-          key: deploy-state-auth-
-          restore-keys: deploy-state-auth-
-
-      - name: Check Cooldown and Last Status
-        id: check-cooldown
-        run: |
-          should_deploy="true"
-          
-          if [ -f .deploy-state-auth ]; then
-            last_deploy=$(sed -n '1p' .deploy-state-auth)
-            last_status=$(sed -n '2p' .deploy-state-auth)
-            current_time=$(date +%s)
-            diff=$((current_time - last_deploy))
-            cooldown_seconds=$((${{ env.DEPLOY_COOLDOWN_HOURS }} * 3600))
-            
-            if [ "$last_status" = "success" ] && [ $diff -lt $cooldown_seconds ]; then
-              remaining=$(((cooldown_seconds - diff) / 60))
-              echo "⏳ Deploy cooldown active. Wait $remaining more minutes." >> $GITHUB_STEP_SUMMARY
-              should_deploy="false"
-            elif [ "$last_status" = "failed" ]; then
-              echo "🔄 Last deploy failed, retrying..." >> $GITHUB_STEP_SUMMARY
-            fi
-          fi
-          
-          echo "deploy=$should_deploy" >> $GITHUB_OUTPUT
-
       - name: Install Railway CLI
-        if: steps.check-cooldown.outputs.deploy == 'true'
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
-        if: steps.check-cooldown.outputs.deploy == 'true'
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_SERVICE: ${{ secrets.RAILWAY_SERVICE_AUTH }}
         run: |
           cd services/auth-service
-          railway up --detach
-          echo "### 🚀 Auth Service Deployed" >> $GITHUB_STEP_SUMMARY
-
-      - name: Save Deploy State (Success)
-        if: steps.check-cooldown.outputs.deploy == 'true' && success()
-        run: |
-          echo "$(date +%s)" > .deploy-state-auth
-          echo "success" >> .deploy-state-auth
-
-      - name: Save Deploy State (Failed)
-        if: steps.check-cooldown.outputs.deploy == 'true' && failure()
-        run: |
-          echo "$(date +%s)" > .deploy-state-auth
-          echo "failed" >> .deploy-state-auth
-
-      - name: Cache Deploy State
-        if: steps.check-cooldown.outputs.deploy == 'true' && always()
-        uses: actions/cache/save@v4
-        with:
-          path: .deploy-state-auth
-          key: deploy-state-auth-${{ github.run_id }}
+          railway up --service $RAILWAY_SERVICE --detach
+          echo "### Auth Service Deployed" >> $GITHUB_STEP_SUMMARY
 
   # ===========================================
   # DEPLOY CATEGORY SERVICE
   # ===========================================
   deploy-category:
-    name: 🚀 Deploy Category Service
+    name: Deploy Category Service
     runs-on: ubuntu-latest
-    needs: [detect-changes, validate-secrets]
+    needs: detect-changes
     if: needs.detect-changes.outputs.services-category == 'true'
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Restore Deploy State
-        uses: actions/cache/restore@v4
-        with:
-          path: .deploy-state-category
-          key: deploy-state-category-
-          restore-keys: deploy-state-category-
-
-      - name: Check Cooldown and Last Status
-        id: check-cooldown
-        run: |
-          should_deploy="true"
-          
-          if [ -f .deploy-state-category ]; then
-            last_deploy=$(sed -n '1p' .deploy-state-category)
-            last_status=$(sed -n '2p' .deploy-state-category)
-            current_time=$(date +%s)
-            diff=$((current_time - last_deploy))
-            cooldown_seconds=$((${{ env.DEPLOY_COOLDOWN_HOURS }} * 3600))
-            
-            if [ "$last_status" = "success" ] && [ $diff -lt $cooldown_seconds ]; then
-              remaining=$(((cooldown_seconds - diff) / 60))
-              echo "⏳ Deploy cooldown active. Wait $remaining more minutes." >> $GITHUB_STEP_SUMMARY
-              should_deploy="false"
-            elif [ "$last_status" = "failed" ]; then
-              echo "🔄 Last deploy failed, retrying..." >> $GITHUB_STEP_SUMMARY
-            fi
-          fi
-          
-          echo "deploy=$should_deploy" >> $GITHUB_OUTPUT
-
       - name: Install Railway CLI
-        if: steps.check-cooldown.outputs.deploy == 'true'
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
-        if: steps.check-cooldown.outputs.deploy == 'true'
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_SERVICE: ${{ secrets.RAILWAY_SERVICE_CATEGORY }}
         run: |
           cd services/category-service
-          railway up --detach
-          echo "### 🚀 Category Service Deployed" >> $GITHUB_STEP_SUMMARY
-
-      - name: Save Deploy State (Success)
-        if: steps.check-cooldown.outputs.deploy == 'true' && success()
-        run: |
-          echo "$(date +%s)" > .deploy-state-category
-          echo "success" >> .deploy-state-category
-
-      - name: Save Deploy State (Failed)
-        if: steps.check-cooldown.outputs.deploy == 'true' && failure()
-        run: |
-          echo "$(date +%s)" > .deploy-state-category
-          echo "failed" >> .deploy-state-category
-
-      - name: Cache Deploy State
-        if: steps.check-cooldown.outputs.deploy == 'true' && always()
-        uses: actions/cache/save@v4
-        with:
-          path: .deploy-state-category
-          key: deploy-state-category-${{ github.run_id }}
+          railway up --service $RAILWAY_SERVICE --detach
+          echo "### Category Service Deployed" >> $GITHUB_STEP_SUMMARY
 
   # ===========================================
   # DEPLOY COUPON SERVICE
   # ===========================================
   deploy-coupon:
-    name: 🚀 Deploy Coupon Service
+    name: Deploy Coupon Service
     runs-on: ubuntu-latest
-    needs: [detect-changes, validate-secrets]
+    needs: detect-changes
     if: needs.detect-changes.outputs.services-coupon == 'true'
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Restore Deploy State
-        uses: actions/cache/restore@v4
-        with:
-          path: .deploy-state-coupon
-          key: deploy-state-coupon-
-          restore-keys: deploy-state-coupon-
-
-      - name: Check Cooldown and Last Status
-        id: check-cooldown
-        run: |
-          should_deploy="true"
-          
-          if [ -f .deploy-state-coupon ]; then
-            last_deploy=$(sed -n '1p' .deploy-state-coupon)
-            last_status=$(sed -n '2p' .deploy-state-coupon)
-            current_time=$(date +%s)
-            diff=$((current_time - last_deploy))
-            cooldown_seconds=$((${{ env.DEPLOY_COOLDOWN_HOURS }} * 3600))
-            
-            if [ "$last_status" = "success" ] && [ $diff -lt $cooldown_seconds ]; then
-              remaining=$(((cooldown_seconds - diff) / 60))
-              echo "⏳ Deploy cooldown active. Wait $remaining more minutes." >> $GITHUB_STEP_SUMMARY
-              should_deploy="false"
-            elif [ "$last_status" = "failed" ]; then
-              echo "🔄 Last deploy failed, retrying..." >> $GITHUB_STEP_SUMMARY
-            fi
-          fi
-          
-          echo "deploy=$should_deploy" >> $GITHUB_OUTPUT
-
       - name: Install Railway CLI
-        if: steps.check-cooldown.outputs.deploy == 'true'
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
-        if: steps.check-cooldown.outputs.deploy == 'true'
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_SERVICE: ${{ secrets.RAILWAY_SERVICE_COUPON }}
         run: |
           cd services/coupon-service
-          railway up --detach
-          echo "### 🚀 Coupon Service Deployed" >> $GITHUB_STEP_SUMMARY
-
-      - name: Save Deploy State (Success)
-        if: steps.check-cooldown.outputs.deploy == 'true' && success()
-        run: |
-          echo "$(date +%s)" > .deploy-state-coupon
-          echo "success" >> .deploy-state-coupon
-
-      - name: Save Deploy State (Failed)
-        if: steps.check-cooldown.outputs.deploy == 'true' && failure()
-        run: |
-          echo "$(date +%s)" > .deploy-state-coupon
-          echo "failed" >> .deploy-state-coupon
-
-      - name: Cache Deploy State
-        if: steps.check-cooldown.outputs.deploy == 'true' && always()
-        uses: actions/cache/save@v4
-        with:
-          path: .deploy-state-coupon
-          key: deploy-state-coupon-${{ github.run_id }}
+          railway up --service $RAILWAY_SERVICE --detach
+          echo "### Coupon Service Deployed" >> $GITHUB_STEP_SUMMARY
 
   # ===========================================
   # DEPLOY GRAPHQL GATEWAY
   # ===========================================
   deploy-gateway:
-    name: 🚀 Deploy GraphQL Gateway
+    name: Deploy GraphQL Gateway
     runs-on: ubuntu-latest
-    needs: [detect-changes, validate-secrets]
+    needs: detect-changes
     if: needs.detect-changes.outputs.services-gateway == 'true'
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Restore Deploy State
-        uses: actions/cache/restore@v4
-        with:
-          path: .deploy-state-gateway
-          key: deploy-state-gateway-
-          restore-keys: deploy-state-gateway-
-
-      - name: Check Cooldown and Last Status
-        id: check-cooldown
-        run: |
-          should_deploy="true"
-          
-          if [ -f .deploy-state-gateway ]; then
-            last_deploy=$(sed -n '1p' .deploy-state-gateway)
-            last_status=$(sed -n '2p' .deploy-state-gateway)
-            current_time=$(date +%s)
-            diff=$((current_time - last_deploy))
-            cooldown_seconds=$((${{ env.DEPLOY_COOLDOWN_HOURS }} * 3600))
-            
-            if [ "$last_status" = "success" ] && [ $diff -lt $cooldown_seconds ]; then
-              remaining=$(((cooldown_seconds - diff) / 60))
-              echo "⏳ Deploy cooldown active. Wait $remaining more minutes." >> $GITHUB_STEP_SUMMARY
-              should_deploy="false"
-            elif [ "$last_status" = "failed" ]; then
-              echo "🔄 Last deploy failed, retrying..." >> $GITHUB_STEP_SUMMARY
-            fi
-          fi
-          
-          echo "deploy=$should_deploy" >> $GITHUB_OUTPUT
-
       - name: Install Railway CLI
-        if: steps.check-cooldown.outputs.deploy == 'true'
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
-        if: steps.check-cooldown.outputs.deploy == 'true'
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_SERVICE: ${{ secrets.RAILWAY_SERVICE_GATEWAY }}
         run: |
           cd services/graphql-gateway
-          railway up --detach
-          echo "### 🚀 GraphQL Gateway Deployed" >> $GITHUB_STEP_SUMMARY
-
-      - name: Save Deploy State (Success)
-        if: steps.check-cooldown.outputs.deploy == 'true' && success()
-        run: |
-          echo "$(date +%s)" > .deploy-state-gateway
-          echo "success" >> .deploy-state-gateway
-
-      - name: Save Deploy State (Failed)
-        if: steps.check-cooldown.outputs.deploy == 'true' && failure()
-        run: |
-          echo "$(date +%s)" > .deploy-state-gateway
-          echo "failed" >> .deploy-state-gateway
-
-      - name: Cache Deploy State
-        if: steps.check-cooldown.outputs.deploy == 'true' && always()
-        uses: actions/cache/save@v4
-        with:
-          path: .deploy-state-gateway
-          key: deploy-state-gateway-${{ github.run_id }}
+          railway up --service $RAILWAY_SERVICE --detach
+          echo "### GraphQL Gateway Deployed" >> $GITHUB_STEP_SUMMARY
 
   # ===========================================
   # DEPLOY ORDER SERVICE
   # ===========================================
   deploy-order:
-    name: 🚀 Deploy Order Service
+    name: Deploy Order Service
     runs-on: ubuntu-latest
-    needs: [detect-changes, validate-secrets]
+    needs: detect-changes
     if: needs.detect-changes.outputs.services-order == 'true'
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Restore Deploy State
-        uses: actions/cache/restore@v4
-        with:
-          path: .deploy-state-order
-          key: deploy-state-order-
-          restore-keys: deploy-state-order-
-
-      - name: Check Cooldown and Last Status
-        id: check-cooldown
-        run: |
-          should_deploy="true"
-          
-          if [ -f .deploy-state-order ]; then
-            last_deploy=$(sed -n '1p' .deploy-state-order)
-            last_status=$(sed -n '2p' .deploy-state-order)
-            current_time=$(date +%s)
-            diff=$((current_time - last_deploy))
-            cooldown_seconds=$((${{ env.DEPLOY_COOLDOWN_HOURS }} * 3600))
-            
-            if [ "$last_status" = "success" ] && [ $diff -lt $cooldown_seconds ]; then
-              remaining=$(((cooldown_seconds - diff) / 60))
-              echo "⏳ Deploy cooldown active. Wait $remaining more minutes." >> $GITHUB_STEP_SUMMARY
-              should_deploy="false"
-            elif [ "$last_status" = "failed" ]; then
-              echo "🔄 Last deploy failed, retrying..." >> $GITHUB_STEP_SUMMARY
-            fi
-          fi
-          
-          echo "deploy=$should_deploy" >> $GITHUB_OUTPUT
-
       - name: Install Railway CLI
-        if: steps.check-cooldown.outputs.deploy == 'true'
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
-        if: steps.check-cooldown.outputs.deploy == 'true'
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_SERVICE: ${{ secrets.RAILWAY_SERVICE_ORDER }}
         run: |
           cd services/order-service
-          railway up --detach
-          echo "### 🚀 Order Service Deployed" >> $GITHUB_STEP_SUMMARY
-
-      - name: Save Deploy State (Success)
-        if: steps.check-cooldown.outputs.deploy == 'true' && success()
-        run: |
-          echo "$(date +%s)" > .deploy-state-order
-          echo "success" >> .deploy-state-order
-
-      - name: Save Deploy State (Failed)
-        if: steps.check-cooldown.outputs.deploy == 'true' && failure()
-        run: |
-          echo "$(date +%s)" > .deploy-state-order
-          echo "failed" >> .deploy-state-order
-
-      - name: Cache Deploy State
-        if: steps.check-cooldown.outputs.deploy == 'true' && always()
-        uses: actions/cache/save@v4
-        with:
-          path: .deploy-state-order
-          key: deploy-state-order-${{ github.run_id }}
+          railway up --service $RAILWAY_SERVICE --detach
+          echo "### Order Service Deployed" >> $GITHUB_STEP_SUMMARY
 
   # ===========================================
   # DEPLOY PRODUCT SERVICE
   # ===========================================
   deploy-product:
-    name: 🚀 Deploy Product Service
+    name: Deploy Product Service
     runs-on: ubuntu-latest
-    needs: [detect-changes, validate-secrets]
+    needs: detect-changes
     if: needs.detect-changes.outputs.services-product == 'true'
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Restore Deploy State
-        uses: actions/cache/restore@v4
-        with:
-          path: .deploy-state-product
-          key: deploy-state-product-
-          restore-keys: deploy-state-product-
-
-      - name: Check Cooldown and Last Status
-        id: check-cooldown
-        run: |
-          should_deploy="true"
-          
-          if [ -f .deploy-state-product ]; then
-            last_deploy=$(sed -n '1p' .deploy-state-product)
-            last_status=$(sed -n '2p' .deploy-state-product)
-            current_time=$(date +%s)
-            diff=$((current_time - last_deploy))
-            cooldown_seconds=$((${{ env.DEPLOY_COOLDOWN_HOURS }} * 3600))
-            
-            if [ "$last_status" = "success" ] && [ $diff -lt $cooldown_seconds ]; then
-              remaining=$(((cooldown_seconds - diff) / 60))
-              echo "⏳ Deploy cooldown active. Wait $remaining more minutes." >> $GITHUB_STEP_SUMMARY
-              should_deploy="false"
-            elif [ "$last_status" = "failed" ]; then
-              echo "🔄 Last deploy failed, retrying..." >> $GITHUB_STEP_SUMMARY
-            fi
-          fi
-          
-          echo "deploy=$should_deploy" >> $GITHUB_OUTPUT
-
       - name: Install Railway CLI
-        if: steps.check-cooldown.outputs.deploy == 'true'
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
-        if: steps.check-cooldown.outputs.deploy == 'true'
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_SERVICE: ${{ secrets.RAILWAY_SERVICE_PRODUCT }}
         run: |
           cd services/product-service
-          railway up --detach
-          echo "### 🚀 Product Service Deployed" >> $GITHUB_STEP_SUMMARY
-
-      - name: Save Deploy State (Success)
-        if: steps.check-cooldown.outputs.deploy == 'true' && success()
-        run: |
-          echo "$(date +%s)" > .deploy-state-product
-          echo "success" >> .deploy-state-product
-
-      - name: Save Deploy State (Failed)
-        if: steps.check-cooldown.outputs.deploy == 'true' && failure()
-        run: |
-          echo "$(date +%s)" > .deploy-state-product
-          echo "failed" >> .deploy-state-product
-
-      - name: Cache Deploy State
-        if: steps.check-cooldown.outputs.deploy == 'true' && always()
-        uses: actions/cache/save@v4
-        with:
-          path: .deploy-state-product
-          key: deploy-state-product-${{ github.run_id }}
+          railway up --service $RAILWAY_SERVICE --detach
+          echo "### Product Service Deployed" >> $GITHUB_STEP_SUMMARY
 
   # ===========================================
   # DEPLOYMENT SUMMARY
   # ===========================================
-  deployment-summary:
-    name: 📊 Deployment Summary
+  summary:
+    name: Deployment Summary
     runs-on: ubuntu-latest
-    needs:
-      - detect-changes
-      - deploy-auth
-      - deploy-category
-      - deploy-coupon
-      - deploy-gateway
-      - deploy-order
-      - deploy-product
+    needs: [deploy-auth, deploy-category, deploy-coupon, deploy-gateway, deploy-order, deploy-product]
     if: always()
     steps:
       - name: Generate Summary
         run: |
-          echo "## 📊 Railway Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## Railway Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Changes Detected" >> $GITHUB_STEP_SUMMARY
-          echo "| Service | Changed |" >> $GITHUB_STEP_SUMMARY
-          echo "|---------|---------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Auth | ${{ needs.detect-changes.outputs.services-auth }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Category | ${{ needs.detect-changes.outputs.services-category }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Coupon | ${{ needs.detect-changes.outputs.services-coupon }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Gateway | ${{ needs.detect-changes.outputs.services-gateway }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Order | ${{ needs.detect-changes.outputs.services-order }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Product | ${{ needs.detect-changes.outputs.services-product }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Deployment Status" >> $GITHUB_STEP_SUMMARY
           echo "| Service | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Auth | ${{ needs.deploy-auth.result }} |" >> $GITHUB_STEP_SUMMARY
@@ -581,17 +241,3 @@ jobs:
           echo "| Gateway | ${{ needs.deploy-gateway.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Order | ${{ needs.deploy-order.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Product | ${{ needs.deploy-product.result }} |" >> $GITHUB_STEP_SUMMARY
-          
-          if [ "${{ needs.deploy-auth.result }}" == "failure" ] || \
-             [ "${{ needs.deploy-category.result }}" == "failure" ] || \
-             [ "${{ needs.deploy-coupon.result }}" == "failure" ] || \
-             [ "${{ needs.deploy-gateway.result }}" == "failure" ] || \
-             [ "${{ needs.deploy-order.result }}" == "failure" ] || \
-             [ "${{ needs.deploy-product.result }}" == "failure" ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "❌ **Some deployments failed**" >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
-          
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ **Railway deployment workflow completed**" >> $GITHUB_STEP_SUMMARY

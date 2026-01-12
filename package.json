@@ -9,7 +9,6 @@
     "services/*"
   ],
   "scripts": {
-    "build:packages": "yarn workspace @3asoftwares/types build && yarn workspace @3asoftwares/utils build && yarn workspace @3asoftwares/ui build",
     "dev:admin": "yarn workspace @3asoftwares/admin-app run dev",
     "dev:shell": "yarn workspace @3asoftwares/shell-app run dev",
     "dev:shell:full": "yarn build:packages && yarn workspace @3asoftwares/shell-app run dev",
@@ -23,6 +22,10 @@
     "dev:frontend": "concurrently \"yarn dev:admin\" \"yarn dev:shell\" \"yarn dev:seller\" --names \"admin,shell,seller\" --prefix-colors \"cyan,green,yellow\"",
     "dev:backend": "concurrently \"yarn dev:auth\" \"yarn dev:category\" \"yarn dev:coupon\" \"yarn dev:gateway\" \"yarn dev:order\" \"yarn dev:product\" --names \"auth,category,coupon,gateway,order,product\" --prefix-colors \"magenta,green,yellow,cyan,blue,white\"",
     "dev:all": "concurrently \"yarn dev:frontend\" \"yarn dev:backend\" --names \"FRONTEND,BACKEND\" --prefix-colors \"cyan,white\"",
+    "build:types": "yarn workspace @3asoftwares/types build",
+    "build:utils": "yarn workspace @3asoftwares/utils build",
+    "build:ui": "yarn workspace @3asoftwares/ui build",
+    "build:storybook": "yarn workspace @3asoftwares/ui build-storybook",
     "build:admin": "yarn workspace @3asoftwares/admin-app run build",
     "build:shell": "yarn build:packages && yarn workspace @3asoftwares/shell-app run build",
     "build:seller": "yarn workspace @3asoftwares/seller-app run build",
@@ -32,6 +35,7 @@
     "build:gateway": "cd services/graphql-gateway && yarn build",
     "build:order": "cd services/order-service && yarn build",
     "build:product": "cd services/product-service && yarn build",
+    "build:packages": "yarn workspace @3asoftwares/types build && yarn workspace @3asoftwares/utils build && yarn workspace @3asoftwares/ui build",
     "build:frontend": "yarn build:admin && yarn build:shell && yarn build:seller",
     "build:backend": "yarn build:auth && yarn build:category && yarn build:coupon && yarn build:gateway && yarn build:order && yarn build:product",
     "build:all": "yarn build:frontend && yarn build:backend",
