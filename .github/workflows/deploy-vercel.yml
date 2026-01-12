@@ -62,43 +62,13 @@ jobs:
           fi
 
   # ===========================================
-  # DETECT CHANGES (for push events)
-  # ===========================================
-  detect-changes:
-    needs: check-ci
-    if: needs.check-ci.outputs.should_deploy == 'true'
-    runs-on: ubuntu-latest
-    outputs:
-      admin-app: ${{ steps.changes.outputs.admin-app }}
-      seller-app: ${{ steps.changes.outputs.seller-app }}
-      shell-app: ${{ steps.changes.outputs.shell-app }}
-      packages: ${{ steps.changes.outputs.packages }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-      - uses: dorny/paths-filter@v3
-        id: changes
-        with:
-          filters: |
-            admin-app:
-              - 'apps/admin-app/**'
-            seller-app:
-              - 'apps/seller-app/**'
-            shell-app:
-              - 'apps/shell-app/**'
-            packages:
-              - 'packages/**'
-
-  # ===========================================
   # DEPLOY ADMIN APP
   # ===========================================
   deploy-admin:
-    needs: [check-ci, detect-changes]
+    needs: check-ci
     if: |
       needs.check-ci.outputs.should_deploy == 'true' &&
-      ((github.event_name == 'workflow_run' && (needs.detect-changes.outputs.admin-app == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.app == 'admin-app' || github.event.inputs.app == 'all')))
+      (github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch' && (github.event.inputs.app == 'admin-app' || github.event.inputs.app == 'all'))
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -177,11 +147,10 @@ jobs:
   # DEPLOY SELLER APP
   # ===========================================
   deploy-seller:
-    needs: [check-ci, detect-changes]
+    needs: check-ci
     if: |
       needs.check-ci.outputs.should_deploy == 'true' &&
-      ((github.event_name == 'workflow_run' && (needs.detect-changes.outputs.seller-app == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.app == 'seller-app' || github.event.inputs.app == 'all')))
+      (github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch' && (github.event.inputs.app == 'seller-app' || github.event.inputs.app == 'all'))
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -262,11 +231,10 @@ jobs:
   # DEPLOY SHELL APP
   # ===========================================
   deploy-shell:
-    needs: [check-ci, detect-changes]
+    needs: check-ci
     if: |
       needs.check-ci.outputs.should_deploy == 'true' &&
-      ((github.event_name == 'workflow_run' && (needs.detect-changes.outputs.shell-app == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.app == 'shell-app' || github.event.inputs.app == 'all')))
+      (github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch' && (github.event.inputs.app == 'shell-app' || github.event.inputs.app == 'all'))
     runs-on: ubuntu-latest
     environment:
       name: production

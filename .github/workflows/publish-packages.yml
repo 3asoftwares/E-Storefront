@@ -53,28 +53,6 @@ env:
 
 jobs:
   # ===========================================
-  # DETECT CHANGES (for push events)
-  # ===========================================
-  detect-changes:
-    runs-on: ubuntu-latest
-    outputs:
-      types: ${{ steps.changes.outputs.types }}
-      utils: ${{ steps.changes.outputs.utils }}
-      ui-library: ${{ steps.changes.outputs.ui-library }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: changes
-        with:
-          filters: |
-            types:
-              - 'packages/types/**'
-            utils:
-              - 'packages/utils/**'
-            ui-library:
-              - 'packages/ui-library/**'
-
-  # ===========================================
   # VALIDATE SECRETS
   # ===========================================
   validate-secrets:
@@ -94,10 +72,10 @@ jobs:
   # PUBLISH @3asoftwares/types
   # ===========================================
   publish-types:
-    needs: [detect-changes, validate-secrets]
+    needs: validate-secrets
     runs-on: ubuntu-latest
     if: |
-      (github.event_name == 'push' && needs.detect-changes.outputs.types == 'true') ||
+      github.event_name == 'push' ||
       github.event_name == 'release' ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.package == 'types' || github.event.inputs.package == 'all'))
     steps:
@@ -161,11 +139,11 @@ jobs:
   # PUBLISH @3asoftwares/utils
   # ===========================================
   publish-utils:
-    needs: [detect-changes, validate-secrets, publish-types]
+    needs: [validate-secrets, publish-types]
     runs-on: ubuntu-latest
     if: |
       always() && needs.validate-secrets.result == 'success' &&
-      ((github.event_name == 'push' && needs.detect-changes.outputs.utils == 'true') ||
+      (github.event_name == 'push' ||
       github.event_name == 'release' ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.package == 'utils' || github.event.inputs.package == 'all')))
     steps:
@@ -229,10 +207,10 @@ jobs:
   # PUBLISH @3asoftwares/ui-library
   # ===========================================
   publish-ui-library:
-    needs: [detect-changes, validate-secrets]
+    needs: validate-secrets
     runs-on: ubuntu-latest
     if: |
-      (github.event_name == 'push' && needs.detect-changes.outputs.ui-library == 'true') ||
+      github.event_name == 'push' ||
       github.event_name == 'release' ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.package == 'ui-library' || github.event.inputs.package == 'all'))
     steps:

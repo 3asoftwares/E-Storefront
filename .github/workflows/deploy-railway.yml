@@ -61,43 +61,6 @@ jobs:
           fi
 
   # ===========================================
-  # DETECT CHANGES (for push events)
-  # ===========================================
-  detect-changes:
-    needs: check-ci
-    if: needs.check-ci.outputs.should_deploy == 'true'
-    runs-on: ubuntu-latest
-    outputs:
-      auth-service: ${{ steps.changes.outputs.auth-service }}
-      category-service: ${{ steps.changes.outputs.category-service }}
-      coupon-service: ${{ steps.changes.outputs.coupon-service }}
-      graphql-gateway: ${{ steps.changes.outputs.graphql-gateway }}
-      order-service: ${{ steps.changes.outputs.order-service }}
-      product-service: ${{ steps.changes.outputs.product-service }}
-      packages: ${{ steps.changes.outputs.packages }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: changes
-        with:
-          filters: |
-            auth-service:
-              - 'services/auth-service/**'
-            category-service:
-              - 'services/category-service/**'
-            coupon-service:
-              - 'services/coupon-service/**'
-            graphql-gateway:
-              - 'services/graphql-gateway/**'
-            order-service:
-              - 'services/order-service/**'
-            product-service:
-              - 'services/product-service/**'
-            packages:
-              - 'packages/types/**'
-              - 'packages/utils/**'
-
-  # ===========================================
   # VALIDATE SECRETS
   # ===========================================
   validate-secrets:
@@ -153,11 +116,10 @@ jobs:
   # DEPLOY AUTH SERVICE
   # ===========================================
   deploy-auth:
-    needs: [check-ci, detect-changes, build-packages]
+    needs: [check-ci, build-packages]
     if: |
       needs.check-ci.outputs.should_deploy == 'true' &&
-      ((github.event_name == 'workflow_run' && (needs.detect-changes.outputs.auth-service == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'auth-service' || github.event.inputs.service == 'all')))
+      (github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'auth-service' || github.event.inputs.service == 'all'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -223,11 +185,10 @@ jobs:
   # DEPLOY CATEGORY SERVICE
   # ===========================================
   deploy-category:
-    needs: [check-ci, detect-changes, build-packages]
+    needs: [check-ci, build-packages]
     if: |
       needs.check-ci.outputs.should_deploy == 'true' &&
-      ((github.event_name == 'workflow_run' && (needs.detect-changes.outputs.category-service == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'category-service' || github.event.inputs.service == 'all')))
+      (github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'category-service' || github.event.inputs.service == 'all'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -292,11 +253,10 @@ jobs:
   # DEPLOY COUPON SERVICE
   # ===========================================
   deploy-coupon:
-    needs: [check-ci, detect-changes, build-packages]
+    needs: [check-ci, build-packages]
     if: |
       needs.check-ci.outputs.should_deploy == 'true' &&
-      ((github.event_name == 'workflow_run' && (needs.detect-changes.outputs.coupon-service == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'coupon-service' || github.event.inputs.service == 'all')))
+      (github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'coupon-service' || github.event.inputs.service == 'all'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -361,11 +321,10 @@ jobs:
   # DEPLOY GRAPHQL GATEWAY
   # ===========================================
   deploy-gateway:
-    needs: [check-ci, detect-changes, build-packages]
+    needs: [check-ci, build-packages]
     if: |
       needs.check-ci.outputs.should_deploy == 'true' &&
-      ((github.event_name == 'workflow_run' && (needs.detect-changes.outputs.graphql-gateway == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'graphql-gateway' || github.event.inputs.service == 'all')))
+      (github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'graphql-gateway' || github.event.inputs.service == 'all'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -430,11 +389,10 @@ jobs:
   # DEPLOY ORDER SERVICE
   # ===========================================
   deploy-order:
-    needs: [check-ci, detect-changes, build-packages]
+    needs: [check-ci, build-packages]
     if: |
       needs.check-ci.outputs.should_deploy == 'true' &&
-      ((github.event_name == 'workflow_run' && (needs.detect-changes.outputs.order-service == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'order-service' || github.event.inputs.service == 'all')))
+      (github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'order-service' || github.event.inputs.service == 'all'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -499,11 +457,10 @@ jobs:
   # DEPLOY PRODUCT SERVICE
   # ===========================================
   deploy-product:
-    needs: [check-ci, detect-changes, build-packages]
+    needs: [check-ci, build-packages]
     if: |
       needs.check-ci.outputs.should_deploy == 'true' &&
-      ((github.event_name == 'workflow_run' && (needs.detect-changes.outputs.product-service == 'true' || needs.detect-changes.outputs.packages == 'true')) ||
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'product-service' || github.event.inputs.service == 'all')))
+      (github.event_name == 'workflow_run' || github.event_name == 'workflow_dispatch' && (github.event.inputs.service == 'product-service' || github.event.inputs.service == 'all'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
