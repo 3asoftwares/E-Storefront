@@ -83,18 +83,10 @@
     "health:backend": "powershell -ExecutionPolicy Bypass -File ./scripts/health-check.ps1 -Services",
     "health:frontend": "powershell -ExecutionPolicy Bypass -File ./scripts/health-check.ps1 -Frontend",
     "health:package": "powershell -ExecutionPolicy Bypass -File ./scripts/health-check.ps1 -Packages",
-    "health:verbose": "powershell -ExecutionPolicy Bypass -File ./scripts/health-check.ps1 -Verbose",
-    "verify:packages": "yarn build:types && yarn build:utils && yarn build:storybook && yarn test:package",
-    "verify:frontend": "yarn build:frontend && yarn test:frontend",
-    "verify:backend": "yarn build:backend && yarn test:backend",
-    "verify:all": "yarn verify:packages && yarn verify:frontend && yarn verify:backend",
-    "vercel:build:deps": "yarn build:types && yarn build:utils",
-    "vercel:build:auth": "yarn vercel:build:deps && yarn workspace @3asoftwares/auth-service build",
-    "vercel:build:category": "yarn vercel:build:deps && yarn workspace @3asoftwares/category-service build",
-    "vercel:build:coupon": "yarn vercel:build:deps && yarn workspace @3asoftwares/coupon-service build",
-    "vercel:build:gateway": "yarn vercel:build:deps && yarn workspace @3asoftwares/graphql-gateway build",
-    "vercel:build:order": "yarn vercel:build:deps && yarn workspace @3asoftwares/order-service build",
-    "vercel:build:product": "yarn vercel:build:deps && yarn workspace @3asoftwares/product-service build"
+    "health:verbose": "powershell -ExecutionPolicy Bypass -File ./scripts/health-check.ps1 -Verbose"
+  },
+  "dependencies": {
+    "tsup": "^8.5.1"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

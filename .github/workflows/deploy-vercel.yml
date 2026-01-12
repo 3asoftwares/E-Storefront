@@ -26,7 +26,7 @@ jobs:
       - name: CI Verification
         run: |
           echo "## ✅ CI Pipeline Passed" >> $GITHUB_STEP_SUMMARY
-          echo "Proceeding with Vercel deployments..." >> $GITHUB_STEP_SUMMARY
+          echo "Proceeding with Vercel deployments (Shell App only)..." >> $GITHUB_STEP_SUMMARY
 
   # ===========================================
   # DETECT CHANGES
@@ -36,8 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: verify-ci
     outputs:
-      apps-admin: ${{ steps.filter.outputs.apps-admin }}
-      apps-seller: ${{ steps.filter.outputs.apps-seller }}
+      # COMMENTED OUT - Other apps
+      # apps-admin: ${{ steps.filter.outputs.apps-admin }}
+      # apps-seller: ${{ steps.filter.outputs.apps-seller }}
       apps-shell: ${{ steps.filter.outputs.apps-shell }}
       packages: ${{ steps.filter.outputs.packages }}
     steps:
@@ -50,12 +51,6 @@ jobs:
         id: filter
         with:
           filters: |
-            apps-admin:
-              - 'apps/admin-app/**'
-              - 'packages/**'
-            apps-seller:
-              - 'apps/seller-app/**'
-              - 'packages/**'
             apps-shell:
               - 'apps/shell-app/**'
               - 'packages/**'
@@ -74,15 +69,11 @@ jobs:
         env:
           HAS_VERCEL_ORG: ${{ secrets.VERCEL_ORG_ID != '' }}
           HAS_VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN != '' }}
-          HAS_ADMIN_PROJECT: ${{ secrets.VERCEL_PROJECT_ID_ADMIN != '' }}
-          HAS_SELLER_PROJECT: ${{ secrets.VERCEL_PROJECT_ID_SELLER != '' }}
           HAS_SHELL_PROJECT: ${{ secrets.VERCEL_PROJECT_ID_SHELL != '' }}
         run: |
           missing=""
           if [ "$HAS_VERCEL_ORG" != "true" ]; then missing="$missing VERCEL_ORG_ID"; fi
           if [ "$HAS_VERCEL_TOKEN" != "true" ]; then missing="$missing VERCEL_TOKEN"; fi
-          if [ "$HAS_ADMIN_PROJECT" != "true" ]; then missing="$missing VERCEL_PROJECT_ID_ADMIN"; fi
-          if [ "$HAS_SELLER_PROJECT" != "true" ]; then missing="$missing VERCEL_PROJECT_ID_SELLER"; fi
           if [ "$HAS_SHELL_PROJECT" != "true" ]; then missing="$missing VERCEL_PROJECT_ID_SHELL"; fi
           
           if [ -n "$missing" ]; then
@@ -93,237 +84,10 @@ jobs:
           echo "✅ All required secrets are configured" >> $GITHUB_STEP_SUMMARY
 
   # ===========================================
-  # DEPLOY ADMIN APP
-  # ===========================================
-  deploy-admin:
-    name: 🚀 Deploy Admin App
-    runs-on: ubuntu-latest
-    needs: [detect-changes, validate-secrets]
-    if: needs.detect-changes.outputs.apps-admin == 'true'
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-
-      - name: Restore Deploy State
-        id: restore-state
-        uses: actions/cache/restore@v4
-        with:
-          path: .deploy-state-admin
-          key: deploy-state-admin-
-          restore-keys: deploy-state-admin-
-
-      - name: Check Cooldown and Last Status
-        id: check-cooldown
-        run: |
-          should_deploy="true"
-          
-          if [ -f .deploy-state-admin ]; then
-            last_deploy=$(sed -n '1p' .deploy-state-admin)
-            last_status=$(sed -n '2p' .deploy-state-admin)
-            current_time=$(date +%s)
-            diff=$((current_time - last_deploy))
-            cooldown_seconds=$((${{ env.DEPLOY_COOLDOWN_HOURS }} * 3600))
-            
-            echo "Last deploy: $((diff / 60)) minutes ago, status: $last_status"
-            
-            # Deploy if: last failed OR older than cooldown
-            if [ "$last_status" = "success" ] && [ $diff -lt $cooldown_seconds ]; then
-              remaining=$(((cooldown_seconds - diff) / 60))
-              echo "⏳ Deploy cooldown active. Last successful deploy was $((diff / 60)) minutes ago. Wait $remaining more minutes." >> $GITHUB_STEP_SUMMARY
-              should_deploy="false"
-            elif [ "$last_status" = "failed" ]; then
-              echo "🔄 Last deploy failed, retrying..." >> $GITHUB_STEP_SUMMARY
-            fi
-          fi
-          
-          echo "deploy=$should_deploy" >> $GITHUB_OUTPUT
-
-      - name: Setup Node.js
-        if: steps.check-cooldown.outputs.deploy == 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-
-      - name: Install dependencies
-        if: steps.check-cooldown.outputs.deploy == 'true'
-        run: yarn install --frozen-lockfile
-
-      - name: Build packages
-        if: steps.check-cooldown.outputs.deploy == 'true'
-        run: |
-          yarn build:types
-          yarn build:utils
-          yarn build:storybook
-
-      - name: Install Vercel CLI
-        if: steps.check-cooldown.outputs.deploy == 'true'
-        run: npm install --global vercel@latest
-
-      - name: Pull Vercel Config
-        if: steps.check-cooldown.outputs.deploy == 'true'
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
-
-      - name: Build Admin App
-        if: steps.check-cooldown.outputs.deploy == 'true'
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
-
-      - name: Deploy to Vercel
-        if: steps.check-cooldown.outputs.deploy == 'true'
-        id: deploy
-        run: |
-          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
-          echo "url=$url" >> $GITHUB_OUTPUT
-          echo "### 🚀 Admin App Deployed" >> $GITHUB_STEP_SUMMARY
-          echo "**URL:** $url" >> $GITHUB_STEP_SUMMARY
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
-
-      - name: Save Deploy State (Success)
-        if: steps.check-cooldown.outputs.deploy == 'true' && success()
-        run: |
-          echo "$(date +%s)" > .deploy-state-admin
-          echo "success" >> .deploy-state-admin
-
-      - name: Save Deploy State (Failed)
-        if: steps.check-cooldown.outputs.deploy == 'true' && failure()
-        run: |
-          echo "$(date +%s)" > .deploy-state-admin
-          echo "failed" >> .deploy-state-admin
-
-      - name: Cache Deploy State
-        if: steps.check-cooldown.outputs.deploy == 'true' && always()
-        uses: actions/cache/save@v4
-        with:
-          path: .deploy-state-admin
-          key: deploy-state-admin-${{ github.run_id }}
-
-  # ===========================================
-  # DEPLOY SELLER APP
-  # ===========================================
-  deploy-seller:
-    name: 🚀 Deploy Seller App
-    runs-on: ubuntu-latest
-    needs: [detect-changes, validate-secrets]
-    if: needs.detect-changes.outputs.apps-seller == 'true'
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-
-      - name: Restore Deploy State
-        id: restore-state
-        uses: actions/cache/restore@v4
-        with:
-          path: .deploy-state-seller
-          key: deploy-state-seller-
-          restore-keys: deploy-state-seller-
-
-      - name: Check Cooldown and Last Status
-        id: check-cooldown
-        run: |
-          should_deploy="true"
-          
-          if [ -f .deploy-state-seller ]; then
-            last_deploy=$(sed -n '1p' .deploy-state-seller)
-            last_status=$(sed -n '2p' .deploy-state-seller)
-            current_time=$(date +%s)
-            diff=$((current_time - last_deploy))
-            cooldown_seconds=$((${{ env.DEPLOY_COOLDOWN_HOURS }} * 3600))
-            
-            echo "Last deploy: $((diff / 60)) minutes ago, status: $last_status"
-            
-            if [ "$last_status" = "success" ] && [ $diff -lt $cooldown_seconds ]; then
-              remaining=$(((cooldown_seconds - diff) / 60))
-              echo "⏳ Deploy cooldown active. Last successful deploy was $((diff / 60)) minutes ago. Wait $remaining more minutes." >> $GITHUB_STEP_SUMMARY
-              should_deploy="false"
-            elif [ "$last_status" = "failed" ]; then
-              echo "🔄 Last deploy failed, retrying..." >> $GITHUB_STEP_SUMMARY
-            fi
-          fi
-          
-          echo "deploy=$should_deploy" >> $GITHUB_OUTPUT
-
-      - name: Setup Node.js
-        if: steps.check-cooldown.outputs.deploy == 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-
-      - name: Install dependencies
-        if: steps.check-cooldown.outputs.deploy == 'true'
-        run: yarn install --frozen-lockfile
-
-      - name: Build packages
-        if: steps.check-cooldown.outputs.deploy == 'true'
-        run: |
-          yarn build:types
-          yarn build:utils
-          yarn build:storybook
-
-      - name: Install Vercel CLI
-        if: steps.check-cooldown.outputs.deploy == 'true'
-        run: npm install --global vercel@latest
-
-      - name: Pull Vercel Config
-        if: steps.check-cooldown.outputs.deploy == 'true'
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SELLER }}
-
-      - name: Build Seller App
-        if: steps.check-cooldown.outputs.deploy == 'true'
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SELLER }}
-
-      - name: Deploy to Vercel
-        if: steps.check-cooldown.outputs.deploy == 'true'
-        id: deploy
-        run: |
-          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
-          echo "url=$url" >> $GITHUB_OUTPUT
-          echo "### 🚀 Seller App Deployed" >> $GITHUB_STEP_SUMMARY
-          echo "**URL:** $url" >> $GITHUB_STEP_SUMMARY
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_SELLER }}
-
-      - name: Save Deploy State (Success)
-        if: steps.check-cooldown.outputs.deploy == 'true' && success()
-        run: |
-          echo "$(date +%s)" > .deploy-state-seller
-          echo "success" >> .deploy-state-seller
-
-      - name: Save Deploy State (Failed)
-        if: steps.check-cooldown.outputs.deploy == 'true' && failure()
-        run: |
-          echo "$(date +%s)" > .deploy-state-seller
-          echo "failed" >> .deploy-state-seller
-
-      - name: Cache Deploy State
-        if: steps.check-cooldown.outputs.deploy == 'true' && always()
-        uses: actions/cache/save@v4
-        with:
-          path: .deploy-state-seller
-          key: deploy-state-seller-${{ github.run_id }}
-
-  # ===========================================
   # DEPLOY SHELL APP (ALWAYS DEPLOYS)
   # ===========================================
   deploy-shell:
-    name: 🚀 Deploy Shell App (Always)
+    name: 🚀 Deploy Shell App
     runs-on: ubuntu-latest
     needs: [validate-secrets]
     steps:
@@ -378,34 +142,34 @@ jobs:
   deployment-summary:
     name: 📊 Deployment Summary
     runs-on: ubuntu-latest
-    needs: [detect-changes, deploy-admin, deploy-seller, deploy-shell]
+    needs: [detect-changes, deploy-shell]
     if: always()
     steps:
       - name: Generate Summary
         run: |
-          echo "## 📊 Vercel Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Changes Detected" >> $GITHUB_STEP_SUMMARY
-          echo "| App | Changed |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----|---------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Admin | ${{ needs.detect-changes.outputs.apps-admin }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Seller | ${{ needs.detect-changes.outputs.apps-seller }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Shell | Always |" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 Vercel Deployment Summary (Shell App Only)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Deployment Status" >> $GITHUB_STEP_SUMMARY
           echo "| App | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Admin | ${{ needs.deploy-admin.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Seller | ${{ needs.deploy-seller.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Shell (Always) | ${{ needs.deploy-shell.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Shell | ${{ needs.deploy-shell.result }} |" >> $GITHUB_STEP_SUMMARY
           
-          if [ "${{ needs.deploy-admin.result }}" == "failure" ] || \
-             [ "${{ needs.deploy-seller.result }}" == "failure" ] || \
-             [ "${{ needs.deploy-shell.result }}" == "failure" ]; then
+          if [ "${{ needs.deploy-shell.result }}" == "failure" ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "❌ **Some deployments failed**" >> $GITHUB_STEP_SUMMARY
+            echo "❌ **Deployment failed**" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
           
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ **Vercel deployment workflow completed**" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Vercel deployment completed**" >> $GITHUB_STEP_SUMMARY
+
+# ===========================================
+# COMMENTED OUT - Admin and Seller App deployments
+# ===========================================
+# deploy-admin:
+#   name: 🚀 Deploy Admin App
+#   ...
+#
+# deploy-seller:
+#   name: 🚀 Deploy Seller App
+#   ...
