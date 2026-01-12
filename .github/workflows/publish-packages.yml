@@ -109,13 +109,13 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies
-        working-directory: packages/types
-        run: npm install
+      - name: Install dependencies from root
+        run: |
+          rm -rf node_modules
+          yarn install --frozen-lockfile || yarn install
 
-      - name: Build
-        working-directory: packages/types
-        run: npx tsup src/index.ts --format cjs,esm --dts --clean
+      - name: Build types package
+        run: yarn build:types
 
       - name: Bump version (if specified)
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.version_bump != 'none'
@@ -177,13 +177,13 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies
-        working-directory: packages/utils
-        run: npm install
+      - name: Install dependencies from root
+        run: |
+          rm -rf node_modules
+          yarn install --frozen-lockfile || yarn install
 
-      - name: Build
-        working-directory: packages/utils
-        run: npx tsup src/index.ts --format cjs,esm --dts --clean
+      - name: Build utils package
+        run: yarn build:types && yarn build:utils
 
       - name: Bump version (if specified)
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.version_bump != 'none'
@@ -244,13 +244,13 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies
-        working-directory: packages/ui-library
-        run: npm install
+      - name: Install dependencies from root
+        run: |
+          rm -rf node_modules
+          yarn install --frozen-lockfile || yarn install
 
-      - name: Build library
-        working-directory: packages/ui-library
-        run: npm run build:lib
+      - name: Build ui-library package
+        run: yarn build:storybook
 
       - name: Bump version (if specified)
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.version_bump != 'none'

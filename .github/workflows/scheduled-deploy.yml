@@ -165,8 +165,8 @@ jobs:
 
       - name: Build packages
         run: |
-          cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
-          cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          yarn build:types
+          yarn build:utils
           yarn build:storybook
 
       - name: Cache built packages

@@ -136,8 +136,8 @@ jobs:
 
       - name: Build packages
         run: |
-          cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
-          cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          yarn build:types
+          yarn build:utils
           yarn build:storybook
 
       - name: Deploy Admin App to Vercel
@@ -218,8 +218,8 @@ jobs:
 
       - name: Build packages
         run: |
-          cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
-          cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          yarn build:types
+          yarn build:utils
           yarn build:storybook
 
       - name: Deploy Seller App to Vercel
@@ -300,8 +300,8 @@ jobs:
 
       - name: Build packages
         run: |
-          cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
-          cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          yarn build:types
+          yarn build:utils
           yarn build:storybook
 
       - name: Deploy Shell App to Vercel

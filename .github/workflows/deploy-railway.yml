@@ -138,8 +138,8 @@ jobs:
 
       - name: Build shared packages
         run: |
-          cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
-          cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+          yarn build:types
+          yarn build:utils
 
       - name: Cache built packages
         uses: actions/cache@v4
@@ -185,8 +185,8 @@ jobs:
       - name: Build packages (if cache miss)
         run: |
           if [ ! -d "packages/types/dist" ]; then
-            cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
-            cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+            yarn build:types
+            yarn build:utils
           fi
 
       - name: Build service
@@ -255,8 +255,8 @@ jobs:
       - name: Build packages (if cache miss)
         run: |
           if [ ! -d "packages/types/dist" ]; then
-            cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
-            cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+            yarn build:types
+            yarn build:utils
           fi
 
       - name: Build service
@@ -324,8 +324,8 @@ jobs:
       - name: Build packages (if cache miss)
         run: |
           if [ ! -d "packages/types/dist" ]; then
-            cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
-            cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+            yarn build:types
+            yarn build:utils
           fi
 
       - name: Build service
@@ -393,8 +393,8 @@ jobs:
       - name: Build packages (if cache miss)
         run: |
           if [ ! -d "packages/types/dist" ]; then
-            cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
-            cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+            yarn build:types
+            yarn build:utils
           fi
 
       - name: Build service
@@ -462,8 +462,8 @@ jobs:
       - name: Build packages (if cache miss)
         run: |
           if [ ! -d "packages/types/dist" ]; then
-            cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
-            cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+            yarn build:types
+            yarn build:utils
           fi
 
       - name: Build service
@@ -531,8 +531,8 @@ jobs:
       - name: Build packages (if cache miss)
         run: |
           if [ ! -d "packages/types/dist" ]; then
-            cd packages/types && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
-            cd packages/utils && npx tsup src/index.ts --format cjs,esm --dts --clean && cd ../..
+            yarn build:types
+            yarn build:utils
           fi
 
       - name: Build service
