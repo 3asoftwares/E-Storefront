@@ -10,6 +10,7 @@ export const PORT_CONFIG = {
   COUPON: 3013,
   PRODUCT: 3014,
   ORDER: 3015,
+  TICKET: 3016,
   GRAPHQL: 4000,
   SHELL: 3000,
   ADMIN: 3001,
@@ -24,6 +25,7 @@ export const SERVICE_URLS = {
   COUPON_SERVICE: `http://localhost:${PORT_CONFIG.COUPON}`,
   PRODUCT_SERVICE: `http://localhost:${PORT_CONFIG.PRODUCT}`,
   ORDER_SERVICE: `http://localhost:${PORT_CONFIG.ORDER}`,
+  TICKET_SERVICE: `http://localhost:${PORT_CONFIG.TICKET}`,
   GRAPHQL_GATEWAY: `http://localhost:${PORT_CONFIG.GRAPHQL}/graphql`,
 };
 
@@ -39,6 +41,7 @@ export const DEFAULT_CORS_ORIGINS = [
   'http://localhost:3001',
   'http://localhost:3002',
   'http://localhost:3003',
+  'http://localhost:3004',
   'http://localhost:8081',
 ];
 

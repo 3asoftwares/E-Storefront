@@ -26,3 +26,6 @@ export * from './api/review.queries';
 
 // Address queries
 export * from './api/address.queries';
+
+// Ticket queries
+export * from './api/ticket.queries';

@@ -5,3 +5,4 @@ export { userTypeDefs, userResolvers } from './user';
 export { categoryTypeDefs, categoryResolvers } from './category';
 export { reviewTypeDefs, reviewResolvers } from './review';
 export { addressTypeDefs, addressResolvers } from './address';
+export { ticketTypeDefs, ticketResolvers } from './ticket';

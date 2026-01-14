@@ -5,6 +5,7 @@ export const SERVICE_URLS = {
   ORDER_SERVICE: 'http://localhost:4003',
   CATEGORY_SERVICE: 'http://localhost:4004',
   COUPON_SERVICE: 'http://localhost:4005',
+  TICKET_SERVICE: 'http://localhost:4006',
 };
 
 export const PORT_CONFIG = {

@@ -64,7 +64,7 @@ function Switch-ToLocal {
     }
     
     # Copy .env.local to .env for each service
-    $services = @("auth-service", "category-service", "coupon-service", "product-service", "order-service", "graphql-gateway")
+    $services = @("auth-service", "category-service", "coupon-service", "product-service", "order-service", "ticket-service", "graphql-gateway")
     foreach ($service in $services) {
         $envLocal = "services/$service/.env.local"
         $envTarget = "services/$service/.env"

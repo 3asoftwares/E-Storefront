@@ -7,6 +7,7 @@ import {
   categoryResolvers,
   reviewResolvers,
   addressResolvers,
+  ticketResolvers,
 } from './types';
 
 export const resolvers = [
@@ -18,4 +19,5 @@ export const resolvers = [
   categoryResolvers,
   reviewResolvers,
   addressResolvers,
+  ticketResolvers,
 ];

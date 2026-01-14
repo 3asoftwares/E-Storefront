@@ -7,6 +7,7 @@ import {
   categoryTypeDefs,
   reviewTypeDefs,
   addressTypeDefs,
+  ticketTypeDefs,
 } from './types';
 
 export const typeDefs = [
@@ -18,4 +19,5 @@ export const typeDefs = [
   categoryTypeDefs,
   reviewTypeDefs,
   addressTypeDefs,
+  ticketTypeDefs,
 ];

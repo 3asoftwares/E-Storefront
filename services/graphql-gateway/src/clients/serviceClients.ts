@@ -8,6 +8,8 @@ const PRODUCT_SERVICE_URL = process.env.PRODUCT_SERVICE_URL || SERVICE_URLS.PROD
 const ORDER_SERVICE_URL = process.env.ORDER_SERVICE_URL || SERVICE_URLS.ORDER_SERVICE;
 const CATEGORY_SERVICE_URL = process.env.CATEGORY_SERVICE_URL || SERVICE_URLS.CATEGORY_SERVICE;
 const COUPON_SERVICE_URL = process.env.COUPON_SERVICE_URL || SERVICE_URLS.COUPON_SERVICE;
+const TICKET_SERVICE_URL =
+  process.env.TICKET_SERVICE_URL || SERVICE_URLS.TICKET_SERVICE || 'http://localhost:3016';
 
 export const authClient: AxiosInstance = axios.create({
   baseURL: AUTH_SERVICE_URL,
@@ -39,6 +41,13 @@ export const categoryClient: AxiosInstance = axios.create({
 
 export const couponClient: AxiosInstance = axios.create({
   baseURL: COUPON_SERVICE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+export const ticketClient: AxiosInstance = axios.create({
+  baseURL: TICKET_SERVICE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

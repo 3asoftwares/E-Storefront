@@ -6,5 +6,6 @@ export * from './category.queries';
 export * from './dashboard.queries';
 export * from './review.queries';
 export * from './address.queries';
+export * from './ticket.queries';
 export * from './graphqlClient';
 export * from './logger.client';
