@@ -1,3 +1,7 @@
+/**
+ * Order Service v1.0.1
+ * Handles order processing and management
+ */
 import dotenv from 'dotenv';
 import path from 'path';
 

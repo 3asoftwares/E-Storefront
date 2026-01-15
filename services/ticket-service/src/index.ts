@@ -1,3 +1,7 @@
+/**
+ * Ticket Service v1.0.1
+ * Handles customer support tickets
+ */
 import dotenv from 'dotenv';
 import path from 'path';
 

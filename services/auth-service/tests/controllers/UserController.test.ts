@@ -60,8 +60,11 @@ describe('UserController', () => {
             users: mockUsers,
             pagination: expect.objectContaining({
               page: 1,
-              limit: 10,
+              limit: 100,
               total: 2,
+              sellerCount: 1,
+              adminCount: 0,
+              customerCount: 1,
             }),
           }),
         })

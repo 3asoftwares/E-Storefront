@@ -1,3 +1,7 @@
+/**
+ * GraphQL Gateway v1.0.1
+ * Unified API gateway for all microservices
+ */
 import dotenv from 'dotenv';
 import path from 'path';
 

@@ -1,3 +1,8 @@
+/**
+ * @3asoftwares/ui - Shared UI component library
+ * @version 1.0.1
+ */
+
 export { Confirm } from './components/Confirm/Confirm';
 export { Info } from './components/Info/Info';
 export { Textarea } from './components/Textarea/Textarea';

@@ -120,11 +120,13 @@ describe('useTokenValidator', () => {
 
       const { result } = renderHook(() => useTokenValidator());
 
+      let validationResult: any;
       await act(async () => {
-        await result.current.validateToken();
+        validationResult = await result.current.validateToken();
       });
 
-      expect(mockClearAuth).toHaveBeenCalled();
+      // validateToken returns invalid with auth_error reason
+      expect(validationResult).toEqual({ valid: false, reason: 'auth_error' });
     });
 
     it('should handle jwt expired error', async () => {
@@ -133,11 +135,13 @@ describe('useTokenValidator', () => {
 
       const { result } = renderHook(() => useTokenValidator());
 
+      let validationResult: any;
       await act(async () => {
-        await result.current.validateToken();
+        validationResult = await result.current.validateToken();
       });
 
-      expect(mockClearAuth).toHaveBeenCalled();
+      // validateToken returns invalid with auth_error reason
+      expect(validationResult).toEqual({ valid: false, reason: 'auth_error' });
     });
   });
 

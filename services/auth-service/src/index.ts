@@ -1,3 +1,7 @@
+/**
+ * Auth Service v1.0.1
+ * Handles user authentication, authorization, and session management
+ */
 import dotenv from 'dotenv';
 import path from 'path';
 

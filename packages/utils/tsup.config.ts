@@ -7,6 +7,7 @@ export default defineConfig([
       index: 'src/index.ts',
       client: 'src/client.ts',
       server: 'src/validation/server.ts',
+      backend: 'src/backend.ts',
     },
     format: ['cjs', 'esm'],
     dts: true,

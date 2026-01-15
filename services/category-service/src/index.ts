@@ -1,3 +1,7 @@
+/**
+ * Category Service v1.0.1
+ * Handles product category management
+ */
 import dotenv from 'dotenv';
 import path from 'path';
 

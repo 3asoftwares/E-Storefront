@@ -1,6 +1,9 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import authReducer from '../../src/store/authSlice';
 
 // Mock window resize
 const mockWindowInnerWidth = (width: number) => {
@@ -24,6 +27,23 @@ jest.mock('../../src/store/uiStore', () => ({
 import { Sidebar } from '../../src/components/Sidebar';
 import { useUIStore } from '../../src/store/uiStore';
 
+// Create test store helper
+const createTestStore = (preloadedState = {}) =>
+  configureStore({
+    reducer: {
+      auth: authReducer,
+    },
+    preloadedState: {
+      auth: {
+        user: { _id: 'test-user-id', email: 'test@example.com', role: 'admin' },
+        isAuthenticated: true,
+        loading: false,
+        error: null,
+      },
+      ...preloadedState,
+    },
+  });
+
 describe('Admin Sidebar Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -40,10 +60,13 @@ describe('Admin Sidebar Component', () => {
   });
 
   const renderSidebar = (initialRoute = '/') => {
+    const store = createTestStore();
     return render(
-      <MemoryRouter initialEntries={[initialRoute]}>
-        <Sidebar />
-      </MemoryRouter>
+      <Provider store={store}>
+        <MemoryRouter initialEntries={[initialRoute]}>
+          <Sidebar />
+        </MemoryRouter>
+      </Provider>
     );
   };
 

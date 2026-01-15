@@ -21,6 +21,11 @@
       "import": "./dist/server.mjs",
       "require": "./dist/server.js"
     },
+    "./backend": {
+      "types": "./dist/backend.d.ts",
+      "import": "./dist/backend.mjs",
+      "require": "./dist/backend.js"
+    },
     "./config/tsconfig.base.json": "./src/config/tsconfig.base.json"
   },
   "files": [

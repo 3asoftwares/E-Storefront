@@ -1,3 +1,7 @@
+/**
+ * Coupon Service v1.0.1
+ * Handles discount coupon management
+ */
 import dotenv from 'dotenv';
 import path from 'path';
 

@@ -14,13 +14,17 @@ describe('UserRole Enum', () => {
     expect(UserRole.ADMIN).toBe('admin');
   });
 
+  it('should have SUPPORT role', () => {
+    expect(UserRole.SUPPORT).toBe('support');
+  });
+
   it('should have SUPER_ADMIN role', () => {
     expect(UserRole.SUPER_ADMIN).toBe('super_admin');
   });
 
-  it('should contain exactly 4 roles', () => {
+  it('should contain exactly 5 roles', () => {
     const roleCount = Object.keys(UserRole).length;
-    expect(roleCount).toBe(4);
+    expect(roleCount).toBe(5);
   });
 
   it('should have all roles as lowercase strings', () => {

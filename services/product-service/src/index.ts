@@ -1,3 +1,7 @@
+/**
+ * Product Service v1.0.1
+ * Handles product catalog and reviews
+ */
 import dotenv from 'dotenv';
 import path from 'path';
 

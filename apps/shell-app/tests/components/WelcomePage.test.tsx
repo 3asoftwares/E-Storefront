@@ -1,5 +1,61 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+
+// Mock the i18n context before importing the component
+jest.mock('../../src/i18n/I18nContext', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        // Welcome section
+        'welcome.title': 'Welcome to',
+        'welcome.brandName': '3A Softwares',
+        'welcome.subtitle': 'Your Complete E-Commerce Platform Solution',
+        'welcome.description': 'A modern, scalable, and feature-rich e-commerce platform built with cutting-edge technologies to help businesses grow and succeed in the digital marketplace.',
+        'welcome.getStarted': 'Get Started',
+        'welcome.learnMore': 'Learn More',
+        // Features section
+        'features.title': 'Platform Features',
+        'features.adminPortal.title': 'Admin Portal',
+        'features.adminPortal.description': 'Comprehensive dashboard to manage your entire e-commerce platform with powerful analytics and reporting tools.',
+        'features.adminPortal.features.userManagement': 'User & seller management',
+        'features.adminPortal.features.analytics': 'Real-time analytics',
+        'features.adminPortal.features.orderTracking': 'Order tracking & management',
+        'features.adminPortal.button': 'Open Admin Portal',
+        'features.sellerPortal.title': 'Seller Portal',
+        'features.sellerPortal.description': 'Easy-to-use interface for sellers to manage their products, inventory, and orders efficiently.',
+        'features.sellerPortal.features.productCatalog': 'Product catalog management',
+        'features.sellerPortal.features.inventoryTracking': 'Inventory tracking',
+        'features.sellerPortal.features.salesAnalytics': 'Sales analytics',
+        'features.sellerPortal.button': 'Open Seller Portal',
+        'features.storefront.title': 'Customer Storefront',
+        'features.storefront.description': 'Beautiful and responsive storefront providing seamless shopping experience for customers.',
+        'features.storefront.features.productSearch': 'Advanced product search',
+        'features.storefront.features.secureCheckout': 'Secure checkout process',
+        'features.storefront.features.orderTracking': 'Order tracking',
+        'features.storefront.button': 'Open Storefront',
+        // CTA section
+        'cta.title': 'Ready to Get Started?',
+        'cta.description': 'Sign up today and experience the power of our e-commerce platform',
+        'cta.createAccount': 'Create Account',
+        'cta.support': 'Support',
+        // Support modal
+        'support.title': 'Contact Support',
+        'support.description': 'Our team is here to help you 24/7',
+        'support.email': 'Email',
+        'support.emailAddress': 'support@3asoftwares.com',
+        'support.phone': 'Phone',
+        'support.phoneNumber': '+1 (555) 123-4567',
+        'support.hours': 'Support Hours',
+        'support.hoursValue': '24/7 Available',
+      };
+      return translations[key] || key;
+    },
+    locale: 'en',
+    setLocale: jest.fn(),
+  }),
+  I18nProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 import { WelcomePage } from '../../src/components/WelcomePage';
 
 // Mock window.location

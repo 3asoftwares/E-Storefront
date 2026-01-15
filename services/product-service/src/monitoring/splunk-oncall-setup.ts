@@ -56,12 +56,12 @@ export function initializeMonitoring(app: Application, redisClient?: Redis): voi
   healthMonitor = createHealthMonitor(SERVICE_NAME, healthChecks, {
     defaultInterval: 30000, // Check every 30 seconds
     defaultTimeout: 5000,
-    onHealthChange: (results) => {
-      const failingChecks = results.filter((r) => !r.healthy);
+    onHealthChange: (results: Array<{ name: string; healthy: boolean }>) => {
+      const failingChecks = results.filter((r: { healthy: boolean }) => !r.healthy);
       if (failingChecks.length > 0) {
         console.warn(
           '[HealthMonitor] Failing checks:',
-          failingChecks.map((c) => c.name)
+          failingChecks.map((c: { name: string }) => c.name)
         );
       }
     },

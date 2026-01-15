@@ -1,5 +1,24 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+
+// Mock the i18n context
+jest.mock('../../src/i18n/I18nContext', () => ({
+  useTranslation: () => ({
+    t: (key: string, params?: Record<string, string>) => {
+      const translations: Record<string, string> = {
+        'footer.copyright': `© ${params?.year || '2025'} 3A Softwares. All rights reserved.`,
+        'footer.privacy': 'Privacy',
+        'footer.terms': 'Terms',
+        'footer.help': 'Help',
+      };
+      return translations[key] || key;
+    },
+    locale: 'en',
+    setLocale: jest.fn(),
+  }),
+  I18nProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 import { Footer } from '../../src/components/Footer';
 
 describe('Footer Component', () => {
@@ -10,7 +29,7 @@ describe('Footer Component', () => {
 
   it('should display copyright text', () => {
     render(<Footer />);
-    expect(screen.getByText(/© 2025 3A Softwares/i)).toBeInTheDocument();
+    expect(screen.getByText(/© 2026 3A Softwares/i)).toBeInTheDocument();
   });
 
   it('should display all rights reserved', () => {
