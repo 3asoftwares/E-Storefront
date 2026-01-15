@@ -286,6 +286,24 @@ jobs:
         working-directory: packages/types
         run: npm version ${{ needs.detect-changes.outputs.version-bump }} --no-git-tag-version
 
+      - name: Check if version exists
+        id: version-check
+        working-directory: packages/types
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "package=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          
+          # Check if version exists on npm
+          if npm view "$PACKAGE_NAME@$NEW_VERSION" version 2>/dev/null; then
+            echo "Version $NEW_VERSION already exists on npm"
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version $NEW_VERSION is available"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Publish (Dry Run)
         if: needs.detect-changes.outputs.dry-run == 'true'
         working-directory: packages/types
@@ -295,15 +313,20 @@ jobs:
           echo "### @3asoftwares/types - DRY RUN successful" >> $GITHUB_STEP_SUMMARY
 
       - name: Publish
-        if: needs.detect-changes.outputs.dry-run != 'true'
+        if: needs.detect-changes.outputs.dry-run != 'true' && steps.version-check.outputs.exists != 'true'
         working-directory: packages/types
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Skip - Version Exists
+        if: steps.version-check.outputs.exists == 'true'
+        run: |
+          echo "### @3asoftwares/types - Skipped (v${{ steps.version-check.outputs.version }} already published)" >> $GITHUB_STEP_SUMMARY
+
       - name: Summary
-        if: needs.detect-changes.outputs.dry-run != 'true'
-        run: echo "### @3asoftwares/types published successfully" >> $GITHUB_STEP_SUMMARY
+        if: needs.detect-changes.outputs.dry-run != 'true' && steps.version-check.outputs.exists != 'true'
+        run: echo "### @3asoftwares/types v${{ steps.version-check.outputs.version }} published successfully" >> $GITHUB_STEP_SUMMARY
 
   # ===========================================
   # PUBLISH UTILS
@@ -345,6 +368,24 @@ jobs:
         working-directory: packages/utils
         run: npm version ${{ needs.detect-changes.outputs.version-bump }} --no-git-tag-version
 
+      - name: Check if version exists
+        id: version-check
+        working-directory: packages/utils
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "package=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          
+          # Check if version exists on npm
+          if npm view "$PACKAGE_NAME@$NEW_VERSION" version 2>/dev/null; then
+            echo "Version $NEW_VERSION already exists on npm"
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version $NEW_VERSION is available"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Publish (Dry Run)
         if: needs.detect-changes.outputs.dry-run == 'true'
         working-directory: packages/utils
@@ -354,15 +395,20 @@ jobs:
           echo "### @3asoftwares/utils - DRY RUN successful" >> $GITHUB_STEP_SUMMARY
 
       - name: Publish
-        if: needs.detect-changes.outputs.dry-run != 'true'
+        if: needs.detect-changes.outputs.dry-run != 'true' && steps.version-check.outputs.exists != 'true'
         working-directory: packages/utils
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Skip - Version Exists
+        if: steps.version-check.outputs.exists == 'true'
+        run: |
+          echo "### @3asoftwares/utils - Skipped (v${{ steps.version-check.outputs.version }} already published)" >> $GITHUB_STEP_SUMMARY
+
       - name: Summary
-        if: needs.detect-changes.outputs.dry-run != 'true'
-        run: echo "### @3asoftwares/utils published successfully" >> $GITHUB_STEP_SUMMARY
+        if: needs.detect-changes.outputs.dry-run != 'true' && steps.version-check.outputs.exists != 'true'
+        run: echo "### @3asoftwares/utils v${{ steps.version-check.outputs.version }} published successfully" >> $GITHUB_STEP_SUMMARY
 
   # ===========================================
   # PUBLISH UI
@@ -404,6 +450,24 @@ jobs:
         working-directory: packages/ui-library
         run: npm version ${{ needs.detect-changes.outputs.version-bump }} --no-git-tag-version
 
+      - name: Check if version exists
+        id: version-check
+        working-directory: packages/ui-library
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "package=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          
+          # Check if version exists on npm
+          if npm view "$PACKAGE_NAME@$NEW_VERSION" version 2>/dev/null; then
+            echo "Version $NEW_VERSION already exists on npm"
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version $NEW_VERSION is available"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Publish (Dry Run)
         if: needs.detect-changes.outputs.dry-run == 'true'
         working-directory: packages/ui-library
@@ -413,15 +477,20 @@ jobs:
           echo "### @3asoftwares/ui - DRY RUN successful" >> $GITHUB_STEP_SUMMARY
 
       - name: Publish
-        if: needs.detect-changes.outputs.dry-run != 'true'
+        if: needs.detect-changes.outputs.dry-run != 'true' && steps.version-check.outputs.exists != 'true'
         working-directory: packages/ui-library
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Skip - Version Exists
+        if: steps.version-check.outputs.exists == 'true'
+        run: |
+          echo "### @3asoftwares/ui - Skipped (v${{ steps.version-check.outputs.version }} already published)" >> $GITHUB_STEP_SUMMARY
+
       - name: Summary
-        if: needs.detect-changes.outputs.dry-run != 'true'
-        run: echo "### @3asoftwares/ui published successfully" >> $GITHUB_STEP_SUMMARY
+        if: needs.detect-changes.outputs.dry-run != 'true' && steps.version-check.outputs.exists != 'true'
+        run: echo "### @3asoftwares/ui v${{ steps.version-check.outputs.version }} published successfully" >> $GITHUB_STEP_SUMMARY
 
   # no-changes job removed - all packages publish now
 

@@ -116,10 +116,7 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
-      - name: Authenticate with Railway
-        run: echo ${{ secrets.RAILWAY_TOKEN }} | railway login
-
-      - name: Link and Deploy to Railway
+      - name: Deploy to Railway
         working-directory: services/auth-service
         run: |
           railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
@@ -143,10 +140,7 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
-      - name: Authenticate with Railway
-        run: echo ${{ secrets.RAILWAY_TOKEN }} | railway login
-
-      - name: Link and Deploy to Railway
+      - name: Deploy to Railway
         working-directory: services/category-service
         run: |
           railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
@@ -170,10 +164,7 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
-      - name: Authenticate with Railway
-        run: echo ${{ secrets.RAILWAY_TOKEN }} | railway login
-
-      - name: Link and Deploy to Railway
+      - name: Deploy to Railway
         working-directory: services/coupon-service
         run: |
           railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
@@ -197,10 +188,7 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
-      - name: Authenticate with Railway
-        run: echo ${{ secrets.RAILWAY_TOKEN }} | railway login
-
-      - name: Link and Deploy to Railway
+      - name: Deploy to Railway
         working-directory: services/graphql-gateway
         run: |
           railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
@@ -224,10 +212,7 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
-      - name: Authenticate with Railway
-        run: echo ${{ secrets.RAILWAY_TOKEN }} | railway login
-
-      - name: Link and Deploy to Railway
+      - name: Deploy to Railway
         working-directory: services/order-service
         run: |
           railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
@@ -251,10 +236,7 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
-      - name: Authenticate with Railway
-        run: echo ${{ secrets.RAILWAY_TOKEN }} | railway login
-
-      - name: Link and Deploy to Railway
+      - name: Deploy to Railway
         working-directory: services/product-service
         run: |
           railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} --environment production
