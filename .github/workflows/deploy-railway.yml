@@ -116,6 +116,15 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
+      - name: Verify Railway Token
+        run: |
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "::error::RAILWAY_TOKEN secret is not set"
+            exit 1
+          fi
+          echo "Railway token is configured"
+          railway whoami
+
       - name: Deploy to Railway
         working-directory: services/auth-service
         run: |
@@ -139,6 +148,15 @@ jobs:
 
       - name: Install Railway CLI
         run: npm install -g @railway/cli
+
+      - name: Verify Railway Token
+        run: |
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "::error::RAILWAY_TOKEN secret is not set"
+            exit 1
+          fi
+          echo "Railway token is configured"
+          railway whoami
 
       - name: Deploy to Railway
         working-directory: services/category-service
@@ -164,6 +182,15 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
+      - name: Verify Railway Token
+        run: |
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "::error::RAILWAY_TOKEN secret is not set"
+            exit 1
+          fi
+          echo "Railway token is configured"
+          railway whoami
+
       - name: Deploy to Railway
         working-directory: services/coupon-service
         run: |
@@ -187,6 +214,15 @@ jobs:
 
       - name: Install Railway CLI
         run: npm install -g @railway/cli
+
+      - name: Verify Railway Token
+        run: |
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "::error::RAILWAY_TOKEN secret is not set"
+            exit 1
+          fi
+          echo "Railway token is configured"
+          railway whoami
 
       - name: Deploy to Railway
         working-directory: services/graphql-gateway
@@ -212,6 +248,15 @@ jobs:
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
+      - name: Verify Railway Token
+        run: |
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "::error::RAILWAY_TOKEN secret is not set"
+            exit 1
+          fi
+          echo "Railway token is configured"
+          railway whoami
+
       - name: Deploy to Railway
         working-directory: services/order-service
         run: |
@@ -235,6 +280,15 @@ jobs:
 
       - name: Install Railway CLI
         run: npm install -g @railway/cli
+
+      - name: Verify Railway Token
+        run: |
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "::error::RAILWAY_TOKEN secret is not set"
+            exit 1
+          fi
+          echo "Railway token is configured"
+          railway whoami
 
       - name: Deploy to Railway
         working-directory: services/product-service
