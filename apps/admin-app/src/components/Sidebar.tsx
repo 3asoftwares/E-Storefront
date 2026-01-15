@@ -20,6 +20,8 @@ import {
 import { Button } from '@3asoftwares/ui';
 import { SUPPORT_APP_URL } from '@3asoftwares/utils/client';
 
+const SUPPORT_URL = process.env.REACT_APP_SUPPORT_APP_URL || SUPPORT_APP_URL;
+
 interface NavItem {
   path: string;
   icon: IconDefinition;
@@ -47,7 +49,7 @@ export const Sidebar: React.FC = () => {
     return [
       ...staticNavItems,
       {
-        path: `${SUPPORT_APP_URL}?userId=${userId}`,
+        path: `${SUPPORT_URL}?userId=${userId}`,
         icon: faHeadset,
         label: 'Support Portal',
         isExternal: true
