@@ -9,6 +9,14 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   
   return {
+    resolve: {
+      alias: {
+        '@3asoftwares/ui/styles.css': path.resolve(
+          __dirname,
+          '../../packages/ui-library/dist/style.css'
+        ),
+      },
+    },
     plugins: [
       react(),
       federation({
@@ -27,13 +35,25 @@ export default defineConfig(({ mode }) => {
     ],
     define: {
       'process.env.VITE_ENV': JSON.stringify(env.VITE_ENV || mode),
-      'process.env.VITE_AUTH_SERVICE': JSON.stringify(env.VITE_AUTH_SERVICE || SERVICE_URLS.AUTH_SERVICE),
-      'process.env.VITE_PRODUCT_SERVICE': JSON.stringify(env.VITE_PRODUCT_SERVICE || SERVICE_URLS.PRODUCT_SERVICE),
-      'process.env.VITE_ORDER_SERVICE': JSON.stringify(env.VITE_ORDER_SERVICE || SERVICE_URLS.ORDER_SERVICE),
-      'process.env.VITE_CATEGORY_SERVICE': JSON.stringify(env.VITE_CATEGORY_SERVICE || SERVICE_URLS.CATEGORY_SERVICE),
+      'process.env.VITE_AUTH_SERVICE': JSON.stringify(
+        env.VITE_AUTH_SERVICE || SERVICE_URLS.AUTH_SERVICE
+      ),
+      'process.env.VITE_PRODUCT_SERVICE': JSON.stringify(
+        env.VITE_PRODUCT_SERVICE || SERVICE_URLS.PRODUCT_SERVICE
+      ),
+      'process.env.VITE_ORDER_SERVICE': JSON.stringify(
+        env.VITE_ORDER_SERVICE || SERVICE_URLS.ORDER_SERVICE
+      ),
+      'process.env.VITE_CATEGORY_SERVICE': JSON.stringify(
+        env.VITE_CATEGORY_SERVICE || SERVICE_URLS.CATEGORY_SERVICE
+      ),
       'process.env.VITE_SHELL_APP_URL': JSON.stringify(env.VITE_SHELL_APP_URL || SHELL_APP_URL),
-      'process.env.VITE_CLOUDINARY_CLOUD_NAME': JSON.stringify(env.VITE_CLOUDINARY_CLOUD_NAME || 'dpdfyou3r'),
-      'process.env.VITE_CLOUDINARY_UPLOAD_PRESET': JSON.stringify(env.VITE_CLOUDINARY_UPLOAD_PRESET || 'ECommerce'),
+      'process.env.VITE_CLOUDINARY_CLOUD_NAME': JSON.stringify(
+        env.VITE_CLOUDINARY_CLOUD_NAME || 'dpdfyou3r'
+      ),
+      'process.env.VITE_CLOUDINARY_UPLOAD_PRESET': JSON.stringify(
+        env.VITE_CLOUDINARY_UPLOAD_PRESET || 'ECommerce'
+      ),
     },
     build: {
       modulePreload: false,
