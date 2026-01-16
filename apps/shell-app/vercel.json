@@ -1,6 +1,6 @@
 {
   "git": {
-    "deploymentEnabled": true
+    "deploymentEnabled": false
   },
   "installCommand": "cd ../.. && yarn install",
   "buildCommand": "cd ../.. && yarn build:packages && yarn workspace @3asoftwares/shell-app build",
