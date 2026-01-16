@@ -42,6 +42,9 @@ export default defineConfig(({ mode }) => {
         env.VITE_AUTH_SERVICE || SERVICE_URLS.AUTH_SERVICE
       ),
       'process.env.VITE_SHELL_APP_URL': JSON.stringify(env.VITE_SHELL_APP_URL || SHELL_APP_URL),
+      'process.env.VITE_SUPPORT_APP_URL': JSON.stringify(
+        env.VITE_SUPPORT_APP_URL || SUPPORT_APP_URL
+      ),
       'process.env.VITE_CLOUDINARY_CLOUD_NAME': JSON.stringify(
         env.VITE_CLOUDINARY_CLOUD_NAME || 'dpdfyou3r'
       ),
