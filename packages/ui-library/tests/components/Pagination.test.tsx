@@ -9,10 +9,21 @@ describe('Pagination', () => {
     onPageChange: vi.fn(),
   };
 
+  // Helper to get nav buttons (they have responsive text with hidden spans)
+  const getPreviousButton = () => {
+    // Find the button containing "Previous" text (hidden on mobile)
+    return screen.getByRole('button', { name: /Previous|←/ });
+  };
+
+  const getNextButton = () => {
+    // Find the button containing "Next" text (hidden on mobile)
+    return screen.getByRole('button', { name: /Next|→/ });
+  };
+
   it('renders pagination component', () => {
     render(<Pagination {...mockProps} />);
-    expect(screen.getByText('Previous')).toBeInTheDocument();
-    expect(screen.getByText('Next')).toBeInTheDocument();
+    expect(getPreviousButton()).toBeInTheDocument();
+    expect(getNextButton()).toBeInTheDocument();
   });
 
   it('does not render when totalPages is 1 or less', () => {
@@ -22,25 +33,25 @@ describe('Pagination', () => {
 
   it('disables Previous button on first page', () => {
     render(<Pagination {...mockProps} currentPage={1} />);
-    expect(screen.getByText('Previous')).toBeDisabled();
+    expect(getPreviousButton()).toBeDisabled();
   });
 
   it('disables Next button on last page', () => {
     render(<Pagination {...mockProps} currentPage={10} totalPages={10} />);
-    expect(screen.getByText('Next')).toBeDisabled();
+    expect(getNextButton()).toBeDisabled();
   });
 
   it('calls onPageChange when Previous is clicked', () => {
     const onPageChange = vi.fn();
     render(<Pagination {...mockProps} currentPage={5} onPageChange={onPageChange} />);
-    fireEvent.click(screen.getByText('Previous'));
+    fireEvent.click(getPreviousButton());
     expect(onPageChange).toHaveBeenCalledWith(4);
   });
 
   it('calls onPageChange when Next is clicked', () => {
     const onPageChange = vi.fn();
     render(<Pagination {...mockProps} currentPage={5} onPageChange={onPageChange} />);
-    fireEvent.click(screen.getByText('Next'));
+    fireEvent.click(getNextButton());
     expect(onPageChange).toHaveBeenCalledWith(6);
   });
 

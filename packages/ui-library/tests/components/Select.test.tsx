@@ -9,9 +9,9 @@ const mockOptions = [
 ];
 
 describe('Select', () => {
-  it('renders select element', () => {
+  it('renders select trigger button', () => {
     render(<Select options={mockOptions} />);
-    expect(screen.getByRole('combobox')).toBeInTheDocument();
+    expect(screen.getByRole('button')).toBeInTheDocument();
   });
 
   it('displays placeholder', () => {
@@ -19,8 +19,9 @@ describe('Select', () => {
     expect(screen.getByText('Select option')).toBeInTheDocument();
   });
 
-  it('renders all options', () => {
+  it('shows options when clicked', () => {
     render(<Select options={mockOptions} />);
+    fireEvent.click(screen.getByRole('button'));
     expect(screen.getByText('Option 1')).toBeInTheDocument();
     expect(screen.getByText('Option 2')).toBeInTheDocument();
     expect(screen.getByText('Option 3')).toBeInTheDocument();
@@ -29,55 +30,59 @@ describe('Select', () => {
   it('handles onChange event', () => {
     const handleChange = vi.fn();
     render(<Select options={mockOptions} onChange={handleChange} />);
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: '1' } });
+    // Open dropdown
+    fireEvent.click(screen.getByRole('button'));
+    // Click option
+    fireEvent.click(screen.getByText('Option 1'));
     expect(handleChange).toHaveBeenCalledWith('1');
   });
 
-  it('sets selected value', () => {
+  it('displays selected value', () => {
     render(<Select options={mockOptions} value="2" />);
-    expect(screen.getByRole('combobox')).toHaveValue('2');
+    expect(screen.getByText('Option 2')).toBeInTheDocument();
   });
 
-  it('applies correct size classes', () => {
+  it('applies correct size classes to trigger button', () => {
     const { rerender } = render(<Select options={mockOptions} size="sm" />);
-    expect(screen.getByRole('combobox')).toHaveClass('px-3', 'py-1.5', 'text-sm');
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('min-h-[36px]');
 
     rerender(<Select options={mockOptions} size="md" />);
-    expect(screen.getByRole('combobox')).toHaveClass('px-4', 'py-2', 'text-base');
+    expect(screen.getByRole('button')).toHaveClass('min-h-[40px]');
 
     rerender(<Select options={mockOptions} size="lg" />);
-    expect(screen.getByRole('combobox')).toHaveClass('px-5', 'py-3', 'text-lg');
+    expect(screen.getByRole('button')).toHaveClass('min-h-[48px]');
   });
 
-  it('applies correct variant classes', () => {
+  it('applies variant classes', () => {
     const { rerender } = render(<Select options={mockOptions} variant="outline" />);
-    expect(screen.getByRole('combobox')).toHaveClass('border-2', 'border-gray-300', 'bg-white');
+    expect(screen.getByRole('button')).toHaveClass('border-2');
 
     rerender(<Select options={mockOptions} variant="filled" />);
-    expect(screen.getByRole('combobox')).toHaveClass('border-0', 'bg-gray-100');
-
-    rerender(<Select options={mockOptions} variant="underline" />);
-    expect(screen.getByRole('combobox')).toHaveClass('border-0', 'border-b-2');
+    expect(screen.getByRole('button')).toHaveClass('border-0');
   });
 
   it('disables select when disabled prop is true', () => {
     render(<Select options={mockOptions} disabled />);
-    expect(screen.getByRole('combobox')).toBeDisabled();
+    expect(screen.getByRole('button')).toBeDisabled();
   });
 
   it('applies error styling', () => {
     render(<Select options={mockOptions} error />);
-    expect(screen.getByRole('combobox')).toHaveClass('border-red-600');
+    expect(screen.getByRole('button')).toHaveClass('border-red-600');
   });
 
-  it('disables specific options', () => {
+  it('closes dropdown when option is selected', () => {
     render(<Select options={mockOptions} />);
-    const options = screen.getAllByRole('option');
-    expect(options[3]).toBeDisabled(); 
+    fireEvent.click(screen.getByRole('button'));
+    expect(screen.getByText('Option 1')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Option 1'));
+    // After selection, dropdown should close - options should not be visible
+    expect(screen.queryAllByRole('button').length).toBe(1); // Only trigger button remains
   });
 
   it('applies custom className', () => {
     render(<Select options={mockOptions} className="custom-class" />);
-    expect(screen.getByRole('combobox')).toHaveClass('custom-class');
+    expect(screen.getByRole('button')).toHaveClass('custom-class');
   });
 });

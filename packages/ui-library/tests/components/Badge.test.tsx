@@ -34,13 +34,16 @@ describe('Badge', () => {
 
   it('applies correct size classes', () => {
     const { rerender } = render(<Badge size="sm">Small</Badge>);
-    expect(screen.getByText('Small')).toHaveClass('px-2', 'py-0.5', 'text-xs');
+    // Responsive classes: px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs
+    expect(screen.getByText('Small')).toHaveClass('px-1.5', 'sm:px-2', 'py-0.5', 'text-[10px]', 'sm:text-xs');
 
     rerender(<Badge size="md">Medium</Badge>);
-    expect(screen.getByText('Medium')).toHaveClass('px-3', 'py-1', 'text-sm');
+    // Responsive classes: px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm
+    expect(screen.getByText('Medium')).toHaveClass('px-2', 'sm:px-3', 'py-0.5', 'sm:py-1', 'text-xs', 'sm:text-sm');
 
     rerender(<Badge size="lg">Large</Badge>);
-    expect(screen.getByText('Large')).toHaveClass('px-4', 'py-1.5', 'text-base');
+    // Responsive classes: px-3 sm:px-4 py-1 sm:py-1.5 text-sm sm:text-base
+    expect(screen.getByText('Large')).toHaveClass('px-3', 'sm:px-4', 'py-1', 'sm:py-1.5', 'text-sm', 'sm:text-base');
   });
 
   it('applies custom className', () => {

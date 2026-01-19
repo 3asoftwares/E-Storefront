@@ -10,16 +10,20 @@ describe('Spinner', () => {
 
   it('applies correct size classes', () => {
     const { container, rerender } = render(<Spinner size="sm" />);
-    expect(container.querySelector('svg')).toHaveClass('w-4', 'h-4');
+    // Responsive classes: w-4 h-4 sm:w-5 sm:h-5
+    expect(container.querySelector('svg')).toHaveClass('w-4', 'h-4', 'sm:w-5', 'sm:h-5');
 
     rerender(<Spinner size="md" />);
-    expect(container.querySelector('svg')).toHaveClass('w-8', 'h-8');
+    // Responsive classes: w-6 h-6 sm:w-8 sm:h-8
+    expect(container.querySelector('svg')).toHaveClass('w-6', 'h-6', 'sm:w-8', 'sm:h-8');
 
     rerender(<Spinner size="lg" />);
-    expect(container.querySelector('svg')).toHaveClass('w-12', 'h-12');
+    // Responsive classes: w-10 h-10 sm:w-12 sm:h-12
+    expect(container.querySelector('svg')).toHaveClass('w-10', 'h-10', 'sm:w-12', 'sm:h-12');
 
     rerender(<Spinner size="xl" />);
-    expect(container.querySelector('svg')).toHaveClass('w-16', 'h-16');
+    // Responsive classes: w-12 h-12 sm:w-16 sm:h-16
+    expect(container.querySelector('svg')).toHaveClass('w-12', 'h-12', 'sm:w-16', 'sm:h-16');
   });
 
   it('applies custom className', () => {

@@ -35,13 +35,16 @@ describe('Button', () => {
 
   it('applies correct size classes', () => {
     const { rerender } = render(<Button size="sm">Small</Button>);
-    expect(screen.getByRole('button')).toHaveClass('text-sm', 'px-3', 'py-1.5');
+    // Responsive classes: text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5
+    expect(screen.getByRole('button')).toHaveClass('text-xs', 'sm:text-sm', 'px-2', 'sm:px-3', 'py-1', 'sm:py-1.5');
 
     rerender(<Button size="md">Medium</Button>);
-    expect(screen.getByRole('button')).toHaveClass('text-base', 'px-4', 'py-2.5');
+    // Responsive classes: text-sm sm:text-base px-3 sm:px-4 py-2 sm:py-2.5
+    expect(screen.getByRole('button')).toHaveClass('text-sm', 'sm:text-base', 'px-3', 'sm:px-4', 'py-2', 'sm:py-2.5');
 
     rerender(<Button size="lg">Large</Button>);
-    expect(screen.getByRole('button')).toHaveClass('text-lg', 'px-6', 'py-4');
+    // Responsive classes: text-base sm:text-lg px-4 sm:px-6 py-3 sm:py-4
+    expect(screen.getByRole('button')).toHaveClass('text-base', 'sm:text-lg', 'px-4', 'sm:px-6', 'py-3', 'sm:py-4');
   });
 
   it('handles onClick event', () => {

@@ -59,13 +59,16 @@ describe('MultiSelect', () => {
 
   it('applies correct size classes', () => {
     const { rerender, container } = render(<MultiSelect options={mockOptions} size="sm" />);
-    expect(container.firstChild?.firstChild).toHaveClass('px-3', 'py-1.5', 'text-sm');
+    // Responsive classes: px-2 sm:px-3 py-1.5 text-xs sm:text-sm
+    expect(container.firstChild?.firstChild).toHaveClass('px-2', 'sm:px-3', 'py-1.5', 'text-xs', 'sm:text-sm');
 
     rerender(<MultiSelect options={mockOptions} size="md" />);
-    expect(container.firstChild?.firstChild).toHaveClass('px-4', 'py-2', 'text-base');
+    // Responsive classes: px-3 sm:px-4 py-2 text-sm sm:text-base
+    expect(container.firstChild?.firstChild).toHaveClass('px-3', 'sm:px-4', 'py-2', 'text-sm', 'sm:text-base');
 
     rerender(<MultiSelect options={mockOptions} size="lg" />);
-    expect(container.firstChild?.firstChild).toHaveClass('px-5', 'py-3', 'text-lg');
+    // Responsive classes: px-4 sm:px-5 py-2.5 sm:py-3 text-base sm:text-lg
+    expect(container.firstChild?.firstChild).toHaveClass('px-4', 'sm:px-5', 'py-2.5', 'sm:py-3', 'text-base', 'sm:text-lg');
   });
 
   it('applies correct variant classes', () => {

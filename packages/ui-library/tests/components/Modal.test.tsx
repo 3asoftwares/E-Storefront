@@ -80,28 +80,32 @@ describe('Modal', () => {
         <div>Content</div>
       </Modal>
     );
-    expect(container.querySelector('.max-w-md')).toBeInTheDocument();
+    // Responsive classes: max-w-[95vw] sm:max-w-md
+    expect(container.querySelector('.sm\\:max-w-md')).toBeInTheDocument();
 
     rerender(
       <Modal isOpen={true} onClose={vi.fn()} size="md">
         <div>Content</div>
       </Modal>
     );
-    expect(container.querySelector('.max-w-lg')).toBeInTheDocument();
+    // Responsive classes: max-w-[95vw] sm:max-w-lg
+    expect(container.querySelector('.sm\\:max-w-lg')).toBeInTheDocument();
 
     rerender(
       <Modal isOpen={true} onClose={vi.fn()} size="lg">
         <div>Content</div>
       </Modal>
     );
-    expect(container.querySelector('.max-w-2xl')).toBeInTheDocument();
+    // Responsive classes: max-w-[95vw] sm:max-w-2xl
+    expect(container.querySelector('.sm\\:max-w-2xl')).toBeInTheDocument();
 
     rerender(
       <Modal isOpen={true} onClose={vi.fn()} size="xl">
         <div>Content</div>
       </Modal>
     );
-    expect(container.querySelector('.max-w-4xl')).toBeInTheDocument();
+    // Responsive classes: max-w-[95vw] sm:max-w-4xl
+    expect(container.querySelector('.sm\\:max-w-4xl')).toBeInTheDocument();
   });
 
   it('renders children correctly', () => {

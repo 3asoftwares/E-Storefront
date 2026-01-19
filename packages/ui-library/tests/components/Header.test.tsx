@@ -15,12 +15,11 @@ describe('Header', () => {
     expect(screen.getByText('Sign Up')).toBeInTheDocument();
   });
 
-  it('shows welcome message and logout when user is logged in', () => {
+  it('shows user avatar when user is logged in', () => {
     const user = { name: 'John Doe' };
     render(<Header user={user} onLogout={vi.fn()} />);
-    expect(screen.getByText(/Welcome,/)).toBeInTheDocument();
-    expect(screen.getByText('John Doe')).toBeInTheDocument();
-    expect(screen.getByText('Log Out')).toBeInTheDocument();
+    // User avatar button should be present
+    expect(screen.getByLabelText('User menu')).toBeInTheDocument();
   });
 
   it('calls onLogin when login button is clicked', () => {
@@ -30,10 +29,14 @@ describe('Header', () => {
     expect(handleLogin).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onLogout when logout button is clicked', () => {
+  it('shows logout option in user dropdown', () => {
     const handleLogout = vi.fn();
     const user = { name: 'John Doe' };
     render(<Header user={user} onLogout={handleLogout} />);
+    // Open user dropdown
+    fireEvent.click(screen.getByLabelText('User menu'));
+    // Logout button should be visible in dropdown (text is "Log Out" with space)
+    expect(screen.getByText('Log Out')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Log Out'));
     expect(handleLogout).toHaveBeenCalledTimes(1);
   });
@@ -52,8 +55,8 @@ describe('Header', () => {
     expect(screen.queryByText('Sign Up')).not.toBeInTheDocument();
   });
 
-  it('does not show logout button when no user', () => {
+  it('does not show user menu when no user', () => {
     render(<Header />);
-    expect(screen.queryByText('Log Out')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('User menu')).not.toBeInTheDocument();
   });
 });
